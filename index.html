@@ -146,14 +146,14 @@ const grade=new THREE.ShaderPass({uniforms:{tDiffuse:{value:null},uTime:{value:0
   fragmentShader:`uniform sampler2D tDiffuse;uniform float uTime,uSpeed,uHit;varying vec2 vUv;
   void main(){vec2 c=vUv-.5;float r=dot(c,c);float ca=.0012+uSpeed*.004+uHit*.01;
   vec3 col;col.r=texture2D(tDiffuse,vUv+c*ca).r;col.g=texture2D(tDiffuse,vUv).g;col.b=texture2D(tDiffuse,vUv-c*ca).b;
-  float vig=smoothstep(.75,.12,r*1.4);col*=mix(.35,1.,vig);col=mix(col,vec3(1.,.15,.2),uHit*(1.-vig)*.7);
+  float vig=smoothstep(.75,.12,r*1.4);col*=mix(.62,1.,vig);col=mix(col,vec3(1.,.15,.2),uHit*(1.-vig)*.7);
   float n=fract(sin(dot(vUv*(uTime+1.),vec2(12.9898,78.233)))*43758.5453);col+=(n-.5)*.035;gl_FragColor=vec4(col,1.);}`});
 composer.addPass(grade);
 function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);composer.setPixelRatio(DPR);composer.setSize(w,h);bloom.resolution.set(w*.5,h*.5);camera.aspect=w/h;baseFov=w<h?72:50;camera.updateProjectionMatrix()}
 let baseFov=50;addEventListener('resize',resize);resize();
 
-const hemi=new THREE.HemisphereLight(0x8a6bff,0x1a0820,.55);scene.add(hemi);
-const moonL=new THREE.DirectionalLight(0xbfd6ff,.55);moonL.position.set(-30,60,40);scene.add(moonL);
+const hemi=new THREE.HemisphereLight(0xb8a6ff,0x3a1a48,1.05);scene.add(hemi);
+const moonL=new THREE.DirectionalLight(0xd6e4ff,.95);moonL.position.set(-30,60,40);scene.add(moonL);
 
 /* ---------- textures ---------- */
 function glowTex(){const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');const gr=g.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.3,'rgba(255,255,255,.5)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,64,64);return new THREE.CanvasTexture(c)}
@@ -196,7 +196,7 @@ const rain=new THREE.LineSegments(rainGeo,new THREE.LineBasicMaterial({color:0x9
 const bike=(function(){
   const outer=new THREE.Group(),inner=new THREE.Group();outer.add(inner);inner.position.y=-.9;
   const metal=new THREE.MeshStandardMaterial({color:0x22232b,metalness:.8,roughness:.35});
-  const paint=new THREE.MeshStandardMaterial({color:0xff2d7a,metalness:.55,roughness:.25,emissive:0x3a0018});
+  const paint=new THREE.MeshStandardMaterial({color:0xff2d7a,metalness:.55,roughness:.25,emissive:0x8a0036});
   const rubber=new THREE.MeshStandardMaterial({color:0x0c0c10,roughness:.8});
   const rimM=new THREE.MeshBasicMaterial({color:0x3de8ff});
   const wheels=[];
@@ -217,17 +217,19 @@ const bike=(function(){
   const tail=new THREE.Mesh(new THREE.BoxGeometry(.06,.1,.26),new THREE.MeshBasicMaterial({color:0xff2050}));tail.position.set(-1.04,1.08,0);inner.add(tail);
   const tg=glow(0xff2050,1.8,.9);tg.position.set(-1.1,1.08,0);inner.add(tg);
   // rider
-  const suit=new THREE.MeshStandardMaterial({color:0x1a1530,roughness:.6,metalness:.2});
+  const suit=new THREE.MeshStandardMaterial({color:0x3a3270,roughness:.5,metalness:.2,emissive:0x140c30});
   const torso=new THREE.Mesh(new THREE.CapsuleGeometry(.2,.5,4,10),suit);torso.position.set(-.12,1.52,0);torso.rotation.z=-.85;inner.add(torso);
   const helm=new THREE.Mesh(new THREE.SphereGeometry(.22,16,12),new THREE.MeshStandardMaterial({color:0xf3ecff,metalness:.5,roughness:.2}));helm.position.set(.22,1.82,0);inner.add(helm);
   const visor=new THREE.Mesh(new THREE.SphereGeometry(.18,12,8,-.6,1.2,1.1,.8),new THREE.MeshBasicMaterial({color:0x3de8ff}));visor.position.set(.27,1.82,0);inner.add(visor);
   const arm=new THREE.Mesh(new THREE.CapsuleGeometry(.07,.42,4,8),suit);arm.position.set(.32,1.42,.14);arm.rotation.z=-1.2;inner.add(arm);
   const thigh=new THREE.Mesh(new THREE.CapsuleGeometry(.09,.38,4,8),suit);thigh.position.set(-.12,1.16,.16);thigh.rotation.z=-1.3;inner.add(thigh);
   const shin=new THREE.Mesh(new THREE.CapsuleGeometry(.08,.36,4,8),suit);shin.position.set(.08,.88,.16);shin.rotation.z=.25;inner.add(shin);
-  scene.add(outer);
+  const under=glow(0x3de8ff,3.8,.55);under.position.set(0,.2,0);inner.add(under);
+  outer.scale.setScalar(1.3);scene.add(outer);
+  const fill=new THREE.PointLight(0xfff4ff,1.7,16,1.5);scene.add(fill);
   const spot=new THREE.SpotLight(0xffe6b0,3,34,.42,.6,1.2);scene.add(spot);const tgt=new THREE.Object3D();scene.add(tgt);spot.target=tgt;
   const red=new THREE.PointLight(0xff2050,1.2,7,2);scene.add(red);
-  return{outer,inner,wheels,spot,tgt,red};
+  return{outer,inner,wheels,spot,tgt,red,fill};
 })();
 
 /* tail-light trail */
@@ -276,18 +278,36 @@ function addObstacle(type,x,y,extra){
     g.add(glow(0xff2a3a,4,.6));o.cx=x;o.cy=y;o.w=.75;o.h=.6;o.amp=extra||0;o.ring=ring}
   else if(type==='ring'){const ring=new THREE.Mesh(new THREE.TorusGeometry(1.5,.09,8,40),new THREE.MeshBasicMaterial({color:0x3de8ff}));ring.rotation.y=Math.PI/2*.85;g.add(ring);g.add(glow(0x3de8ff,5,.35));o.cx=x;o.cy=y;o.ring=ring}
   g.position.set(x,type==='drone'||type==='ring'?y:y,0);scene.add(g);obs.push(o);return o}
+const rampMat=new THREE.MeshStandardMaterial({color:0x2c2440,metalness:.6,roughness:.35,emissive:0x120a22});
+function addRamp(r){const len=8,h=2.3,x1=r.x1-.3,x0=x1-len;r.ramp={x0,x1,h};
+  const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(len,0);sh.lineTo(len,h);sh.lineTo(0,0);
+  const geo=new THREE.ExtrudeGeometry(sh,{depth:3.4,bevelEnabled:false});geo.translate(0,0,-1.7);
+  const m=new THREE.Mesh(geo,rampMat);m.position.set(x0,r.y,0);r.g.add(m);
+  const ang=Math.atan2(h,len),hyp=Math.hypot(len,h);
+  for(const z of[-1.7,1.7]){const e=new THREE.Mesh(new THREE.BoxGeometry(hyp,.1,.1),new THREE.MeshBasicMaterial({color:0xffd166}));e.position.set(x0+len/2,r.y+h/2+.05,z);e.rotation.z=ang;r.g.add(e)}
+  for(let i=0;i<4;i++){const c=new THREE.Mesh(new THREE.BoxGeometry(.18,.06,2.6),new THREE.MeshBasicMaterial({color:0x3de8ff}));const t=(i+.5)/4;c.position.set(x0+len*t,r.y+h*t+.06,0);c.rotation.z=ang;r.g.add(c)}
+  const lip=glow(0xffd166,5,.6);lip.position.set(x1,r.y+h,0);r.g.add(lip);
+  const sign=new THREE.Mesh(new THREE.PlaneGeometry(2.6,.9),new THREE.MeshBasicMaterial({map:RAMP_TEX,transparent:true}));sign.position.set(x0-2.5,r.y+2.2,-2.2);r.g.add(sign);
+  const pole=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,1.8,5),roofMat);pole.position.set(x0-2.5,r.y+.9,-2.3);r.g.add(pole)}
+const RAMP_TEX=(function(){const c=document.createElement('canvas');c.width=256;c.height=90;const g=c.getContext('2d');g.fillStyle='#0d0618';g.fillRect(0,0,256,90);g.strokeStyle='#ffd166';g.lineWidth=6;g.strokeRect(4,4,248,82);g.fillStyle='#ffd166';g.font='bold 52px Impact, "Arial Narrow", sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText('RAMP ▲',128,48);return new THREE.CanvasTexture(c)})();
+function surfY(r,x){if(!r)return-999;const p=r.ramp;if(p&&x>=p.x0&&x<=p.x1)return r.y+p.h*(x-p.x0)/(p.x1-p.x0);return r.y}
+function slopeAt(r,x){const p=r&&r.ramp;return p&&x>=p.x0&&x<=p.x1?Math.atan2(p.h,p.x1-p.x0):0}
+let afterRamp=false,rampsMade=0;
 function generateTo(xLimit){
   while(genX<xLimit){
     const d=genX;const diff=smooth(80,3200,d);
-    const gap=d<60?0:rand(lerp(4,8,diff),lerp(7.5,15,diff));
+    let gap=d<60?0:rand(lerp(4,8,diff),lerp(7.5,15,diff));
     const dh=lerp(1.6,5.5,diff);let y=clamp(genY+rand(-dh,dh*.75),-6,9);if(d<60)y=0;
-    const len=d<60?70:rand(lerp(28,13,diff),lerp(46,26,diff));
+    let len=d<60?70:rand(lerp(28,13,diff),lerp(46,26,diff));
+    const wasRamp=afterRamp;afterRamp=false;if(wasRamp){gap=rand(7,11);y=clamp(genY-rand(.5,3.5),-6,9);len=Math.max(len,30)}
+    const makeRamp=!wasRamp&&d>70&&len>=20&&(rampsMade===0||Math.random()<.3);
     const x0=genX+gap,x1=x0+len;const r=addRoof(x0,x1,y,d<60);
+    if(makeRamp){addRamp(r);rampsMade++;afterRamp=true}
     // gap content
-    if(gap>5&&d>380&&Math.random()<lerp(.25,.7,diff)){const yy=Math.max(genY,y)+rand(1.5,4);addObstacle('drone',genX+gap/2,yy,rand(1.2,2.6)*(Math.random()<.5?1:-1))}
+    if(!wasRamp&&gap>5&&d>380&&Math.random()<lerp(.25,.7,diff)){const yy=Math.max(genY,y)+rand(1.5,4);addObstacle('drone',genX+gap/2,yy,rand(1.2,2.6)*(Math.random()<.5?1:-1))}
     else if(gap>4&&d>40&&Math.random()<.45){addObstacle('ring',genX+gap/2,Math.max(genY,y)+rand(2.5,4.5))}
     // roof content
-    if(d>60){let cx=x0+rand(6,9);while(cx<x1-6){const p=Math.random();
+    if(d>60){let cx=x0+(wasRamp?rand(18,22):rand(6,9));const endX=makeRamp?x1-16:x1-6;while(cx<endX){const p=Math.random();
       if(d>180&&p<lerp(.2,.45,diff))addObstacle('sign',cx,y);
       else if(d>90&&p<lerp(.45,.75,diff))addObstacle('barrier',cx,y);
       else if(d>600&&p<lerp(.5,.85,diff))addObstacle('drone',cx,y+rand(2.2,4),rand(1,2)*(Math.random()<.5?1:-1));
@@ -325,12 +345,12 @@ function setMuted(v){SV.muted=v;save();$('#muteBtn').textContent=v?'SOUND OFF':'
 $('#muteBtn').addEventListener('click',e=>{e.stopPropagation();audioInit();setMuted(!SV.muted)});
 
 /* ---------- state ---------- */
-let state='title',deadT=0,time=0,timeScale=1,slowT=0,shake=0,hit=0;
+let rampHint=false;let state='title',deadT=0,time=0,timeScale=1,slowT=0,shake=0,hit=0;
 const B={x:0,y:0,vy:0,ang:0,av:0,ground:true,roof:null,rot:0,speed:17,boost:0,nitro:3,crashed:false,held:false,holdT:0};
 const R={score:0,dist:0,flips:0,near:0,mult:1,multT:0,trick:0,ringsN:0};
 function reset(){
-  for(const r of roofs)disposeG(r.g);for(const o of obs)disposeG(o.g);roofs.length=0;obs.length=0;genX=-20;genY=0;generateTo(220);
-  Object.assign(B,{x:0,y:0,vy:0,ang:0,av:0,ground:true,roof:roofs[0],rot:0,speed:17,boost:0,nitro:3,crashed:false,held:false,holdT:0});
+  for(const r of roofs)disposeG(r.g);for(const o of obs)disposeG(o.g);roofs.length=0;obs.length=0;genX=-20;genY=0;afterRamp=false;rampsMade=0;rampHint=false;generateTo(220);
+  Object.assign(B,{x:0,y:0,vy:0,ang:0,av:0,ground:true,roof:roofs[0],rot:0,fromRamp:false,onRamp:false,speed:17,boost:0,nitro:3,crashed:false,held:false,holdT:0});
   Object.assign(R,{score:0,dist:0,flips:0,near:0,mult:1,multT:0,trick:0,ringsN:0});
   bike.outer.rotation.set(0,0,0);for(let i=0;i<TRAIL;i++)trailPos.set([-1,1,0],i*3);
   camX=8;camY=3;}
@@ -341,7 +361,7 @@ function press(){audioInit();
   if(state==='over'){if(deadT>.7)startRun();return}
   if(state!=='ride'||B.crashed)return;
   B.held=true;B.holdT=0;
-  if(B.ground){B.vy=13.2;B.ground=false;B.roof=null;B.rot=0;SFX.hop();burst(B.x-.8,B.y+.1,6,4)}
+  if(B.ground){const sl=B.onRamp?slopeAt(B.roof,B.x):0;B.vy=13.2+(sl?5:0);B.ground=false;B.fromRamp=!!sl;B.onRamp=false;B.roof=null;B.rot=0;SFX.hop();burst(B.x-.8,B.y+.1,6,4)}
   else if(B.nitro>0){B.nitro--;B.vy=Math.max(B.vy,0)+9.5;B.vy=Math.min(B.vy,13);B.boost=Math.max(B.boost,3);SFX.nitro();burst(B.x-1.1,B.y+1,10,6)}
 }
 function release(){B.held=false}
@@ -352,7 +372,7 @@ addEventListener('keydown',e=>{if(e.repeat)return;if(e.code==='Space'||e.code===
 addEventListener('keyup',e=>{if(e.code==='Space'||e.code==='ArrowUp'||e.code==='KeyW'||e.code==='Enter')release()});
 
 function startRun(){reset();state='ride';$('#titleS').hidden=true;$('#overS').hidden=true;$('#hud').hidden=false;seqT=0;seqI=0;if(A.eng)A.eng.g.gain.value=.08}
-function crash(why){if(B.crashed)return;B.crashed=true;B.av=rand(6,12)*(Math.random()<.5?1:-1);B.vy=Math.max(B.vy,5);hit=1;shake=1;slowT=.6;SFX.crash();burst(B.x,B.y+.6,60,10);
+function crash(why){if(B.crashed)return;B.why=why;B.crashed=true;B.av=rand(6,12)*(Math.random()<.5?1:-1);B.vy=Math.max(B.vy,5);hit=1;shake=1;slowT=.6;SFX.crash();burst(B.x,B.y+.6,60,10);
   setTimeout(()=>gameOver(why),900)}
 function gameOver(why){state='over';deadT=0;SV.runs++;const sc=Math.round(R.score);const nb=sc>SV.best;if(nb)SV.best=sc;save();
   $('#overTitle').textContent=why==='fall'?'FELL':'WIPEOUT';$('#finalV').textContent=sc.toLocaleString();$('#newBest').hidden=!nb;
@@ -365,13 +385,14 @@ function award(base,label,col,sub){const pts=Math.round(base*R.mult);R.score+=pt
 /* ---------- update ---------- */
 const G=36;
 function land(r){
-  const a=normAng(B.ang);B.y=r.y;B.vy=0;B.ground=true;B.roof=r;
+  const sl=slopeAt(r,B.x);const a=normAng(B.ang-sl);B.y=surfY(r,B.x);B.vy=0;B.ground=true;B.roof=r;const ramped=B.fromRamp;B.fromRamp=false;
   if(Math.abs(a)<.72){
     const flips=Math.floor((Math.abs(B.rot)+.72)/TAU);
-    B.ang=0;B.av=0;B.nitro=3;burst(B.x-.6,B.y+.05,8,5);SFX.land();
+    B.ang=sl;B.av=0;B.nitro=3;burst(B.x-.6,B.y+.05,8,5);SFX.land();
     if(flips>0){R.flips+=flips;R.mult=Math.min(9,R.mult+flips);R.multT=7;const clean=Math.abs(a)<.22;
-      award(300*flips*(clean?1.5:1),flips===1?'BACKFLIP':flips===2?'DOUBLE FLIP':flips===3?'TRIPLE FLIP':flips+'× FLIP',clean?'var(--cyan)':'var(--amber)',clean?'PERFECT':'');
+      const nm=flips===1?'BACKFLIP':flips===2?'DOUBLE FLIP':flips===3?'TRIPLE FLIP':flips+'× FLIP';award(300*flips*(clean?1.5:1)*(ramped?1.5:1),(ramped?'RAMP ':'')+nm,clean?'var(--cyan)':'var(--amber)',clean?'PERFECT':'');
       SFX.clean(flips);B.boost=Math.max(B.boost,5+flips*2);slowT=Math.max(slowT,.22)}
+    else if(ramped){award(60,'BIG AIR','var(--ink)')}
     B.rot=0;
   }else crash('land')
 }
@@ -382,18 +403,22 @@ function updateRide(dt){
   const px=B.x,py=B.y;
   if(!B.crashed){
     B.x+=B.speed*dt;R.dist=B.x;
-    if(B.ground){const r=roofAt(B.x);if(r&&Math.abs(r.y-B.y)<.05){B.roof=r;B.y=r.y}else{B.ground=false;B.rot=0}}
+    if(B.ground){const r=roofAt(B.x);const wasOn=B.onRamp,rr=B.roof;
+      if(wasOn&&rr&&rr.ramp&&B.x>rr.ramp.x1){B.ground=false;B.onRamp=false;B.vy=16.5+B.speed*.12;B.fromRamp=true;B.rot=0;B.boost=Math.max(B.boost,3);SFX.nitro();burst(B.x-.8,B.y,14,7)}
+      else if(r&&Math.abs(surfY(r,B.x)-B.y)<.7){B.roof=r;B.y=surfY(r,B.x);B.onRamp=!!slopeAt(r,B.x)}else{B.ground=false;B.onRamp=false;B.rot=0}}
+    if(!rampHint){const rr=roofs.find(q=>q.ramp&&q.ramp.x0>B.x&&q.ramp.x0-B.x<35);if(rr){rampHint=true;if(SV.runs<4)pop('RAMP AHEAD','HOLD IN THE AIR TO FLIP','var(--amber)')}}
     if(!B.ground){
       B.vy-=G*dt;B.y+=B.vy*dt;
-      if(B.held&&B.holdT>.11){B.av=lerp(B.av,8.2,dt*10)}else{B.av*=Math.pow(.04,dt);const a=normAng(B.ang);const target=clamp(B.vy*.03,-.35,.35);if(Math.abs(a-target)<1)B.av+=(target-a)*dt*60*.15}
+      if(B.held&&B.holdT>.11){B.av=lerp(B.av,8.2,dt*10)}else{B.av*=Math.pow(.00002,dt);const a=normAng(B.ang);const target=clamp(B.vy*.03,-.35,.35);if(Math.abs(a-target)<1.1)B.ang+=(target-a)*Math.min(1,dt*6)}
       B.ang+=B.av*dt;B.rot+=B.av*dt;
       const r=roofAt(B.x);
-      if(r&&py>=r.y-.08&&B.y<=r.y&&B.vy<=0)land(r);
-      else if(r&&B.y<r.y-.3){crash('wall')}
+      const sy=surfY(r,B.x);
+      if(r&&py>=sy-.12&&B.y<=sy&&B.vy<=0)land(r);
+      else if(r&&B.y<sy-.35){crash('wall')}
       if(B.y<-28)crash('fall');
-    }else{B.ang=lerp(B.ang,B.held?.18:0,dt*10)}
+    }else{const sl=B.onRamp?slopeAt(B.roof,B.x):0;B.ang=lerp(B.ang,sl+(B.held&&!sl?.18:0),dt*12)}
     // obstacles
-    const bx=B.x+.1,by=B.y+.9,bw=1.0,bh=.8;
+    const bx=B.x+.1,by=B.y+1.15,bw=1.2,bh=1.0;
     for(const o of obs){if(o.passed)continue;if(o.x<B.x-8){o.passed=true;continue}
       if(Math.abs(o.x-B.x)>12)continue;
       const dx=Math.max(0,Math.abs(bx-o.cx)-(bw+o.w)),dy=Math.max(0,Math.abs(by-o.cy)-(bh+o.h));const dd=Math.hypot(dx,dy);
@@ -407,7 +432,7 @@ function updateRide(dt){
     R.score+=B.speed*dt*.5*Math.max(1,R.mult*.5);
   }else{
     B.x+=B.speed*.45*dt;B.vy-=G*dt;B.y+=B.vy*dt;B.ang+=B.av*dt;
-    const r=roofAt(B.x);if(r&&B.y<r.y&&py>=r.y-.1){B.y=r.y;B.vy=Math.abs(B.vy)*.35;B.av*=.6;burst(B.x,B.y+.2,14,7)}
+    const r=roofAt(B.x);if(r&&B.y<surfY(r,B.x)&&py>=surfY(r,B.x)-.3){B.y=surfY(r,B.x);B.vy=Math.abs(B.vy)*.35;B.av*=.6;burst(B.x,B.y+.2,14,7)}
     B.speed*=Math.pow(.5,dt);
   }
   generateTo(B.x+240);cleanup(B.x);
@@ -417,14 +442,14 @@ function updateRide(dt){
 
 /* ---------- visuals ---------- */
 let camX=8,camY=3;const cTop=new THREE.Color(),cHor=new THREE.Color(),cFog=new THREE.Color();
-const SKY=[[0,0x3b1460,0xff6a6a,0x3a1640],[800,0x24104a,0xd23d8a,0x2a0f3d],[2000,0x120a2e,0x6a2a9a,0x170a28],[3500,0x05040f,0x2a1a6a,0x08061a]];
+const SKY=[[0,0x3b1460,0xff6a6a,0x3a1640],[800,0x24104a,0xd23d8a,0x2a0f3d],[2000,0x120a2e,0x6a2a9a,0x170a28],[3500,0x0e0a2a,0x4a2a9a,0x140e34]];
 function skyAt(d){let a=SKY[0],b=SKY[SKY.length-1];for(let i=0;i<SKY.length-1;i++)if(d>=SKY[i][0]&&d<=SKY[i+1][0]){a=SKY[i];b=SKY[i+1];break}const t=clamp((d-a[0])/(b[0]-a[0]),0,1);
   cTop.setHex(a[1]).lerp(new THREE.Color(b[1]),t);cHor.setHex(a[2]).lerp(new THREE.Color(b[2]),t);cFog.setHex(a[3]).lerp(new THREE.Color(b[3]),t)}
 function updateVisuals(dt,rdt){
-  if(state==='title'){B.speed=14;B.x+=14*dt;if(B.x>24){B.x-=30;camX-=30;for(let i=0;i<TRAIL;i++)trailPos[i*3]-=30}const r=roofAt(B.x);if(r)B.y=r.y}
+  if(state==='title'){B.speed=14;B.x+=14*dt;if(B.x>24){B.x-=30;camX-=30;for(let i=0;i<TRAIL;i++)trailPos[i*3]-=30}const r=roofAt(B.x);if(r)B.y=surfY(r,B.x)}
   skyAt(R.dist);sky.material.uniforms.uTop.value.copy(cTop);sky.material.uniforms.uHor.value.copy(cHor);scene.fog.color.copy(cFog);renderer.setClearColor(cFog);
   // bike
-  bike.outer.position.set(B.x,B.y+.9,0);bike.outer.rotation.z=B.ang;
+  bike.outer.position.set(B.x,B.y+1.17,0);bike.fill.position.set(B.x+1.5,B.y+4,6);bike.outer.rotation.z=B.ang;
   for(const w of bike.wheels)w.rotation.z-=B.speed*dt/.43;
   const ca=Math.cos(B.ang),sa=Math.sin(B.ang);
   const hx=B.x+ca*1.05-sa*.15,hy=B.y+.9+sa*1.05+ca*.15;bike.spot.position.set(hx,hy,.3);bike.tgt.position.set(hx+ca*12+2,hy+sa*12-3,0);
@@ -446,7 +471,7 @@ function updateVisuals(dt,rdt){
   rainGeo.attributes.position.needsUpdate=true;
   // camera
   const lead=B.crashed?2:(innerWidth<innerHeight?4:6)+B.speed*.12;camX=lerp(camX,B.x+lead,Math.min(1,dt*6));camY=lerp(camY,B.y+2.6+Math.max(0,B.vy)*.06,Math.min(1,dt*3));
-  const sh=shake*shake;camera.position.set(camX+(Math.random()-.5)*sh,camY+5.2+(Math.random()-.5)*sh,(innerWidth<innerHeight?27:18)+B.speed*.14);
+  const sh=shake*shake;camera.position.set(camX+(Math.random()-.5)*sh,camY+5.2+(Math.random()-.5)*sh,(innerWidth<innerHeight?23:17)+B.speed*.14);
   camera.lookAt(camX,camY+.4,0);camera.fov=lerp(camera.fov,baseFov+B.speed*.25,dt*2);camera.updateProjectionMatrix();
   sky.position.x=camX;moon.position.x=camX+80;moonCore.position.x=camX+80;updateSkyline(camX);
   grade.uniforms.uTime.value=time;grade.uniforms.uSpeed.value=clamp((B.speed-17)/20,0,1);grade.uniforms.uHit.value=hit;
