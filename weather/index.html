@@ -43,7 +43,8 @@
     box-shadow:0 0 30px 8px rgba(255,244,200,.35),0 0 90px 30px rgba(255,244,200,.12);
     transition:left 3s linear,top 3s linear,opacity 3s}
   .moon::after{content:'';position:absolute;width:12px;height:12px;border-radius:50%;background:rgba(200,185,130,.35);top:14px;left:26px;box-shadow:-12px 14px 0 -2px rgba(200,185,130,.3)}
-  .stars{position:absolute;inset:0;transition:opacity 3s}
+  .stars{position:absolute;inset:0;transition:opacity 3s;opacity:0}
+  .sun,.moon{opacity:0}
   .stars i{position:absolute;border-radius:50%;background:#fff;animation:twinkle 4s ease-in-out infinite}
   @keyframes twinkle{0%,100%{opacity:.9}50%{opacity:.35}}
   .cloud{position:absolute;height:34px;border-radius:999px;filter:blur(1.5px);transition:opacity 3s,background 3s;animation:drift linear infinite}
