@@ -32,10 +32,30 @@
     transition:background .6s ease;
     overflow-x:hidden;
   }
-  .bg{position:fixed;inset:0;z-index:0;background:linear-gradient(165deg,var(--g1) 0%,var(--g2) 52%,var(--g3) 100%);transition:background .6s}
-  .blob{position:fixed;border-radius:50%;filter:blur(60px);opacity:.45;pointer-events:none;z-index:0;transition:background .8s}
-  .blob.a{width:340px;height:340px;top:-90px;right:-110px;background:var(--g1)}
-  .blob.b{width:300px;height:300px;bottom:-80px;left:-120px;background:var(--g3)}
+  .bg{position:fixed;inset:0;z-index:0;background:linear-gradient(180deg,var(--g1) 0%,var(--g2) 45%,var(--g3) 100%)}
+
+  /* sky scene: sun/moon arc from left horizon to right horizon */
+  .scene{position:absolute;top:0;left:0;right:0;height:360px;overflow:hidden;z-index:0;pointer-events:none}
+  .horizon-glow{position:absolute;left:-10%;right:-10%;bottom:-60px;height:140px;border-radius:50%;filter:blur(30px);opacity:0;transition:opacity 3s,background 3s}
+  .sun{position:absolute;width:76px;height:76px;margin:-38px 0 0 -38px;border-radius:50%;transition:left 3s linear,top 3s linear,opacity 3s,box-shadow 3s,background 3s}
+  .moon{position:absolute;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;
+    background:radial-gradient(circle at 35% 35%,#FFFBEA,#F2E3A8 70%);
+    box-shadow:0 0 30px 8px rgba(255,244,200,.35),0 0 90px 30px rgba(255,244,200,.12);
+    transition:left 3s linear,top 3s linear,opacity 3s}
+  .moon::after{content:'';position:absolute;width:12px;height:12px;border-radius:50%;background:rgba(200,185,130,.35);top:14px;left:26px;box-shadow:-12px 14px 0 -2px rgba(200,185,130,.3)}
+  .stars{position:absolute;inset:0;transition:opacity 3s}
+  .stars i{position:absolute;border-radius:50%;background:#fff;animation:twinkle 4s ease-in-out infinite}
+  @keyframes twinkle{0%,100%{opacity:.9}50%{opacity:.35}}
+  .cloud{position:absolute;height:34px;border-radius:999px;filter:blur(1.5px);transition:opacity 3s,background 3s;animation:drift linear infinite}
+  .cloud::before,.cloud::after{content:'';position:absolute;border-radius:50%;background:inherit}
+  .cloud::before{width:48%;height:180%;left:16%;bottom:20%}
+  .cloud::after{width:36%;height:140%;left:50%;bottom:25%}
+  @keyframes drift{from{transform:translateX(-140px)}to{transform:translateX(calc(100vw + 140px))}}
+  .precip{position:absolute;inset:0;opacity:0;transition:opacity 3s}
+  .precip.rain{background:repeating-linear-gradient(105deg,transparent 0 13px,rgba(255,255,255,.4) 13px 14px);background-size:40px 60px;animation:fall .45s linear infinite}
+  .precip.snow{background-image:radial-gradient(circle,#fff 1.5px,transparent 2px),radial-gradient(circle,rgba(255,255,255,.8) 1px,transparent 1.5px);background-size:46px 46px,30px 30px;animation:snowfall 6s linear infinite}
+  @keyframes fall{to{background-position:-16px 60px}}
+  @keyframes snowfall{to{background-position:20px 184px,-10px 120px}}
 
   .app{
     position:relative;z-index:1;max-width:480px;margin:0 auto;
@@ -67,9 +87,7 @@
   .chip.active{background:#fff;color:#333}
 
   /* hero */
-  .hero{text-align:center;padding:26px 0 18px}
-  .hero .big-icon{width:132px;height:132px;margin:0 auto;filter:drop-shadow(0 12px 24px rgba(0,0,0,.15));animation:float 6s ease-in-out infinite}
-  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  .hero{text-align:center;padding:70px 0 44px;text-shadow:0 2px 20px rgba(0,0,0,.22)}
   .temp{font-size:104px;font-weight:300;line-height:1;letter-spacing:-5px;margin-top:4px}
   .temp sup{font-size:44px;vertical-align:top;position:relative;top:12px;letter-spacing:0;margin-left:4px}
   .cond{font-size:21px;font-weight:500;margin-top:6px}
@@ -150,7 +168,15 @@
 </style>
 </head>
 <body>
-<div class="bg"></div><div class="blob a"></div><div class="blob b"></div>
+<div class="bg" id="bg"></div>
+<div class="scene" id="scene">
+  <div class="stars" id="stars"></div>
+  <div class="horizon-glow" id="hglow"></div>
+  <div class="moon" id="moon"></div>
+  <div class="sun" id="sun"></div>
+  <div id="clouds"></div>
+  <div class="precip" id="precip"></div>
+</div>
 
 <main class="app loading" id="app">
   <header class="top">
@@ -212,22 +238,6 @@ const LABELS = {0:'Clear',1:'Mostly clear',2:'Partly cloudy',3:'Overcast',45:'Fo
   71:'Light snow',73:'Snow',75:'Heavy snow',77:'Snow grains',80:'Showers',81:'Showers',82:'Heavy showers',
   85:'Snow showers',86:'Snow showers',95:'Thunderstorm',96:'Storm with hail',99:'Storm with hail'};
 
-const THEMES = {
-  'clear-d':  ['#FFD166','#FF8A5B','#FF5E7E'],
-  'clear-n':  ['#4B3FB5','#2C2A7A','#9B3FA8'],
-  'partly-d': ['#5FD4FF','#4D8DFF','#9A6BFF'],
-  'partly-n': ['#3E4C9A','#2A2F6E','#6A3F9E'],
-  'cloudy-d': ['#8FB8F5','#8E9BFF','#B49BE6'],
-  'cloudy-n': ['#4A5A8A','#33395F','#5E4C86'],
-  'fog-d':    ['#B6CFE0','#A8B4E6','#CDB6E4'],
-  'fog-n':    ['#57667E','#3F4660','#5F5478'],
-  'rain-d':   ['#00C6FB','#3A7BD5','#6A5AE0'],
-  'rain-n':   ['#1E5AA8','#1F2E6B','#4A3A9A'],
-  'snow-d':   ['#A1E3FF','#A1C4FD','#E0C3FC'],
-  'snow-n':   ['#5C7BB8','#3E4D85','#7A62A8'],
-  'storm-d':  ['#7B2FF7','#41295A','#F107A3'],
-  'storm-n':  ['#4B1D8F','#1F0B3A','#8A0F6B'],
-};
 
 /* ---------- icons ---------- */
 const SUN = (cx=32,cy=32,r=11)=>{
@@ -268,13 +278,6 @@ const fmtHour = iso => { const h = Number(iso.slice(11,13)); return `${(h%12)||1
 const dayName = (iso, i) => i===0 ? 'Today' : new Date(iso+'T12:00:00').toLocaleDateString('en-AU',{weekday:'short'});
 function uvLabel(u){ return u<3?'Low':u<6?'Moderate':u<8?'High':u<11?'Very high':'Extreme'; }
 
-function setTheme(code, isDay){
-  const key = `${kind(code)}-${isDay?'d':'n'}`;
-  const [a,b,c] = THEMES[key] || THEMES['cloudy-d'];
-  const r = document.documentElement.style;
-  r.setProperty('--g1',a); r.setProperty('--g2',b); r.setProperty('--g3',c);
-  document.querySelector('meta[name=theme-color]').setAttribute('content', b);
-}
 
 /* ---------- data ---------- */
 async function getWeather(p){
@@ -306,7 +309,7 @@ async function load(p){
 /* ---------- render ---------- */
 function render(d){
   const c = d.current, h = d.hourly, dy = d.daily;
-  setTheme(c.weather_code, c.is_day);
+  lastData = d;
 
   // hourly: from current hour, 24 entries
   const nowKey = c.time.slice(0,13);
@@ -347,8 +350,7 @@ function render(d){
   const arrow = `<svg viewBox="0 0 24 24"><path d="M12 2l5 14-5-3-5 3z" fill="#fff"/></svg>`;
 
   $('content').innerHTML = `
-    <section class="hero">
-      <div class="big-icon">${icon(c.weather_code, c.is_day)}</div>
+    <section class="hero" id="hero">
       <div class="temp">${r0(c.temperature_2m)}<sup>°</sup></div>
       <div class="cond">${LABELS[c.weather_code] || '—'}</div>
       <div class="hilo">H ${r0(dy.temperature_2m_max[0])}°  ·  L ${r0(dy.temperature_2m_min[0])}°  ·  Feels like ${r0(c.apparent_temperature)}°</div>
@@ -401,7 +403,134 @@ function render(d){
 
     <p class="foot">Updated ${fmtTime(c.time)} · Data by <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a></p>
   `;
+  buildClouds(kind(c.weather_code));
+  updateSky();
 }
+
+/* ---------- living sky ---------- */
+let lastData = null;
+// Sky colours (top, middle, horizon) keyed by day progress: 0 = sunrise, 1 = sunset.
+const SKY = [
+  [-0.16, ['#0A0F26','#151A40','#2A2763']],
+  [-0.06, ['#1E2561','#56398A','#C95A7C']],
+  [ 0.02, ['#4558A8','#EE877F','#FFC46C']],
+  [ 0.14, ['#4C9FEE','#8ACAF4','#FFE1A4']],
+  [ 0.50, ['#2D89EA','#56B2F4','#A4DCFF']],
+  [ 0.86, ['#3986DE','#86BAEE','#FFD298']],
+  [ 0.98, ['#3B3E92','#E05F7C','#FF995A']],
+  [ 1.06, ['#1E2161','#5A2E7E','#B4446F']],
+  [ 1.16, ['#0A0F26','#151A40','#2A2763']],
+];
+const CLOUDINESS = {clear:0, partly:.12, cloudy:.42, fog:.5, rain:.5, snow:.3, storm:.62};
+
+const hex2rgb = h => [1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const rgb2hex = a => '#'+a.map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('');
+const mix = (a,b,t) => { const A=hex2rgb(a),B=hex2rgb(b); return rgb2hex(A.map((v,i)=>v+(B[i]-v)*t)); };
+const clamp = (v,a=0,b=1) => Math.max(a,Math.min(b,v));
+function mute(hex, amt){ // desaturate + dim for overcast skies
+  const [r,g,b] = hex2rgb(hex), l = (.3*r+.59*g+.11*b)*.88;
+  return rgb2hex([r,g,b].map(v=>v+(l-v)*amt));
+}
+function skyAt(p){
+  if (p <= SKY[0][0] || p >= SKY[SKY.length-1][0]) return SKY[0][1];
+  for (let i=0;i<SKY.length-1;i++){
+    const [p0,c0] = SKY[i], [p1,c1] = SKY[i+1];
+    if (p >= p0 && p <= p1){ const t=(p-p0)/(p1-p0); return c0.map((c,j)=>mix(c,c1[j],t)); }
+  }
+}
+
+function buildClouds(k){
+  const n = {clear:0, partly:2, cloudy:4, fog:3, rain:4, snow:3, storm:4}[k] ?? 2;
+  let html = '';
+  for (let i=0;i<n;i++){
+    const w = 110 + (i*47)%90, top = 40 + (i*67)%200, dur = 70 + i*23, delay = -(i*31 % dur);
+    html += `<div class="cloud" style="width:${w}px;top:${top}px;animation-duration:${dur}s;animation-delay:${delay}s"></div>`;
+  }
+  $('clouds').innerHTML = html;
+  const pr = $('precip');
+  pr.className = 'precip' + (k==='rain'||k==='storm' ? ' rain' : k==='snow' ? ' snow' : '');
+}
+
+function buildStars(){
+  let html='';
+  for (let i=0;i<46;i++){
+    const s = Math.random()<.2 ? 3 : 2;
+    html += `<i style="left:${Math.random()*100}%;top:${Math.random()*92}%;width:${s}px;height:${s}px;animation-delay:${-Math.random()*4}s"></i>`;
+  }
+  $('stars').innerHTML = html;
+}
+buildStars();
+
+const parseLocal = s => Date.parse(s + ':00Z'); // location-local wall time as a UTC timestamp
+function updateSky(){
+  const d = lastData; if (!d) return;
+  const dy = d.daily;
+  const now = Date.now() + (d.utc_offset_seconds||0)*1000;
+  const today = new Date(now).toISOString().slice(0,10);
+  let i = dy.time.indexOf(today); if (i < 0) i = 0;
+  const rise = parseLocal(dy.sunrise[i]), set = parseLocal(dy.sunset[i]);
+  const p = (now - rise) / (set - rise);
+
+  // moon progress across the night
+  let q = -1;
+  if (now > set){ const next = dy.sunrise[i+1] ? parseLocal(dy.sunrise[i+1]) : rise + 864e5; q = (now - set)/(next - set); }
+  else if (now < rise){ const prev = set - 864e5; q = (now - prev)/(rise - prev); }
+
+  const k = kind(d.current.weather_code);
+  const cloud = CLOUDINESS[k] ?? 0;
+  const night = p < 0 ? clamp(-p/0.08) : p > 1 ? clamp((p-1)/0.08) : 0;
+  const elev = clamp(Math.sin(Math.PI*p));
+
+  // sky gradient
+  const cols = skyAt(p).map(c => mute(c, cloud));
+  const r = document.documentElement.style;
+  r.setProperty('--g1', cols[0]); r.setProperty('--g2', cols[1]); r.setProperty('--g3', cols[2]);
+  document.querySelector('meta[name=theme-color]').setAttribute('content', cols[0]);
+
+  // arc geometry: horizon sits just under the temperature block
+  const hero = document.getElementById('hero');
+  const H = hero ? hero.getBoundingClientRect().bottom + window.scrollY : 360;
+  const scene = $('scene'); scene.style.height = H + 'px';
+  const W = scene.clientWidth;
+  const place = (el, t) => {
+    el.style.left = (W*(0.07 + t*0.86)) + 'px';
+    el.style.top  = (H - Math.sin(Math.PI*t)*(H - 86)) + 'px';
+  };
+
+  // sun: deep orange at the horizon, pale gold overhead
+  const sun = $('sun');
+  if (p > -0.2 && p < 1.2){
+    place(sun, p);
+    const core = mix('#FF7A3D', '#FFF6CF', Math.pow(elev, .55));
+    const glow = mix('#FF5E3A', '#FFE27A', elev);
+    sun.style.background = `radial-gradient(circle at 50% 50%, #FFFDF2 0%, ${core} 55%, ${glow} 100%)`;
+    sun.style.boxShadow = `0 0 40px 12px ${glow}cc, 0 0 120px 50px ${glow}55, 0 0 240px 120px ${glow}22`;
+    sun.style.opacity = 1 - cloud*0.85;
+  } else sun.style.opacity = 0;
+
+  // horizon glow around sunrise/sunset
+  const twilight = clamp(1 - Math.min(Math.abs(p), Math.abs(p-1)) / 0.12);
+  const hg = $('hglow');
+  hg.style.background = `radial-gradient(ellipse at ${p < .5 ? '15%' : '85%'} 50%, #FF8A50, transparent 70%)`;
+  hg.style.opacity = twilight * (1 - cloud) * 0.85;
+
+  // moon + stars
+  const moon = $('moon');
+  if (q >= 0){ place(moon, q); moon.style.opacity = night * (1 - cloud*0.7); }
+  else moon.style.opacity = 0;
+  $('stars').style.opacity = night * (1 - cloud*1.4);
+
+  // clouds tint with the sky
+  const cloudCol = mix(mix('#FFFFFF', cols[1], .25), '#3A3F5C', night*.75);
+  const darker = (k==='rain'||k==='storm') ? .35 : 0;
+  document.querySelectorAll('.cloud').forEach(c => {
+    c.style.background = mix(cloudCol, '#5A6178', darker);
+    c.style.opacity = k==='clear' ? 0 : k==='partly' ? .75 : .92;
+  });
+  $('precip').style.opacity = (k==='rain'||k==='storm'||k==='snow') ? .55 : 0;
+}
+setInterval(updateSky, 30000);
+window.addEventListener('resize', updateSky);
 
 function tempColor(t){
   if(t<=0) return '#9AD8FF'; if(t<=8) return '#6EC6FF'; if(t<=14) return '#5BE3C0';
