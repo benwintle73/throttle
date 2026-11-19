@@ -138,6 +138,36 @@
   .compass em{position:absolute;top:2px;left:50%;transform:translateX(-50%);font-size:9px;font-style:normal;font-weight:700;color:var(--soft)}
 
   .foot{text-align:center;font-size:12px;color:var(--soft);margin-top:22px}
+
+  /* ===== Neon Coast mode ===== */
+  .neon-only{display:none}
+  body.neon .neon-only{display:block}
+  body.neon{--glass:rgba(24,6,48,.34);--line:rgba(255,70,190,.5);--soft:rgba(255,226,250,.82)}
+  body.neon .card{box-shadow:inset 0 0 0 1px rgba(0,240,255,.12),0 0 22px rgba(255,46,154,.28)}
+  body.neon .card h2{color:#62F7FF;text-shadow:0 0 8px rgba(0,240,255,.7)}
+  body.neon .hero{text-shadow:none;padding-bottom:86px}
+  body.neon .temp{font-weight:700;font-style:italic;letter-spacing:-3px;
+    background:linear-gradient(180deg,#FFF59A 0%,#FFB347 40%,#FF4FA3 75%,#C84BFF 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 0 10px rgba(255,46,154,.75)) drop-shadow(0 0 1px rgba(255,255,255,.9))}
+  body.neon .cond{text-transform:uppercase;letter-spacing:5px;font-weight:600;color:#fff;text-shadow:0 0 4px #FF2E9A,0 0 14px #FF2E9A,0 0 30px rgba(255,46,154,.6)}
+  body.neon .hilo{color:#fff;text-shadow:0 1px 8px rgba(40,0,70,.65),0 0 14px rgba(255,46,154,.5)}
+  body.neon .place h1{text-shadow:0 0 10px rgba(255,46,154,.8)}
+  body.neon .icon-btn,body.neon .chip,body.neon .refresh{box-shadow:0 0 12px rgba(255,46,154,.35)}
+  body.neon .hour.now{background:rgba(255,46,154,.28)}
+  .chip.mode{display:inline-flex;align-items:center;gap:6px}
+  .chip.mode.on{background:linear-gradient(90deg,#FF2E9A,#FF9A3D);color:#fff;border-color:transparent;box-shadow:0 0 14px rgba(255,46,154,.7)}
+  .skyline{position:absolute;left:0;right:0;bottom:-1px;height:64px}
+  .skyline svg{width:100%;height:100%;display:block}
+  .palm{position:absolute;bottom:-6px;width:112px;height:154px}
+  .palm.l{left:-26px}
+  .palm.r{right:-26px;transform:scaleX(-1)}
+  .floor{position:fixed;left:-20%;right:-20%;bottom:0;height:38vh;z-index:0;pointer-events:none;perspective:260px;
+    -webkit-mask-image:linear-gradient(to top,#000 10%,transparent 95%);mask-image:linear-gradient(to top,#000 10%,transparent 95%)}
+  .floor div{position:absolute;inset:0;transform:rotateX(62deg);transform-origin:50% 100%;opacity:.45;
+    background-image:linear-gradient(rgba(255,60,200,.9) 2px,transparent 2px),linear-gradient(90deg,rgba(0,240,255,.7) 2px,transparent 2px);
+    background-size:60px 60px;animation:floor 2.4s linear infinite}
+  @keyframes floor{to{background-position:0 60px}}
   .refresh{display:inline-flex;align-items:center;gap:8px;margin:18px auto 0;padding:10px 18px;border-radius:999px;
     border:1px solid var(--line);background:var(--glass);color:#fff;font:500 14px 'Outfit',sans-serif;cursor:pointer;
     backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
@@ -189,8 +219,26 @@
   <div class="moon" id="moon"></div>
   <div class="sun" id="sun"></div>
   <div id="clouds"></div>
+  <div class="skyline neon-only" id="skyline"></div>
+  <svg class="palm l neon-only" viewBox="0 0 150 200"><use href="#palmShape"/></svg>
+  <svg class="palm r neon-only" viewBox="0 0 150 200"><use href="#palmShape"/></svg>
   <div class="precip" id="precip"></div>
 </div>
+<div class="floor neon-only"><div></div></div>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <g id="palmShape" fill="#1A0930" stroke="rgba(255,60,180,.55)" stroke-width="1.2">
+      <path d="M60 204 C64 150 67 108 75 62" stroke="#1A0930" stroke-width="9" fill="none" stroke-linecap="round"/>
+      <path d="M60 204 C64 150 67 108 75 62" stroke="rgba(255,60,180,.45)" stroke-width="1" fill="none" transform="translate(4 0)"/>
+      <path d="M74 62 C50 40 22 44 6 74 C28 56 50 54 74 65Z"/>
+      <path d="M74 62 C58 30 34 18 16 24 C40 30 56 42 72 63Z"/>
+      <path d="M74 62 C80 28 100 12 124 16 C102 26 86 40 76 63Z"/>
+      <path d="M74 62 C100 42 128 46 146 76 C122 58 100 56 76 65Z"/>
+      <path d="M74 62 C60 70 46 92 44 116 C52 94 62 80 75 66Z"/>
+      <path d="M74 62 C92 70 104 94 104 118 C98 96 88 82 74 67Z"/>
+    </g>
+  </defs>
+</svg>
 
 <div class="ptr" id="ptr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg></div>
 <main class="app loading" id="app">
@@ -447,6 +495,40 @@ const SKY = [
   [ 1.06, ['#1E2161','#5A2E7E','#B4446F']],
   [ 1.16, ['#0A0F26','#151A40','#2A2763']],
 ];
+const NEON_SKY = [
+  [-0.16, ['#0D0221','#26083F','#541066']],
+  [-0.06, ['#1B0638','#6E1B72','#FF3E8A']],
+  [ 0.02, ['#3A1C71','#D9567E','#FFAF6B']],
+  [ 0.14, ['#1FC8D6','#86DDEB','#FFBC8F']],
+  [ 0.50, ['#10CFF5','#7FE3FC','#FFC1E3']],
+  [ 0.86, ['#2C9BFF','#B98BFF','#FF9C8C']],
+  [ 0.98, ['#5B0E91','#FF2E9A','#FF9A3D']],
+  [ 1.06, ['#2A0845','#921F80','#FF4F81']],
+  [ 1.16, ['#0D0221','#26083F','#541066']],
+];
+let neon = store.get('wx_neon', false);
+function applyMode(){
+  document.body.classList.toggle('neon', neon);
+  renderChips();
+  updateSky();
+}
+function buildSkyline(){
+  // original generic skyline: deterministic block towers with lit windows
+  let x = 0, svg = '', win = '', i = 0;
+  const W = 400, H = 64;
+  while (x < W){
+    const w = 14 + ((i*37)%22), h = 18 + ((i*53)%40), top = H - h;
+    svg += `<rect x="${x}" y="${top}" width="${w}" height="${h}"/>`;
+    if (i % 5 === 2) svg += `<rect x="${x+3}" y="${top-6}" width="${w-6}" height="6"/><rect x="${x+w/2-1}" y="${top-16}" width="2" height="10"/>`;
+    for (let wy = top+5; wy < H-4; wy += 7) for (let wx = x+3; wx < x+w-3; wx += 5)
+      if (((wx*7+wy*3+i)%5) < 2) win += `<rect x="${wx}" y="${wy}" width="2" height="3"/>`;
+    x += w + 2; i++;
+  }
+  $('skyline').innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice">
+    <g fill="#1A0930" stroke="rgba(255,60,190,.55)" stroke-width=".6">${svg}</g>
+    <g id="winLights" fill="#FFE27A">${win}</g></svg>`;
+}
+buildSkyline();
 const CLOUDINESS = {clear:0, partly:.12, cloudy:.42, fog:.5, rain:.5, snow:.3, storm:.62};
 
 const hex2rgb = h => [1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
@@ -458,9 +540,10 @@ function mute(hex, amt){ // desaturate + dim for overcast skies
   return rgb2hex([r,g,b].map(v=>v+(l-v)*amt));
 }
 function skyAt(p){
-  if (p <= SKY[0][0] || p >= SKY[SKY.length-1][0]) return SKY[0][1];
-  for (let i=0;i<SKY.length-1;i++){
-    const [p0,c0] = SKY[i], [p1,c1] = SKY[i+1];
+  const K = neon ? NEON_SKY : SKY;
+  if (p <= K[0][0] || p >= K[K.length-1][0]) return K[0][1];
+  for (let i=0;i<K.length-1;i++){
+    const [p0,c0] = K[i], [p1,c1] = K[i+1];
     if (p >= p0 && p <= p1){ const t=(p-p0)/(p1-p0); return c0.map((c,j)=>mix(c,c1[j],t)); }
   }
 }
@@ -508,7 +591,7 @@ function updateSky(){
   const elev = clamp(Math.sin(Math.PI*p));
 
   // sky gradient
-  const cols = skyAt(p).map(c => mute(c, cloud));
+  const cols = skyAt(p).map(c => mute(c, neon ? cloud*.6 : cloud));
   const r = document.documentElement.style;
   r.setProperty('--g1', cols[0]); r.setProperty('--g2', cols[1]); r.setProperty('--g3', cols[2]);
   document.querySelector('meta[name=theme-color]').setAttribute('content', cols[0]);
@@ -529,16 +612,27 @@ function updateSky(){
     place(sun, p);
     const core = mix('#FF7A3D', '#FFF6CF', Math.pow(elev, .55));
     const glow = mix('#FF5E3A', '#FFE27A', elev);
-    sun.style.background = `radial-gradient(circle at 50% 50%, #FFFDF2 0%, ${core} 55%, ${glow} 100%)`;
-    sun.style.boxShadow = `0 0 40px 12px ${glow}cc, 0 0 120px 50px ${glow}55, 0 0 240px 120px ${glow}22`;
+    if (neon){
+      sun.style.width = sun.style.height = '104px'; sun.style.margin = '-52px 0 0 -52px';
+      sun.style.background = 'linear-gradient(180deg,#FFF59A 0%,#FFB347 38%,#FF4F8B 72%,#D63BFF 100%)';
+      sun.style.webkitMaskImage = sun.style.maskImage = 'linear-gradient(180deg,#000 0 52%,transparent 52% 56%,#000 56% 64%,transparent 64% 69%,#000 69% 77%,transparent 77% 83%,#000 83% 90%,transparent 90% 97%,#000 97%)';
+      sun.style.boxShadow = 'none';
+      sun.style.filter = 'drop-shadow(0 0 22px rgba(255,79,139,.9)) drop-shadow(0 0 60px rgba(255,140,60,.5))';
+    } else {
+      sun.style.width = sun.style.height = ''; sun.style.margin = '';
+      sun.style.webkitMaskImage = sun.style.maskImage = ''; sun.style.filter = '';
+      sun.style.background = `radial-gradient(circle at 50% 50%, #FFFDF2 0%, ${core} 55%, ${glow} 100%)`;
+      sun.style.boxShadow = `0 0 40px 12px ${glow}cc, 0 0 120px 50px ${glow}55, 0 0 240px 120px ${glow}22`;
+    }
     sun.style.opacity = 1 - cloud*0.85;
   } else sun.style.opacity = 0;
 
   // horizon glow around sunrise/sunset
   const twilight = clamp(1 - Math.min(Math.abs(p), Math.abs(p-1)) / 0.12);
   const hg = $('hglow');
-  hg.style.background = `radial-gradient(ellipse at ${p < .5 ? '15%' : '85%'} 50%, #FF8A50, transparent 70%)`;
-  hg.style.opacity = twilight * (1 - cloud) * 0.85;
+  hg.style.background = `radial-gradient(ellipse at ${p < .5 ? '15%' : '85%'} 50%, ${neon ? '#FF2E9A' : '#FF8A50'}, transparent 70%)`;
+  hg.style.opacity = neon ? Math.max(.35, twilight) * (1 - cloud*.5) : twilight * (1 - cloud) * 0.85;
+  const wl = document.getElementById('winLights'); if (wl) wl.style.opacity = .25 + night*.75;
 
   // moon + stars
   const moon = $('moon');
@@ -570,10 +664,14 @@ function svgCal(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentC
 /* ---------- saved places ---------- */
 const same = (a,b) => Math.abs(a.lat-b.lat)<0.01 && Math.abs(a.lon-b.lon)<0.01;
 function renderChips(){
-  $('chips').innerHTML = saved.map((p,i)=>`<button class="chip ${same(p,current)?'active':''}" data-i="${i}">${p.name}</button>`).join('');
+  $('chips').innerHTML = `<button class="chip mode ${neon?'on':''}" id="modeBtn">🌴 Neon Coast</button>` + saved.map((p,i)=>`<button class="chip ${same(p,current)?'active':''}" data-i="${i}">${p.name}</button>`).join('');
 }
 function renderSave(){ $('saveBtn').classList.toggle('on', saved.some(p=>same(p,current))); }
-$('chips').onclick = e => { const b = e.target.closest('.chip'); if(b) load(saved[+b.dataset.i]); };
+$('chips').onclick = e => {
+  const b = e.target.closest('.chip'); if(!b) return;
+  if (b.id === 'modeBtn'){ neon = !neon; store.set('wx_neon', neon); applyMode(); return; }
+  load(saved[+b.dataset.i]);
+};
 $('saveBtn').onclick = () => {
   const i = saved.findIndex(p=>same(p,current));
   if(i>=0) saved.splice(i,1); else saved.push({...current});
@@ -618,6 +716,7 @@ $('results').onclick = e => { const r = e.target.closest('.res[data-i]'); if(r) 
 function pick(i){ closeSheet(); load(lastResults[i]); }
 
 /* ---------- go ---------- */
+document.body.classList.toggle('neon', neon);
 load(current);
 
 // Auto refresh: every 10 min while open, and whenever the app comes back to the foreground
