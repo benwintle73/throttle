@@ -712,7 +712,8 @@ function updateSky(){
     c.style.background = mix(cloudCol, '#5A6178', darker);
     c.style.opacity = k==='clear' ? 0 : k==='partly' ? .75 : .92;
   });
-  $('precip').style.opacity = (k==='rain'||k==='storm'||k==='snow') ? .55 : 0;
+  // normal mode: no falling rain/snow overlay (clouds and greyer sky show the weather); Neon Coast keeps it
+  $('precip').style.opacity = neon && (k==='rain'||k==='storm'||k==='snow') ? .55 : 0;
 }
 setInterval(updateSky, 30000);
 window.addEventListener('resize', updateSky);
