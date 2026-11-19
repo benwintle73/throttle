@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --g1:#FFD166; --g2:#FF8A5B; --g3:#FF5E7E;
@@ -139,35 +139,77 @@
 
   .foot{text-align:center;font-size:12px;color:var(--soft);margin-top:22px}
 
-  /* ===== Neon Coast mode ===== */
+  /* ===== Neon Coast mode: painted panel-grid collage ===== */
   .neon-only{display:none}
   body.neon .neon-only{display:block}
-  body.neon{--glass:rgba(24,6,48,.34);--line:rgba(255,70,190,.5);--soft:rgba(255,226,250,.82)}
-  body.neon .card{box-shadow:inset 0 0 0 1px rgba(0,240,255,.12),0 0 22px rgba(255,46,154,.28)}
-  body.neon .card h2{color:#62F7FF;text-shadow:0 0 8px rgba(0,240,255,.7)}
-  body.neon .hero{text-shadow:none;padding-bottom:86px}
-  body.neon .temp{font-weight:700;font-style:italic;letter-spacing:-3px;
-    background:linear-gradient(180deg,#FFF59A 0%,#FFB347 40%,#FF4FA3 75%,#C84BFF 100%);
-    -webkit-background-clip:text;background-clip:text;color:transparent;
-    filter:drop-shadow(0 0 10px rgba(255,46,154,.75)) drop-shadow(0 0 1px rgba(255,255,255,.9))}
-  body.neon .cond{text-transform:uppercase;letter-spacing:5px;font-weight:600;color:#fff;text-shadow:0 0 4px #FF2E9A,0 0 14px #FF2E9A,0 0 30px rgba(255,46,154,.6)}
-  body.neon .hilo{color:#fff;text-shadow:0 1px 8px rgba(40,0,70,.65),0 0 14px rgba(255,46,154,.5)}
-  body.neon .place h1{text-shadow:0 0 10px rgba(255,46,154,.8)}
-  body.neon .icon-btn,body.neon .chip,body.neon .refresh{box-shadow:0 0 12px rgba(255,46,154,.35)}
-  body.neon .hour.now{background:rgba(255,46,154,.28)}
+  body.neon{background:#070707}
+  body.neon .bg{display:none}
+  body.neon .app{padding-left:10px;padding-right:10px}
+  body.neon .top{padding:0 4px}
+  body.neon .place h1{font-family:'Anton',sans-serif;font-weight:400;font-size:28px;letter-spacing:1px;text-transform:uppercase}
+  body.neon .place p{text-transform:uppercase;letter-spacing:2px;font-size:11px;font-weight:600}
+  body.neon .icon-btn{background:#000;border:2px solid #fff;border-radius:4px;backdrop-filter:none}
+  body.neon .chip{background:#000;border:2px solid #fff;border-radius:3px;text-transform:uppercase;letter-spacing:1px;font-weight:700;font-size:12px;backdrop-filter:none}
+  body.neon .chip.active{background:#fff;color:#000}
+  body.neon .chips{margin:12px -10px 0;padding:0 14px 2px}
+
+  /* hero panel holds the painted scene */
+  body.neon .hero{position:relative;margin-top:12px;min-height:450px;padding:40px 0 0;text-shadow:none;border-radius:3px}
+  body.neon .temp{font-family:'Anton',sans-serif;font-weight:400;font-size:132px;letter-spacing:0;line-height:.95;color:#fff;
+    -webkit-text-stroke:3px #000;paint-order:stroke fill;text-shadow:6px 6px 0 #000}
+  body.neon .temp sup{font-size:52px;top:14px}
+  body.neon .cond{display:inline-block;margin-top:14px;background:#000;color:#fff;font-family:'Anton',sans-serif;font-weight:400;
+    font-size:26px;letter-spacing:2px;text-transform:uppercase;padding:2px 14px 4px;transform:rotate(-2deg)}
+  body.neon .hilo{display:table;margin:10px auto 0;background:#fff;color:#000;font-weight:800;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;transform:rotate(1deg)}
+
+  /* panels */
+  body.neon .card{position:relative;overflow:hidden;border:0;border-radius:3px;margin-top:10px;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;padding:16px 16px 14px}
+  body.neon .card::after{content:'';position:absolute;inset:0;pointer-events:none;
+    background-image:radial-gradient(rgba(0,0,0,.22) 1px,transparent 1.5px),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+    background-size:5px 5px,160px 160px;mix-blend-mode:multiply;opacity:.55}
+  body.neon .card > *{position:relative;z-index:1}
+  body.neon .card h2{display:inline-flex;background:#000;color:#fff;padding:4px 9px;border-radius:2px;letter-spacing:2px;font-weight:800;font-size:11px;text-shadow:none}
+  body.neon .hourly-card{background:linear-gradient(160deg,#12B5C4 0%,#1C6FD1 55%,#3B2A9E 100%)}
+  body.neon .daily-card{background:linear-gradient(165deg,#FF3F8E 0%,#FF6F5E 50%,#FFA63D 100%)}
+  body.neon .grid{gap:10px;margin-top:10px}
+  body.neon .grid .card:nth-child(1){background:linear-gradient(150deg,#00C9A7,#007EA8)}
+  body.neon .grid .card:nth-child(2){background:linear-gradient(150deg,#FFC23D,#FF5E62)}
+  body.neon .grid .card:nth-child(3){background:linear-gradient(150deg,#6A3DF0,#E0368F)}
+  body.neon .grid .card:nth-child(4){background:linear-gradient(150deg,#14C6EB,#3F3FD8)}
+  body.neon .grid .card:nth-child(5){background:linear-gradient(150deg,#FF9A3D,#E5267A)}
+  body.neon .grid .card:nth-child(6){background:linear-gradient(150deg,#FF4FB4,#7A3BB0)}
+  body.neon .stat .v{font-family:'Anton',sans-serif;font-weight:400;font-size:40px;letter-spacing:.5px;text-shadow:3px 3px 0 rgba(0,0,0,.45)}
+  body.neon .stat .v small{font-family:'Outfit',sans-serif;font-weight:700;font-size:15px}
+  body.neon .stat .s{color:#fff;font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:1px}
+  body.neon .hour .v,body.neon .day .hi{font-family:'Anton',sans-serif;font-weight:400;font-size:20px;letter-spacing:.5px}
+  body.neon .day .n{font-weight:800;text-transform:uppercase;letter-spacing:1px;font-size:14px}
+  body.neon .day .lo{color:#fff;opacity:.85}
+  body.neon .day + .day{border-top:1px solid rgba(0,0,0,.18)}
+  body.neon .range{background:rgba(0,0,0,.28)}
+  body.neon .hour.now{background:#000}
+  body.neon .hour .p,body.neon .day .p{color:#fff}
+  body.neon .meter{border:2px solid #000}
+  body.neon .refresh{background:#000;border:2px solid #fff;border-radius:3px;text-transform:uppercase;letter-spacing:1px;font-weight:700;backdrop-filter:none}
+  body.neon .foot{color:rgba(255,255,255,.7)}
   .chip.mode{display:inline-flex;align-items:center;gap:6px}
-  .chip.mode.on{background:linear-gradient(90deg,#FF2E9A,#FF9A3D);color:#fff;border-color:transparent;box-shadow:0 0 14px rgba(255,46,154,.7)}
-  .skyline{position:absolute;left:0;right:0;bottom:-1px;height:64px}
+  .chip.mode.on{background:linear-gradient(90deg,#FF2E9A,#FF9A3D)!important;color:#fff!important;border-color:#fff}
+
+  /* scene pieces */
+  body.neon .scene{border-radius:3px;background:linear-gradient(180deg,var(--g1) 0%,var(--g2) 46%,var(--g3) 76%)}
+  .sea{position:absolute;left:0;right:0;bottom:0;transition:background 3s}
+  .sea::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(180deg,rgba(255,255,255,.0) 0 7px,rgba(255,255,255,.14) 7px 8px);animation:swell 5s ease-in-out infinite alternate}
+  @keyframes swell{to{transform:translateY(3px)}}
+  .glint{position:absolute;top:0;bottom:0;width:90px;margin-left:-45px;transition:left 3s linear,opacity 3s;
+    background:repeating-linear-gradient(180deg,var(--glint,#FFE7A3) 0 3px,transparent 3px 9px);
+    -webkit-mask-image:linear-gradient(180deg,#000,transparent 95%),radial-gradient(ellipse at 50% 0,#000 30%,transparent 70%);
+    mask-image:linear-gradient(180deg,#000,transparent 95%);opacity:.8;animation:glint 1.6s ease-in-out infinite alternate}
+  @keyframes glint{to{transform:scaleX(.7)}}
+  .skyline{position:absolute;left:0;right:0;height:70px}
   .skyline svg{width:100%;height:100%;display:block}
-  .palm{position:absolute;bottom:-6px;width:112px;height:154px}
-  .palm.l{left:-26px}
-  .palm.r{right:-26px;transform:scaleX(-1)}
-  .floor{position:fixed;left:-20%;right:-20%;bottom:0;height:38vh;z-index:0;pointer-events:none;perspective:260px;
-    -webkit-mask-image:linear-gradient(to top,#000 10%,transparent 95%);mask-image:linear-gradient(to top,#000 10%,transparent 95%)}
-  .floor div{position:absolute;inset:0;transform:rotateX(62deg);transform-origin:50% 100%;opacity:.45;
-    background-image:linear-gradient(rgba(255,60,200,.9) 2px,transparent 2px),linear-gradient(90deg,rgba(0,240,255,.7) 2px,transparent 2px);
-    background-size:60px 60px;animation:floor 2.4s linear infinite}
-  @keyframes floor{to{background-position:0 60px}}
+  .palm{position:absolute;bottom:-4px;width:150px;height:210px}
+  .palm.l{left:-34px}
+  .palm.r{right:-40px;transform:scaleX(-1) scale(.86);transform-origin:bottom center}
+  .haze{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 100%,rgba(255,170,120,.35),transparent 60%);mix-blend-mode:screen}
   .refresh{display:inline-flex;align-items:center;gap:8px;margin:18px auto 0;padding:10px 18px;border-radius:999px;
     border:1px solid var(--line);background:var(--glass);color:#fff;font:500 14px 'Outfit',sans-serif;cursor:pointer;
     backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
@@ -219,12 +261,13 @@
   <div class="moon" id="moon"></div>
   <div class="sun" id="sun"></div>
   <div id="clouds"></div>
+  <div class="haze neon-only"></div>
   <div class="skyline neon-only" id="skyline"></div>
+  <div class="sea neon-only" id="sea"><div class="glint" id="glint"></div></div>
   <svg class="palm l neon-only" viewBox="0 0 150 200"><use href="#palmShape"/></svg>
   <svg class="palm r neon-only" viewBox="0 0 150 200"><use href="#palmShape"/></svg>
   <div class="precip" id="precip"></div>
 </div>
-<div class="floor neon-only"><div></div></div>
 <svg width="0" height="0" style="position:absolute">
   <defs>
     <g id="palmShape" fill="#1A0930" stroke="rgba(255,60,180,.55)" stroke-width="1.2">
@@ -429,12 +472,12 @@ function render(d){
       <div class="hilo">H ${r0(dy.temperature_2m_max[0])}°  ·  L ${r0(dy.temperature_2m_min[0])}°  ·  Feels like ${r0(c.apparent_temperature)}°</div>
     </section>
 
-    <section class="card">
+    <section class="card hourly-card">
       <h2>${svgClock()} Next 24 hours</h2>
       <div class="hourly">${hours}</div>
     </section>
 
-    <section class="card">
+    <section class="card daily-card">
       <h2>${svgCal()} 7-day forecast</h2>
       ${days}
     </section>
@@ -596,14 +639,28 @@ function updateSky(){
   r.setProperty('--g1', cols[0]); r.setProperty('--g2', cols[1]); r.setProperty('--g3', cols[2]);
   document.querySelector('meta[name=theme-color]').setAttribute('content', cols[0]);
 
-  // arc geometry: horizon sits just under the temperature block
+  // arc geometry
   const hero = document.getElementById('hero');
-  const H = hero ? hero.getBoundingClientRect().bottom + window.scrollY : 360;
-  const scene = $('scene'); scene.style.height = H + 'px';
-  const W = scene.clientWidth;
+  const scene = $('scene');
+  let H, W;
+  if (neon && hero){
+    const rc = hero.getBoundingClientRect();
+    Object.assign(scene.style, {top:(rc.top+scrollY)+'px', left:rc.left+'px', right:'auto', width:rc.width+'px', height:rc.height+'px'});
+    W = rc.width; H = rc.height*0.77;                       // horizon line where sky meets sea
+    const sea = $('sea'); sea.style.top = H+'px';
+    $('skyline').style.top = (H-70)+'px'; $('skyline').style.bottom = 'auto';
+    const seaTop = mix(mix(cols[2], '#2EE6D6', .55), '#2A0F4A', night*.8);
+    const seaBot = mix('#0B6E8C', '#08061A', night*.9);
+    sea.style.background = `linear-gradient(180deg, ${seaTop} 0%, ${seaBot} 100%)`;
+  } else {
+    Object.assign(scene.style, {left:'0', right:'0', width:'', top:'0'});
+    H = hero ? hero.getBoundingClientRect().bottom + window.scrollY : 360;
+    scene.style.height = H + 'px';
+    W = scene.clientWidth;
+  }
   const place = (el, t) => {
     el.style.left = (W*(0.07 + t*0.86)) + 'px';
-    el.style.top  = (H - Math.sin(Math.PI*t)*(H - 86)) + 'px';
+    el.style.top  = (H - Math.sin(Math.PI*t)*(H - (neon ? 60 : 86))) + 'px';
   };
 
   // sun: deep orange at the horizon, pale gold overhead
@@ -613,11 +670,10 @@ function updateSky(){
     const core = mix('#FF7A3D', '#FFF6CF', Math.pow(elev, .55));
     const glow = mix('#FF5E3A', '#FFE27A', elev);
     if (neon){
-      sun.style.width = sun.style.height = '104px'; sun.style.margin = '-52px 0 0 -52px';
-      sun.style.background = 'linear-gradient(180deg,#FFF59A 0%,#FFB347 38%,#FF4F8B 72%,#D63BFF 100%)';
-      sun.style.webkitMaskImage = sun.style.maskImage = 'linear-gradient(180deg,#000 0 52%,transparent 52% 56%,#000 56% 64%,transparent 64% 69%,#000 69% 77%,transparent 77% 83%,#000 83% 90%,transparent 90% 97%,#000 97%)';
-      sun.style.boxShadow = 'none';
-      sun.style.filter = 'drop-shadow(0 0 22px rgba(255,79,139,.9)) drop-shadow(0 0 60px rgba(255,140,60,.5))';
+      sun.style.width = sun.style.height = '92px'; sun.style.margin = '-46px 0 0 -46px';
+      sun.style.webkitMaskImage = sun.style.maskImage = ''; sun.style.filter = '';
+      sun.style.background = `radial-gradient(circle, #FFFFF4 0%, #FFF3C4 38%, ${mix('#FF5A3C','#FFD36B',elev)} 72%, ${mix('#FF2E7A','#FFB347',elev)} 100%)`;
+      sun.style.boxShadow = `0 0 50px 20px ${mix('#FF4F7B','#FFD36B',elev)}bb, 0 0 160px 80px ${mix('#FF3E8A','#FFB347',elev)}55, 0 0 320px 160px #FF5FA222`;
     } else {
       sun.style.width = sun.style.height = ''; sun.style.margin = '';
       sun.style.webkitMaskImage = sun.style.maskImage = ''; sun.style.filter = '';
@@ -633,6 +689,15 @@ function updateSky(){
   hg.style.background = `radial-gradient(ellipse at ${p < .5 ? '15%' : '85%'} 50%, ${neon ? '#FF2E9A' : '#FF8A50'}, transparent 70%)`;
   hg.style.opacity = neon ? Math.max(.35, twilight) * (1 - cloud*.5) : twilight * (1 - cloud) * 0.85;
   const wl = document.getElementById('winLights'); if (wl) wl.style.opacity = .25 + night*.75;
+  if (neon){
+    const g = $('glint');
+    const src = (p > -0.05 && p < 1.05) ? p : (q >= 0 ? q : -1);
+    if (src >= 0){
+      g.style.left = (W*(0.07 + src*0.86)) + 'px';
+      g.style.setProperty('--glint', night > .5 ? '#FFF4C8' : mix('#FF7A50', '#FFF1B8', elev));
+      g.style.opacity = (1 - cloud) * (night > .5 ? .45 : .85);
+    } else g.style.opacity = 0;
+  }
 
   // moon + stars
   const moon = $('moon');
