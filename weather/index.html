@@ -38,11 +38,9 @@
   .scene{position:absolute;top:0;left:0;right:0;height:360px;overflow:hidden;z-index:0;pointer-events:none}
   .horizon-glow{position:absolute;left:-10%;right:-10%;bottom:-60px;height:140px;border-radius:50%;filter:blur(30px);opacity:0;transition:opacity 3s,background 3s}
   .sun{position:absolute;width:76px;height:76px;margin:-38px 0 0 -38px;border-radius:50%;transition:left 3s linear,top 3s linear,opacity 3s,box-shadow 3s,background 3s}
-  .moon{position:absolute;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;
-    background:radial-gradient(circle at 35% 35%,#FFFBEA,#F2E3A8 70%);
+  .moon{position:absolute;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;
     box-shadow:0 0 30px 8px rgba(255,244,200,.35),0 0 90px 30px rgba(255,244,200,.12);
     transition:left 3s linear,top 3s linear,opacity 3s}
-  .moon::after{content:'';position:absolute;width:12px;height:12px;border-radius:50%;background:rgba(200,185,130,.35);top:14px;left:26px;box-shadow:-12px 14px 0 -2px rgba(200,185,130,.3)}
   .stars{position:absolute;inset:0;transition:opacity 3s;opacity:0}
   .sun,.moon{opacity:0}
   .stars i{position:absolute;border-radius:50%;background:#fff;animation:twinkle 4s ease-in-out infinite}
@@ -138,6 +136,19 @@
   .compass em{position:absolute;top:2px;left:50%;transform:translateX(-50%);font-size:9px;font-style:normal;font-weight:700;color:var(--soft)}
 
   .foot{text-align:center;font-size:12px;color:var(--soft);margin-top:22px}
+  .wear{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:12px}
+  .wear span{padding:5px 11px;border-radius:999px;background:rgba(255,255,255,.2);border:1px solid var(--line);font-size:13px;font-weight:500;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);text-shadow:none}
+  .nowcast .msg{font-size:17px;font-weight:600;margin-bottom:12px}
+  .bars{display:flex;align-items:flex-end;gap:5px;height:46px}
+  .bars i{flex:1;border-radius:5px 5px 2px 2px;background:rgba(255,255,255,.22);min-height:4px}
+  .bars i.wet{background:linear-gradient(180deg,#9BE7FF,#3FA9F5)}
+  .bar-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--soft);margin-top:6px}
+  .moon-ico{width:46px;height:46px;float:right;margin-left:6px}
+  body.neon .wear span{background:#000;border:2px solid #fff;border-radius:2px;text-transform:uppercase;font-size:11px;font-weight:800;letter-spacing:1px}
+  body.neon .nowcast{background:linear-gradient(160deg,#2EE6D6 0%,#1C8FD1 60%,#2A3FA8 100%)}
+  body.neon .nowcast .msg{font-family:'Anton',sans-serif;font-weight:400;font-size:22px;letter-spacing:.5px;text-transform:uppercase;text-shadow:2px 2px 0 rgba(0,0,0,.45)}
+  body.neon .bars i{background:rgba(0,0,0,.25)}
+  body.neon .bars i.wet{background:#fff}
 
   /* ===== Neon Coast mode: painted panel-grid collage ===== */
   .neon-only{display:none}
@@ -391,6 +402,7 @@ async function getWeather(p){
    + `&current=temperature_2m,apparent_temperature,relative_humidity_2m,is_day,weather_code,wind_speed_10m,wind_gusts_10m,wind_direction_10m,precipitation`
    + `&hourly=temperature_2m,weather_code,precipitation_probability,is_day`
    + `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,sunrise,sunset,uv_index_max`
+   + `&minutely_15=precipitation&forecast_minutely_15=10`
    + `&timezone=auto&forecast_days=7`;
   const res = await fetch(url);
   if(!res.ok) throw new Error('Weather unavailable');
@@ -470,7 +482,10 @@ function render(d){
       <div class="temp">${r0(c.temperature_2m)}<sup>°</sup></div>
       <div class="cond">${LABELS[c.weather_code] || '—'}</div>
       <div class="hilo">H ${r0(dy.temperature_2m_max[0])}°  ·  L ${r0(dy.temperature_2m_min[0])}°  ·  Feels like ${r0(c.apparent_temperature)}°</div>
+      <div class="wear">${wearTips(d, start).map(t=>`<span>${t}</span>`).join('')}</div>
     </section>
+
+    ${nowcastCard(d)}
 
     <section class="card hourly-card">
       <h2>${svgClock()} Next 24 hours</h2>
@@ -511,9 +526,10 @@ function render(d){
         <div class="s">Sunset ${fmtTime(dy.sunset[0])}</div>
       </div>
       <div class="card stat">
-        <h2>Feels like</h2>
-        <div class="v">${r0(c.apparent_temperature)}°</div>
-        <div class="s">${feelsNote(c.apparent_temperature, c.temperature_2m)}</div>
+        <h2>Moon</h2>
+        <div class="moon-ico">${moonSVG(moonPhase().f, current.lat)}</div>
+        <div class="v">${moonPhase().illum}<small>%</small></div>
+        <div class="s">${moonPhase().name}</div>
       </div>
     </section>
 
@@ -701,6 +717,9 @@ function updateSky(){
 
   // moon + stars
   const moon = $('moon');
+  const mp = moonPhase();
+  if (moon.dataset.f !== mp.f.toFixed(3)){ moon.innerHTML = moonSVG(mp.f, current.lat); moon.dataset.f = mp.f.toFixed(3); }
+  moon.style.boxShadow = `0 0 30px 8px rgba(255,244,200,${.35*mp.illum/100}),0 0 90px 30px rgba(255,244,200,${.12*mp.illum/100})`;
   if (q >= 0){ place(moon, q); moon.style.opacity = night * (1 - cloud*0.7); }
   else moon.style.opacity = 0;
   $('stars').style.opacity = night * (1 - cloud*1.4);
@@ -717,6 +736,69 @@ function updateSky(){
 }
 setInterval(updateSky, 30000);
 window.addEventListener('resize', updateSky);
+
+/* ---------- what to wear ---------- */
+function wearTips(d, start){
+  const c = d.current, h = d.hourly, dy = d.daily;
+  const f = c.apparent_temperature, tips = [];
+  tips.push(f <= 5 ? '🧣 Beanie + heavy jacket' : f <= 11 ? '🧥 Proper jacket' : f <= 16 ? '🧥 Hoodie or light jacket'
+          : f <= 21 ? '👕 Long sleeves' : f <= 27 ? '👕 T-shirt weather' : '🩳 Shorts + singlet');
+  const next3 = h.precipitation_probability.slice(start, start+3);
+  const raining = ['rain','storm'].includes(kind(c.weather_code)) || (c.precipitation||0) > 0;
+  if (raining || Math.max(0, ...next3) >= 50) tips.push('☂️ Umbrella');
+  if (c.wind_gusts_10m >= 45 || c.wind_speed_10m >= 30) tips.push('💨 Windproof layer');
+  if (c.is_day && (dy.uv_index_max[0] ?? 0) >= 6 && !['rain','storm','fog','cloudy'].includes(kind(c.weather_code))) tips.push('🕶️ Sunnies + SPF');
+  return tips;
+}
+
+/* ---------- rain in the next 2 hours ---------- */
+function nowcastCard(d){
+  const m = d.minutely_15; if (!m || !m.time) return '';
+  let i0 = m.time.findIndex(t => t >= d.current.time.slice(0,16)); if (i0 < 0) i0 = 0;
+  const T = m.time.slice(i0, i0+8), P = m.precipitation.slice(i0, i0+8).map(v => v || 0);
+  if (P.length < 4) return '';
+  const WET = 0.1, wet = P.map(v => v >= WET);
+  const mins = i => i*15;
+  let msg;
+  if (!wet.some(Boolean)) msg = 'No rain for the next 2 hours';
+  else if (wet[0]){
+    const stop = wet.indexOf(false);
+    msg = stop < 0 ? 'Rain for the next 2 hours' : `Rain easing in about ${mins(stop)} min`;
+  } else msg = `Rain starting in about ${mins(wet.indexOf(true))} min`;
+  const max = Math.max(1, ...P);
+  const bars = P.map((v,i) => `<i class="${wet[i]?'wet':''}" style="height:${Math.max(8, v/max*100)}%"></i>`).join('');
+  return `<section class="card nowcast">
+    <h2>${svgDrop()} Next 2 hours</h2>
+    <div class="msg" ${wet.some(Boolean)?'':'style="margin:0"'}>${msg}</div>
+    ${wet.some(Boolean) ? `<div class="bars">${bars}</div>
+    <div class="bar-labels"><span>Now</span><span>+1 hr</span><span>+2 hr</span></div>` : ''}
+  </section>`;
+}
+function svgDrop(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg>`; }
+
+/* ---------- moon phase ---------- */
+function moonPhase(when = Date.now()){
+  const SYN = 29.530588853, ref = Date.UTC(2000,0,6,18,14);
+  const f = (((when - ref)/864e5) / SYN % 1 + 1) % 1;           // 0 new, .5 full
+  const illum = Math.round((1 - Math.cos(2*Math.PI*f)) / 2 * 100);
+  const names = ['New moon','Waxing crescent','First quarter','Waxing gibbous','Full moon','Waning gibbous','Last quarter','Waning crescent'];
+  return { f, illum, name: names[Math.round(f*8) % 8] };
+}
+function moonPath(f){
+  const waxing = f < .5, rx = Math.abs(Math.cos(2*Math.PI*f)).toFixed(3);
+  const s1 = waxing ? 1 : 0, s2 = waxing ? (f < .25 ? 0 : 1) : (f < .75 ? 0 : 1);
+  return `M0 -1 A1 1 0 0 ${s1} 0 1 A${rx} 1 0 0 ${s2} 0 -1Z`;
+}
+function moonSVG(f, lat){
+  // southern hemisphere sees the moon flipped (waxing lit on the left)
+  const flip = lat < 0 ? 'scale(-1 1)' : '';
+  return `<svg viewBox="-1.1 -1.1 2.2 2.2" width="100%" height="100%">
+    <defs><radialGradient id="mg" cx="-.3" cy="-.3" r="1.4" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFFCEB"/><stop offset="1" stop-color="#E9D79A"/></radialGradient></defs>
+    <circle r="1" fill="rgba(20,24,60,.55)"/>
+    <g transform="${flip}"><path d="${moonPath(f)}" fill="url(#mg)"/></g>
+    <circle cx=".28" cy="-.2" r=".14" fill="rgba(160,140,90,.25)"/><circle cx="-.3" cy=".32" r=".1" fill="rgba(160,140,90,.2)"/>
+  </svg>`;
+}
 
 function tempColor(t){
   if(t<=0) return '#9AD8FF'; if(t<=8) return '#6EC6FF'; if(t<=14) return '#5BE3C0';
