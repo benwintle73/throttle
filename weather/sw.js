@@ -1,5 +1,5 @@
-const CACHE = 'wx-v9';
-const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon.svg'];
+const CACHE = 'wx-v11';
+const SHELL = ['./', 'index.html', 'quotes.js', 'manifest.webmanifest', 'icon.svg'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
