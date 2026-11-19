@@ -139,16 +139,32 @@
   .wear{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:12px}
   .wear span{padding:5px 11px;border-radius:999px;background:rgba(255,255,255,.2);border:1px solid var(--line);font-size:13px;font-weight:500;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);text-shadow:none}
   .nowcast .msg{font-size:17px;font-weight:600;margin-bottom:12px}
-  .bars{display:flex;align-items:flex-end;gap:5px;height:46px}
-  .bars i{flex:1;border-radius:5px 5px 2px 2px;background:rgba(255,255,255,.22);min-height:4px}
-  .bars i.wet{background:linear-gradient(180deg,#9BE7FF,#3FA9F5)}
-  .bar-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--soft);margin-top:6px}
+  .rain-sum{display:flex;gap:18px;margin-bottom:14px}
+  .rain-sum div{font-size:12px;color:var(--soft);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+  .rain-sum b{display:block;font-size:24px;color:#fff;letter-spacing:0;text-transform:none;font-weight:600;margin-top:2px}
+  .rain-sum b small{font-size:13px;font-weight:500;margin-left:2px}
+  .rchart{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;align-items:end;height:150px;padding-top:4px;
+    background:repeating-linear-gradient(180deg,transparent 0 36px,rgba(255,255,255,.14) 36px 37px)}
+  .rcol{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+  .rcol em{font-style:normal;font-size:12px;font-weight:700;margin-bottom:4px;white-space:nowrap}
+  .rcol i{width:100%;border-radius:7px 7px 3px 3px;background:rgba(255,255,255,.2);min-height:4px}
+  .rcol i.l{background:linear-gradient(180deg,#B6EEFF,#6CC8F7)}
+  .rcol i.m{background:linear-gradient(180deg,#6CC8F7,#2F86E8)}
+  .rcol i.h{background:linear-gradient(180deg,#5E7BFF,#3A2FC8)}
+  .rtimes{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:8px;text-align:center;font-size:11px;color:var(--soft);font-weight:600}
+  .rkey{display:flex;gap:14px;margin-top:12px;font-size:11px;color:var(--soft)}
+  .rkey span{display:inline-flex;align-items:center;gap:5px}
+  .rkey span::before{content:'';width:10px;height:10px;border-radius:3px;background:var(--k)}
   .moon-ico{width:46px;height:46px;float:right;margin-left:6px}
   body.neon .wear span{background:#000;border:2px solid #fff;border-radius:2px;text-transform:uppercase;font-size:11px;font-weight:800;letter-spacing:1px}
   body.neon .nowcast{background:linear-gradient(160deg,#2EE6D6 0%,#1C8FD1 60%,#2A3FA8 100%)}
   body.neon .nowcast .msg{font-family:'Anton',sans-serif;font-weight:400;font-size:22px;letter-spacing:.5px;text-transform:uppercase;text-shadow:2px 2px 0 rgba(0,0,0,.45)}
-  body.neon .bars i{background:rgba(0,0,0,.25)}
-  body.neon .bars i.wet{background:#fff}
+  body.neon .rcol i{background:rgba(0,0,0,.25)}
+  body.neon .rcol i.l{background:#fff}
+  body.neon .rcol i.m{background:#FFE14D}
+  body.neon .rcol i.h{background:#FF2E9A}
+  body.neon .rchart{background:repeating-linear-gradient(180deg,transparent 0 36px,rgba(0,0,0,.18) 36px 37px)}
+  body.neon .rain-sum b,body.neon .rcol em{font-family:'Anton',sans-serif;font-weight:400;letter-spacing:.5px}
 
   /* ===== Neon Coast mode: painted panel-grid collage ===== */
   .neon-only{display:none}
@@ -757,23 +773,37 @@ function nowcastCard(d){
   let i0 = m.time.findIndex(t => t >= d.current.time.slice(0,16)); if (i0 < 0) i0 = 0;
   const T = m.time.slice(i0, i0+8), P = m.precipitation.slice(i0, i0+8).map(v => v || 0);
   if (P.length < 4) return '';
-  const WET = 0.1, wet = P.map(v => v >= WET);
-  const mins = i => i*15;
+  const WET = 0.1, wet = P.map(v => v >= WET), any = wet.some(Boolean);
   let msg;
-  if (!wet.some(Boolean)) msg = 'No rain for the next 2 hours';
+  if (!any) msg = 'No rain for the next 2 hours';
   else if (wet[0]){
     const stop = wet.indexOf(false);
-    msg = stop < 0 ? 'Rain for the next 2 hours' : `Rain easing in about ${mins(stop)} min`;
-  } else msg = `Rain starting in about ${mins(wet.indexOf(true))} min`;
-  const max = Math.max(1, ...P);
-  const bars = P.map((v,i) => `<i class="${wet[i]?'wet':''}" style="height:${Math.max(8, v/max*100)}%"></i>`).join('');
+    msg = stop < 0 ? 'Rain for the next 2 hours' : `Rain easing in about ${stop*15} min`;
+  } else msg = `Rain starting in about ${wet.indexOf(true)*15} min`;
+  if (!any) return `<section class="card nowcast"><h2>${svgDrop()} Next 2 hours</h2><div class="msg" style="margin:0">${msg}</div></section>`;
+
+  // intensity per 15 min: light < 0.5 mm, moderate < 2 mm, heavy >= 2 mm
+  const lvl = v => v < WET ? '' : v < 0.5 ? 'l' : v < 2 ? 'm' : 'h';
+  const total = P.reduce((a,v)=>a+v,0), peak = Math.max(...P);
+  const scale = Math.max(1, Math.ceil(peak*2)/2);                  // chart top, at least 1 mm
+  const fmt = v => v >= 10 ? v.toFixed(0) : v.toFixed(1);
+  const cols = P.map(v => `<div class="rcol">${v >= WET ? `<em>${fmt(v)}</em>` : ''}<i class="${lvl(v)}" style="height:${v >= WET ? Math.max(6, v/scale*82) : 3}%"></i></div>`).join('');
+  const times = T.map((t,i) => `<span>${i===0 ? 'Now' : fmtClock(t)}</span>`).join('');
+  const peakName = peak < 0.5 ? 'Light' : peak < 2 ? 'Moderate' : 'Heavy';
   return `<section class="card nowcast">
     <h2>${svgDrop()} Next 2 hours</h2>
-    <div class="msg" ${wet.some(Boolean)?'':'style="margin:0"'}>${msg}</div>
-    ${wet.some(Boolean) ? `<div class="bars">${bars}</div>
-    <div class="bar-labels"><span>Now</span><span>+1 hr</span><span>+2 hr</span></div>` : ''}
+    <div class="msg">${msg}</div>
+    <div class="rain-sum">
+      <div>Total<b>${fmt(total)}<small>mm</small></b></div>
+      <div>Heaviest<b>${fmt(peak)}<small>mm / 15 min</small></b></div>
+      <div>Intensity<b>${peakName}</b></div>
+    </div>
+    <div class="rchart">${cols}</div>
+    <div class="rtimes">${times}</div>
+    <div class="rkey"><span style="--k:#8FDCFB">Light</span><span style="--k:#3F95EC">Moderate</span><span style="--k:#4A3FD8">Heavy</span><span style="opacity:.8">mm per 15 min</span></div>
   </section>`;
 }
+const fmtClock = iso => { const h = +iso.slice(11,13), m = iso.slice(14,16); return `${(h%12)||12}:${m}`; };
 function svgDrop(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg>`; }
 
 /* ---------- moon phase ---------- */
