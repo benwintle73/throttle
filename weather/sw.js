@@ -1,4 +1,4 @@
-const CACHE = 'wx-v8';
+const CACHE = 'wx-v9';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon.svg'];
 
 self.addEventListener('install', e => {

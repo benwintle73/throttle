@@ -785,7 +785,7 @@ function nowcastCard(d){
   // intensity per 15 min: light < 0.5 mm, moderate < 2 mm, heavy >= 2 mm
   const lvl = v => v < WET ? '' : v < 0.5 ? 'l' : v < 2 ? 'm' : 'h';
   const total = P.reduce((a,v)=>a+v,0), peak = Math.max(...P);
-  const scale = Math.max(1, Math.ceil(peak*2)/2);                  // chart top, at least 1 mm
+  const scale = Math.max(0.5, Math.ceil(peak*4)/4);                // chart top: fits drizzle, at least 0.5 mm
   const fmt = v => v >= 10 ? v.toFixed(0) : v.toFixed(1);
   const cols = P.map(v => `<div class="rcol">${v >= WET ? `<em>${fmt(v)}</em>` : ''}<i class="${lvl(v)}" style="height:${v >= WET ? Math.max(6, v/scale*82) : 3}%"></i></div>`).join('');
   const times = T.map((t,i) => `<span>${i===0 ? 'Now' : fmtClock(t)}</span>`).join('');
