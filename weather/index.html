@@ -413,6 +413,13 @@
   .kb button.del{pointer-events:auto}
   .kb button.del svg{pointer-events:none}
   .kb button.c{background:#14C8B4}.kb button.p{background:#FF9F43}.kb button.a{background:rgba(0,0,0,.35);color:rgba(255,255,255,.55)}
+  .kb button.h{box-shadow:0 0 0 2px #FFD84D inset,0 0 14px rgba(255,216,77,.75);animation:hintglow 1.6s ease-in-out infinite}
+  .kb button.c.h,.kb button.p.h{animation:none;box-shadow:0 0 0 2px #FFD84D inset}
+  @keyframes hintglow{50%{box-shadow:0 0 0 2px #FFD84D inset,0 0 4px rgba(255,216,77,.3)}}
+  .pz-hint{display:flex;justify-content:center;margin:0 0 8px;flex-shrink:0}
+  .pz-hint button{border:0;border-radius:999px;padding:7px 14px;background:rgba(255,216,77,.22);color:#fff;font:700 13px 'Outfit',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px}
+  .pz-hint button:disabled{opacity:.45;cursor:default}
+  .pz-hint:empty{display:none}
   .pz-actions{display:flex;gap:8px;justify-content:center;margin-top:8px}
   .pz-actions button{border:0;border-radius:999px;padding:8px 16px;background:#fff;color:#333;font:700 13px 'Outfit',sans-serif;cursor:pointer}
   .pz-actions button.ghost{background:rgba(255,255,255,.18);color:#fff}
@@ -685,6 +692,7 @@
     </div>
     <div class="pz-grid" id="pzGrid"></div>
     <div class="pz-msg" id="pzMsg"></div>
+    <div class="pz-hint" id="pzHint"></div>
     <div class="kb" id="kb"></div>
     <div class="lb" id="lb"></div>
   </div>
@@ -1263,7 +1271,7 @@ function pzCached(){ const c = store.get('wx_pz_srv', null); return c && c.day =
 function fromServer(d){
   const c = pzCached() || {};
   return { day:d.day, num:d.num, guesses:d.guesses||[], pats:d.patterns||[], done:!!d.done, won:!!d.won, word:d.word,
-           score:d.score, seconds:d.seconds, legacy:!!d.legacy, legacyGuesses:d.legacy_guesses, rank:c.rank, players:c.players };
+           hints:d.hints||[], hintRows:d.hint_rows||[], score:d.score, seconds:d.seconds, legacy:!!d.legacy, legacyGuesses:d.legacy_guesses, rank:c.rank, players:c.players };
 }
 function pzState(){
   const t = puzzleToday(); if (!t) return null;
@@ -1273,6 +1281,7 @@ function pzState(){
   }
   let st = store.get('wx_pz', null);
   if (!st || st.day !== t.day) st = { day: t.day, guesses: [], done: false, won: false };
+  st.hints = st.hints || []; st.hintRows = st.hintRows || [];
   st.pats = st.guesses.map(g => score(g, t.word));
   if (st.done) st.word = t.word;
   return { mode:'practice', day:t.day, num:t.num, word:t.word, st };
@@ -1335,9 +1344,10 @@ function drawPuzzle(revealRow = -1){
   $('pzGrid').innerHTML = html;
   const rank = {c:3,p:2,a:1}, keys = {};
   st.guesses.forEach((g,r) => (st.pats[r]||'').split('').forEach((c,i) => { if (!keys[g[i]] || rank[c] > rank[keys[g[i]]]) keys[g[i]] = c; }));
+  const hinted = new Set(st.hints || []);
   const rows = ['qwertyuiop','asdfghjkl','↵zxcvbnm⌫'];
   $('kb').innerHTML = rows.map(r => `<div>${[...r].map(k => k==='↵' ? `<button class="wide" data-k="enter">Enter</button>`
-    : k==='⌫' ? `<button class="wide del" data-k="back" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M21 5H9l-6 7 6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z"/><path d="M18 9l-6 6M12 9l6 6"/></svg></button>` : `<button class="${keys[k]||''}" data-k="${k}">${k}</button>`).join('')}</div>`).join('');
+    : k==='⌫' ? `<button class="wide del" data-k="back" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M21 5H9l-6 7 6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z"/><path d="M18 9l-6 6M12 9l6 6"/></svg></button>` : `<button class="${keys[k]||''}${hinted.has(k) && !st.done ? ' h' : ''}" data-k="${k}">${k}</button>`).join('')}</div>`).join('');
   let msg = '';
   const daily = PZ.mode === 'daily';
   if (st.legacy){
@@ -1356,6 +1366,33 @@ function drawPuzzle(revealRow = -1){
     }
   }
   $('pzMsg').innerHTML = msg;
+  // hint button: up to 3 per game, one per line, 75 points each
+  const used = (st.hints || []).length, rowNow = st.guesses.length, usedHere = (st.hintRows || []).includes(rowNow);
+  $('pzHint').innerHTML = st.done || st.legacy ? '' :
+    `<button id="hintBtn" ${used >= 3 || usedHere ? 'disabled' : ''}>💡 ${used >= 3 ? 'No hints left' : usedHere ? 'One hint per line' : `Hint · ${3 - used} left${daily ? ' · −75 pts' : ''}`}</button>`;
+  const hb = $('hintBtn'); if (hb) hb.onclick = pzHint;
+}
+async function pzHint(){
+  if (!PZ || pzBusy || PZ.st.done) return;
+  const st = PZ.st;
+  if (PZ.mode === 'daily'){
+    pzBusy = true;
+    const { data, error } = await sb.rpc('weather_hint');
+    pzBusy = false;
+    if (error) return toast(/per line/i.test(error.message) ? 'One hint per line' : /left|new letters/i.test(error.message) ? 'No hints left' : 'Couldn’t reach the server — try again');
+    PZ.st = fromServer(data); store.set('wx_pz_srv', PZ.st, true);
+  } else {
+    if (st.hints.length >= 3 || st.hintRows.includes(st.guesses.length)) return;
+    const seen = st.guesses.join(''), w = PZ.word;
+    let opts = [...new Set(w)].filter(c => !seen.includes(c) && !st.hints.includes(c));
+    if (!opts.length) opts = [...new Set(w)].filter(c => !st.hints.includes(c));
+    if (!opts.length) return toast('No new letters to hint');
+    st.hints.push(opts[Math.floor(Math.random() * opts.length)]); st.hintRows.push(st.guesses.length);
+    store.set('wx_pz', { day: st.day, guesses: st.guesses, done: st.done, won: st.won, hints: st.hints, hintRows: st.hintRows }, true);
+  }
+  drawPuzzle();
+  const L = PZ.st.hints[PZ.st.hints.length - 1];
+  toast(`Hint: the word has ${'aeiou'.includes(L) ? 'an' : 'a'} ${L.toUpperCase()} — it’s lit up below`);
 }
 function finishStats(won, n){
   const s = pzStats(); s.played++;
@@ -1450,7 +1487,7 @@ function drawBoard(){
     <div class="lb-tabs"><button class="${boardTab==='week'?'on':''}" data-t="week">This week</button><button class="${boardTab==='today'?'on':''}" data-t="today">Today</button><button class="${boardTab==='all'?'on':''}" data-t="all">All time</button></div>
     ${rows || `<div class="lb-empty">No scores yet — be the first.</div>`}
     ${meBox}
-    <div class="lb-rules"><b>Scoring</b> — solved in 1 guess: 600 · 2: 500 · 3: 400 · 4: 300 · 5: 200 · 6: 100. Speed bonus up to +100, dropping 1 point every 6 seconds from your first guess to your last. Not solved: 0. The week runs Monday to Sunday and resets each Monday; All time keeps adding up. Every guess is checked and timed on the server.<br>Playing as <b>${esc(d.nickname || '—')}</b> — change your name in your account.</div>
+    <div class="lb-rules"><b>Scoring</b> — solved in 1 guess: 600 · 2: 500 · 3: 400 · 4: 300 · 5: 200 · 6: 100. Speed bonus up to +100, dropping 1 point every 6 seconds from your first guess to your last. Each hint costs 75 (up to 3, one per line). Not solved: 0. The week runs Monday to Sunday and resets each Monday; All time keeps adding up. Every guess is checked and timed on the server.<br>Playing as <b>${esc(d.nickname || '—')}</b> — change your name in your account.</div>
     <div class="pz-actions" style="margin-top:12px"><button class="ghost" onclick="$('pz').classList.remove('board')">Back to puzzle</button></div>`;
   lb.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { boardTab = b.dataset.t; drawBoard(); });
   lb.querySelectorAll('[data-lg]').forEach(b => b.onclick = () => pickLeague(b.dataset.lg || null));
@@ -1479,7 +1516,7 @@ async function pzKey(k){
       st.done = true; st.won = st.guesses[row] === PZ.word; st.word = PZ.word;
       finishStats(st.won, st.guesses.length);
     }
-    store.set('wx_pz', { day: st.day, guesses: st.guesses, done: st.done, won: st.won }, true);
+    store.set('wx_pz', { day: st.day, guesses: st.guesses, done: st.done, won: st.won, hints: st.hints, hintRows: st.hintRows }, true);
     return drawPuzzle(row);
   }
   if (/^[a-z]$/.test(k) && cur.length < 5){ cur += k; drawPuzzle(); }
