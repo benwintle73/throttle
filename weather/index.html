@@ -2948,13 +2948,25 @@ window.addEventListener('focus', refreshIfStale);
 // iPhone home-screen apps can be left nudged up after the keyboard or a sheet closes, so the top
 // of the page can't be reached. Snap the viewport back whenever that happens.
 function unstickViewport(){
+  // iOS 26 bug: the visual viewport can get stuck shifted up after the keyboard closes or after re-rendering.
+  // A real 1px scroll and back forces WebKit to recalculate it.
   setTimeout(() => {
-    const vv = window.visualViewport;
-    if (vv && vv.offsetTop > 0) window.scrollTo(window.scrollX, window.scrollY + vv.offsetTop);
-    window.scrollTo(window.scrollX, Math.max(0, window.scrollY));
-    if (lastData) updateSky();
+    const y = Math.max(0, window.scrollY);
+    window.scrollTo(0, y + 1);
+    requestAnimationFrame(() => { window.scrollTo(0, y); if (lastData) updateSky(); });
   }, 80);
 }
+function viewportShifted(){
+  const vv = window.visualViewport, top = document.querySelector('.app');
+  if (vv && Math.abs(vv.offsetTop) > 2) return true;
+  if (window.scrollY <= 0 && top){
+    const pad = parseFloat(getComputedStyle(top).paddingTop) || 0, t = top.getBoundingClientRect().top;
+    return t < -2;   // page drawn higher than its own top
+  }
+  return false;
+}
+addEventListener('touchend', () => setTimeout(() => { if (window.scrollY <= 0 && viewportShifted()) unstickViewport(); }, 400), { passive: true });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') unstickViewport(); });
 document.addEventListener('focusout', e => { if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) unstickViewport(); });
 if (window.visualViewport) visualViewport.addEventListener('resize', () => { if (!document.activeElement || !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) unstickViewport(); });
 new MutationObserver(muts => { if (muts.some(m => m.oldValue && /\bopen\b/.test(m.oldValue) && !m.target.classList.contains('open'))) unstickViewport(); })
