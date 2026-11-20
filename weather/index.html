@@ -174,33 +174,35 @@
     padding:calc(env(safe-area-inset-top) + 12px) 10px calc(env(safe-area-inset-bottom) + 12px)}
   .pz.open{opacity:1;pointer-events:auto}
   .pz-in{width:100%;max-width:440px;height:100%;display:flex;flex-direction:column}
-  .pz-head{display:flex;align-items:center;gap:10px;padding:4px 6px}
+  .pz-head{display:flex;align-items:center;gap:10px;padding:2px 6px;flex-shrink:0}
   .pz-head h3{flex:1;font-size:20px;font-weight:700}
   .pz-head small{display:block;font-size:12px;color:var(--soft);font-weight:500}
-  .pz-grid{flex:1;display:flex;flex-direction:column;justify-content:center;gap:7px;padding:8px 26px}
-  .pz-row{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+  .pz-grid{flex:1 1 auto;min-height:0;display:grid;grid-template-rows:repeat(6,minmax(0,1fr));gap:6px;padding:10px 0;justify-content:center}
+  .pz-row{display:flex;gap:6px;min-height:0;height:100%;justify-content:center}
   .pz-row.shake{animation:shake .45s}
   @keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
-  .tile{aspect-ratio:1;border-radius:12px;display:grid;place-items:center;font-size:30px;font-weight:700;text-transform:uppercase;
+  .tile{height:100%;max-height:calc((100vw - 90px)/5);max-height:min(62px,calc((100vw - 90px)/5));aspect-ratio:1;border-radius:10px;display:grid;place-items:center;font-size:clamp(18px,5.4vw,28px);font-weight:700;text-transform:uppercase;
     background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.22);color:#fff}
   .tile.f{border-color:rgba(255,255,255,.6);animation:pop .1s}
   @keyframes pop{50%{transform:scale(1.08)}}
   .tile.c,.tile.p,.tile.a{border-color:transparent;animation:flip .5s ease both}
   .tile.c{background:#14C8B4}.tile.p{background:#FF9F43}.tile.a{background:rgba(0,0,0,.32)}
   @keyframes flip{0%{transform:rotateX(0)}50%{transform:rotateX(90deg)}100%{transform:rotateX(0)}}
-  .pz-help{padding:6px 14px 0;text-align:center}
+  .pz-help{padding:4px 10px 0;text-align:center;flex-shrink:0}
   .pz-help p{font-size:13px;color:var(--soft);font-weight:500}
-  .pz-key{display:flex;justify-content:center;gap:16px;margin-top:10px}
-  .pz-key span{display:flex;align-items:center;gap:7px;font-size:12px;line-height:1.2;text-align:left;font-weight:600}
-  .pz-key i{width:22px;height:22px;border-radius:6px;flex-shrink:0}
+  .pz-key{display:flex;justify-content:center;gap:12px;margin-top:8px}
+  .pz-key span{display:flex;align-items:center;gap:6px;font-size:11px;line-height:1.2;text-align:left;font-weight:600}
+  .pz-key i{width:18px;height:18px;border-radius:5px;flex-shrink:0}
   .pz-key i.c{background:#14C8B4}.pz-key i.p{background:#FF9F43}.pz-key i.a{background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.2)}
   body.neon .pz-key i{border-radius:2px}
   body.neon .pz-key i.p{background:#FF3F8E}
-  .pz-msg{text-align:center;min-height:52px;font-size:15px;font-weight:600;padding:4px 10px;margin-bottom:16px}
+  .pz-msg{text-align:center;font-size:14px;font-weight:600;padding:2px 10px 0;margin-bottom:12px}
+  .pz-msg:empty{display:none}
+  .pz-msg b{font-size:19px!important}
   .pz-msg b{display:block;font-size:22px;margin-bottom:2px}
-  .kb{display:flex;flex-direction:column;gap:7px;padding:0 2px}
+  .kb{display:flex;flex-direction:column;gap:6px;padding:0 2px;flex-shrink:0}
   .kb div{display:flex;gap:5px;justify-content:center}
-  .kb button{flex:1;max-width:40px;height:54px;border:0;border-radius:8px;background:rgba(255,255,255,.22);color:#fff;
+  .kb button{flex:1;max-width:40px;height:50px;border:0;border-radius:8px;background:rgba(255,255,255,.22);color:#fff;
     font:700 16px 'Outfit',sans-serif;text-transform:uppercase;cursor:pointer;touch-action:manipulation}
   .kb button.wide{max-width:64px;flex:1.5;font-size:12px}
   .kb button.del{display:grid;place-items:center}
@@ -218,7 +220,7 @@
   body.neon .tile.c{background:#14C8B4}.neon .tile.p{background:#FF3F8E}
   body.neon .kb button{border-radius:2px}
   body.neon .kb button.p,body.neon .pz-card .mini i.p{background:#FF3F8E}
-  body.neon .pz-head h3{font-family:'Anton',sans-serif;font-weight:400;font-size:26px;letter-spacing:1px;text-transform:uppercase}
+  body.neon .pz-head h3{font-family:'Anton',sans-serif;font-weight:400;font-size:22px;letter-spacing:1px;text-transform:uppercase}
   .moon-ico{width:46px;height:46px;float:right;margin-left:6px}
   body.neon .wear span{background:#000;border:2px solid #fff;border-radius:2px;text-transform:uppercase;font-size:11px;font-weight:800;letter-spacing:1px}
   body.neon .nowcast{background:linear-gradient(160deg,#2EE6D6 0%,#1C8FD1 60%,#2A3FA8 100%)}
@@ -414,7 +416,7 @@
       <button class="icon-btn" id="pzClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <div class="pz-help">
-      <p>Guess the 5-letter word in 6 tries. Type a word and press Enter.</p>
+      <p>Guess the 5-letter word in 6 tries, then press Enter.</p>
       <div class="pz-key">
         <span><i class="c"></i>Right letter,<br>right spot</span>
         <span><i class="p"></i>Right letter,<br>wrong spot</span>
