@@ -1197,7 +1197,7 @@ async function load(p, quiet=false){
   current = p; store.set('wx_last', p);
   if (!quiet) $('app').classList.add('loading');
   $('placeName').textContent = p.name;
-  $('placeSub').textContent = p.sub || '';
+  $('placeSub').textContent = subWithDist(p);
   renderChips(); renderSave();
   try{
     const d = await getWeather(p);
@@ -1440,6 +1440,27 @@ function drawLand(){
 setInterval(drawLand, 5000);
 addEventListener('resize', drawLand);
 addEventListener('orientationchange', () => setTimeout(drawLand, 200));
+// Straight-line distance from where you are to the place you're viewing
+function kmBetween(a, b){ const R = 6371, r = Math.PI/180, dLa = (b.lat-a.lat)*r, dLo = (b.lon-a.lon)*r;
+  return 2*R*Math.asin(Math.sqrt(Math.sin(dLa/2)**2 + Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLo/2)**2)); }
+function distKm(p){
+  const h = store.get('wx_here', null);
+  if (!h || !p || p.here || p.lat == null) return null;
+  const d = kmBetween(h, p); return d < 3 ? null : d;
+}
+function fmtKm(d){ return d < 10 ? d.toFixed(1) + ' km' : Math.round(d).toLocaleString('en-AU') + ' km'; }
+function subWithDist(p){ const d = distKm(p); if (d == null) return p.sub || ''; return `${(p.sub || '').replace(/, Australia$/, '')} · ${fmtKm(d)} away`.replace(/^ · /, ''); }
+function distText(p){ const d = distKm(p); return d == null ? '' : ` · ${fmtKm(d)} away`; }
+// quietly refresh where you are (only if location is already allowed — never prompts)
+(async () => {
+  try{
+    const st = navigator.permissions && await navigator.permissions.query({ name: 'geolocation' });
+    if (st && st.state === 'granted') navigator.geolocation.getCurrentPosition(pos => {
+      store.set('wx_here', { lat: pos.coords.latitude, lon: pos.coords.longitude, t: Date.now() }, true);
+      if (current && $('placeSub')) $('placeSub').textContent = subWithDist(current);
+    }, () => {}, { maximumAge: 600000, timeout: 15000 });
+  }catch(e){}
+})();
 function setThemeClass(){
   ['neon','murray','retro','beach'].forEach(t => document.body.classList.toggle(t, theme === t));
 }
@@ -3107,6 +3128,7 @@ function locateAndLoad(quiet = false, explicit = false){
   if (explicit) $('placeName').textContent = 'Locating…';
   navigator.geolocation.getCurrentPosition(async pos => {
     const { latitude: lat, longitude: lon } = pos.coords;
+    store.set('wx_here', { lat, lon, t: Date.now() }, true);
     // Same town as a saved place? Use that place's forecast so the two never disagree.
     const km = (a, b) => { const R = 6371, r = Math.PI/180, dLa = (b.lat-a.lat)*r, dLo = (b.lon-a.lon)*r;
       return 2*R*Math.asin(Math.sqrt(Math.sin(dLa/2)**2 + Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLo/2)**2)); };
@@ -3128,7 +3150,7 @@ function drawFavs(){
   const f = $('favs');
   if ($('q').value.trim().length >= 2){ f.innerHTML = ''; return; }
   const here = `<div class="fav ${current.here ? 'on' : ''}" data-act="here">${LOC_SVG}<div><b>My location</b><small>Use where you are now</small></div></div>`;
-  const list = saved.map((p, i) => `<div class="fav ${!current.here && same(p, current) ? 'on' : ''}" data-i="${i}">${PIN_SVG}<div><b>${esc(p.name)}</b><small>${esc(p.sub || '')}</small></div><button class="rm" data-rm="${i}" aria-label="Remove ${esc(p.name)}">✕</button></div>`).join('');
+  const list = saved.map((p, i) => `<div class="fav ${!current.here && same(p, current) ? 'on' : ''}" data-i="${i}">${PIN_SVG}<div><b>${esc(p.name)}</b><small>${esc(p.sub || '')}${distKm(p) != null ? ` · ${fmtKm(distKm(p))}` : ''}</small></div><button class="rm" data-rm="${i}" aria-label="Remove ${esc(p.name)}">✕</button></div>`).join('');
   f.innerHTML = here + (saved.length ? `<h5>Favourites</h5>${list}` : `<h5>Favourites</h5><div class="fav" style="cursor:default"><div><small>Tap ☆ on any place to add it here</small></div></div>`);
 }
 $('favs').onclick = e => {
@@ -3242,7 +3264,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.86', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.87', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
