@@ -1197,6 +1197,7 @@ function render(d){
 
     <div class="refresh-wrap"><button class="refresh" id="refreshBtn" onclick="refreshNow()">${REFRESH_SVG} Refresh</button></div>
     <p class="foot" style="margin-top:10px">Tip: hold a card to rearrange</p>
+    <p class="foot" id="vpDiag" style="margin-top:6px;font-size:11px;opacity:.7"></p>
     <p class="foot">Updated ${new Date(lastFetch).toLocaleTimeString('en-AU',{hour:'numeric',minute:'2-digit'})} · Data by <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a></p>
   `;
   buildClouds(kind(c.weather_code));
@@ -2966,6 +2967,14 @@ function viewportShifted(){
   return false;
 }
 addEventListener('touchend', () => setTimeout(() => { if (window.scrollY <= 0 && viewportShifted()) unstickViewport(); }, 400), { passive: true });
+function vpDiag(){
+  const el = document.getElementById('vpDiag'); if (!el) return;
+  const vv = window.visualViewport || {}, app = document.querySelector('.app'), probe = document.createElement('div');
+  probe.style.cssText = 'position:fixed;top:env(safe-area-inset-top);left:0;width:1px;height:1px;visibility:hidden'; document.body.appendChild(probe);
+  const sat = probe.getBoundingClientRect().top; probe.remove();
+  el.textContent = `screen check: sy ${Math.round(scrollY)} · vo ${Math.round(vv.offsetTop||0)} · vh ${Math.round(vv.height||0)} · ih ${innerHeight} · ch ${document.documentElement.clientHeight} · sat ${Math.round(sat)} · at ${Math.round(app ? app.getBoundingClientRect().top : 0)} · ${theme}`;
+}
+setInterval(vpDiag, 1000);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') unstickViewport(); });
 document.addEventListener('focusout', e => { if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) unstickViewport(); });
 if (window.visualViewport) visualViewport.addEventListener('resize', () => { if (!document.activeElement || !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) unstickViewport(); });
