@@ -1,4 +1,4 @@
-const CACHE = 'wx-v19';
+const CACHE = 'wx-v20';
 const SHELL = ['./', 'index.html', 'quotes.js', 'puzzle-words.js', 'manifest.webmanifest', 'icon.svg'];
 
 self.addEventListener('install', e => {

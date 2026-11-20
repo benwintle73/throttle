@@ -251,6 +251,34 @@
   .kb button.del{pointer-events:auto}
   .kb button.del svg{pointer-events:none}
   .kb button.c{background:#14C8B4}.kb button.p{background:#FF9F43}.kb button.a{background:rgba(0,0,0,.35);color:rgba(255,255,255,.55)}
+  .pz-actions{display:flex;gap:8px;justify-content:center;margin-top:8px}
+  .pz-actions button{border:0;border-radius:999px;padding:8px 16px;background:#fff;color:#333;font:700 13px 'Outfit',sans-serif;cursor:pointer}
+  .pz-actions button.ghost{background:rgba(255,255,255,.18);color:#fff}
+  .lb{flex:1 1 auto;min-height:0;overflow:auto;padding:6px 6px 10px;display:none}
+  .pz.board .lb{display:block}
+  .pz.board .pz-grid,.pz.board .pz-help,.pz.board .pz-msg,.pz.board .kb{display:none}
+  .lb-tabs{display:flex;background:rgba(255,255,255,.14);border-radius:12px;padding:4px;margin:6px 0 12px}
+  .lb-tabs button{flex:1;border:0;background:none;color:#fff;padding:9px;border-radius:9px;font:700 14px 'Outfit',sans-serif;cursor:pointer;opacity:.75}
+  .lb-tabs button.on{background:#fff;color:#222;opacity:1}
+  .lb-row{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;margin-bottom:6px;background:rgba(255,255,255,.1)}
+  .lb-row.me{background:rgba(20,200,180,.35);outline:2px solid #14C8B4}
+  .lb-row .rk{font-size:18px;font-weight:800;text-align:center}
+  .lb-row .nm{font-weight:600;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lb-row .nm small{display:block;font-weight:500;font-size:12px;color:var(--soft)}
+  .lb-row .sc{font-weight:800;font-size:17px;text-align:right}
+  .lb-row .sc small{display:block;font-weight:500;font-size:11px;color:var(--soft)}
+  .lb-me{margin-top:12px;padding:14px;border-radius:14px;background:rgba(255,255,255,.16);text-align:center;font-weight:600}
+  .lb-me b{font-size:22px;display:block}
+  .lb-empty{text-align:center;color:var(--soft);padding:30px 10px;font-size:15px}
+  .lb-rules{margin-top:14px;font-size:12px;line-height:1.55;color:var(--soft);background:rgba(0,0,0,.15);border-radius:12px;padding:12px 14px}
+  .lb-rules b{color:#fff}
+  body.neon .lb-row,body.neon .lb-tabs,body.neon .lb-tabs button,body.neon .lb-me,body.neon .lb-rules,body.neon .pz-actions button{border-radius:2px}
+  body.neon .lb-row .rk,body.neon .lb-row .sc,body.neon .lb-me b{font-family:'Anton',sans-serif;font-weight:400;letter-spacing:.5px}
+  body.neon .lb-row.me{background:rgba(255,46,154,.35);outline-color:#FF2E9A}
+  .nick{margin-top:14px}
+  .nick .rowi{display:flex;gap:8px}
+  .nick .rowi input{flex:1}
+  .nick .rowi button{border:0;border-radius:12px;padding:0 16px;background:#222;color:#fff;font:600 14px 'Outfit',sans-serif;cursor:pointer}
   .toast{position:fixed;left:50%;top:22%;transform:translateX(-50%);background:#fff;color:#222;padding:10px 16px;border-radius:12px;font-weight:600;font-size:14px;z-index:40;opacity:0;transition:opacity .2s;pointer-events:none}
   .toast.show{opacity:1}
   body.neon .pz-card{background:linear-gradient(150deg,#14C8B4,#0F6FB8)}
@@ -458,6 +486,7 @@
   <div class="pz-in">
     <div class="pz-head">
       <h3 id="pzTitle">Daily Word<small id="pzSub"></small></h3>
+      <button class="icon-btn" id="pzBoardBtn" aria-label="Leaderboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M8 21V11H3v10zM15 21V4h-6v17zM21 21v-7h-6v7z"/></svg></button>
       <button class="icon-btn" id="pzClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <div class="pz-help">
@@ -471,6 +500,7 @@
     <div class="pz-grid" id="pzGrid"></div>
     <div class="pz-msg" id="pzMsg"></div>
     <div class="kb" id="kb"></div>
+    <div class="lb" id="lb"></div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -960,7 +990,7 @@ function puzzleCard(){
   const last = st.guesses.length ? score(st.guesses[st.guesses.length-1], word) : null;
   const mini = (last || Array(5).fill('')).map(c => `<i class="${c}"></i>`).join('');
   let t1, t2, go;
-  if (st.done && st.won){ t1 = `Solved in ${st.guesses.length}`; t2 = `🔥 ${stats.streak}-day streak · new word tomorrow`; go = 'View'; }
+  if (st.done && st.won){ t1 = `Solved in ${st.guesses.length}`; t2 = st.score != null ? `${st.score} pts${st.rank ? ` · #${st.rank} today` : ''} · 🔥 ${stats.streak}-day streak` : `🔥 ${stats.streak}-day streak · new word tomorrow`; go = 'View'; }
   else if (st.done){ t1 = `The word was ${word.toUpperCase()}`; t2 = 'New word tomorrow'; go = 'View'; }
   else if (st.guesses.length){ t1 = `${6 - st.guesses.length} guesses left`; t2 = 'Keep going'; go = 'Play'; }
   else { t1 = `Daily Word #${P.num}`; t2 = stats.streak ? `🔥 ${stats.streak}-day streak — keep it alive` : 'Guess today’s 5-letter word'; go = 'Play'; }
@@ -973,12 +1003,17 @@ function puzzleCard(){
 let PZ = null, cur = '';
 function openPuzzle(){
   PZ = pzState(); if (!PZ) return; cur = '';
+  $('pz').classList.remove('board');
+  if (!PZ.st.done) PZ.t0 = Date.now();
   $('pzTitle').firstChild.textContent = `Daily Word #${PZ.num}`;
   const stats = pzStats();
   $('pzSub').textContent = `Played ${stats.played} · Won ${stats.wins} · Streak ${stats.streak} · Best ${stats.best}`;
   drawPuzzle(); $('pz').classList.add('open');
 }
-function closePuzzle(){ $('pz').classList.remove('open'); if (lastData) render(lastData); }
+function bankTime(){ if (PZ && PZ.t0 && !PZ.st.done){ PZ.st.ms = (PZ.st.ms||0) + (Date.now() - PZ.t0); PZ.t0 = Date.now(); store.set('wx_pz', PZ.st, true); } }
+function closePuzzle(){ bankTime(); if (PZ) PZ.t0 = 0; $('pz').classList.remove('open','board'); if (lastData) render(lastData); }
+document.addEventListener('visibilitychange', () => { if (!PZ || !$('pz').classList.contains('open')) return;
+  if (document.visibilityState === 'hidden'){ bankTime(); PZ.t0 = 0; } else if (!PZ.st.done) PZ.t0 = Date.now(); });
 $('pzClose').onclick = closePuzzle;
 
 function drawPuzzle(revealRow = -1){
@@ -1008,8 +1043,64 @@ function drawPuzzle(revealRow = -1){
     msg = st.won ? `<b>${['Genius!','Brilliant!','Great work!','Nice one!','Solid!','Phew!'][st.guesses.length-1]}</b>🔥 ${stats.streak}-day streak · new word tomorrow`
                  : `<b>${word.toUpperCase()}</b>Streak reset — back tomorrow`;
   }
+  if (st.done){
+    const sc = st.score != null ? `Score <b style="display:inline;font-size:inherit">${st.score}</b>${st.rank ? ` · #${st.rank} of ${st.players} today` : ''}` : '';
+    msg += `<div style="margin-top:6px;font-size:13px">${user ? (sc || 'Saving your score…') : 'Sign in to get on the leaderboard'}</div>
+      <div class="pz-actions">${user ? `<button onclick="showBoard()">Leaderboard</button>` : `<button onclick="closePuzzle();openAcct()">Sign in</button>`}</div>`;
+  }
   $('pzMsg').innerHTML = msg;
 }
+
+/* ---------- leaderboard ---------- */
+let boardTab = 'all', boardData = null;
+async function submitScore(){
+  if (!sb || !user || !PZ) return;
+  const st = PZ.st; if (!st.done || st.submitted) return;
+  const secs = Math.round((st.ms || 0) / 1000);
+  const { data, error } = await sb.rpc('weather_submit', { p_day: PZ.day, p_guesses: st.guesses.length, p_won: st.won, p_seconds: secs });
+  if (error) return;
+  st.submitted = true; st.score = data;
+  try {
+    const b = await sb.rpc('weather_board', { p_day: PZ.day });
+    if (!b.error && b.data && b.data.today.me){ st.rank = b.data.today.me.rank; st.players = b.data.today.players; boardData = b.data; }
+  } catch {}
+  store.set('wx_pz', st);
+  if ($('pz').classList.contains('open') && !$('pz').classList.contains('board')) drawPuzzle();
+  if (lastData && !$('pz').classList.contains('open')) render(lastData);
+}
+// a game finished while signed out (or offline) gets submitted after sign-in
+function submitPending(){ const P = pzState(); if (P && P.st.done && !P.st.submitted && user){ PZ = PZ && PZ.day === P.day ? PZ : P; submitScore(); } }
+
+const ord = n => n + (['th','st','nd','rd'][((n%100)-20)%10] || ['th','st','nd','rd'][n%100] || 'th');
+const mmss = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+async function showBoard(){
+  if (!PZ) PZ = pzState();
+  $('pz').classList.add('board');
+  const lb = $('lb');
+  if (!user){ lb.innerHTML = `<div class="lb-empty">Sign in to see the leaderboard and add your scores.<div class="pz-actions" style="margin-top:14px"><button onclick="closePuzzle();openAcct()">Sign in</button></div></div>`; return; }
+  lb.innerHTML = `<div class="lb-empty">Loading…</div>`;
+  const { data, error } = await sb.rpc('weather_board', { p_day: PZ.day });
+  if (error){ lb.innerHTML = `<div class="lb-empty">Couldn’t load the leaderboard. Check your connection.</div>`; return; }
+  boardData = data; drawBoard();
+}
+function drawBoard(){
+  const d = boardData, lb = $('lb'); if (!d) return;
+  const T = boardTab === 'all' ? d.all : d.today;
+  const rows = (T.top || []).map(r => boardTab === 'all'
+    ? `<div class="lb-row ${r.me?'me':''}"><div class="rk">${r.rank}</div><div class="nm">${esc(r.name)}<small>${r.games} game${r.games===1?'':'s'} · ${r.wins} solved</small></div><div class="sc">${r.total}<small>pts</small></div></div>`
+    : `<div class="lb-row ${r.me?'me':''}"><div class="rk">${r.rank}</div><div class="nm">${esc(r.name)}<small>${r.won ? `${r.guesses} guess${r.guesses===1?'':'es'} · ${mmss(r.seconds)}` : 'Not solved'}</small></div><div class="sc">${r.score}<small>pts</small></div></div>`).join('');
+  const me = T.me, inTop = me && me.rank <= 10;
+  const meBox = me ? (inTop ? '' : `<div class="lb-me">You’re<b>${ord(me.rank)} of ${T.players}</b>${boardTab==='all' ? `${me.total} pts over ${me.games} game${me.games===1?'':'s'}` : `${me.score} pts today`}</div>`)
+                   : `<div class="lb-me">${boardTab==='all' ? 'Finish a puzzle to get on the board.' : 'You haven’t finished today’s puzzle yet.'}</div>`;
+  lb.innerHTML = `
+    <div class="lb-tabs"><button class="${boardTab==='all'?'on':''}" data-t="all">Overall</button><button class="${boardTab==='today'?'on':''}" data-t="today">Today</button></div>
+    ${rows || `<div class="lb-empty">No scores yet — be the first.</div>`}
+    ${meBox}
+    <div class="lb-rules"><b>Scoring</b> — solved in 1 guess: 600 · 2: 500 · 3: 400 · 4: 300 · 5: 200 · 6: 100. Speed bonus up to +100 (drops 1 point every 6 seconds; the clock only runs while the puzzle is open). Not solved: 0. Daily scores add up for the Overall board.<br>Playing as <b>${esc(d.nickname || '—')}</b> — change your name in your account.</div>
+    <div class="pz-actions" style="margin-top:12px"><button class="ghost" onclick="$('pz').classList.remove('board')">Back to puzzle</button></div>`;
+  lb.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { boardTab = b.dataset.t; drawBoard(); });
+}
+$('pzBoardBtn').onclick = () => $('pz').classList.contains('board') ? $('pz').classList.remove('board') : showBoard();
 function toast(t){ const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove('show'), 1400); }
 function pzKey(k){
   if (!PZ || PZ.st.done || !$('pz').classList.contains('open')) return;
@@ -1019,6 +1110,7 @@ function pzKey(k){
     if (!window.PUZZLE_VALID.has(cur)){ shakeRow(); return toast('Not in word list'); }
     const st = PZ.st; st.guesses.push(cur); const row = st.guesses.length-1; cur = '';
     if (st.guesses[row] === PZ.word || st.guesses.length === 6){
+      bankTime(); PZ.t0 = 0;
       st.done = true; st.won = st.guesses[row] === PZ.word;
       const s = pzStats(); s.played++;
       if (st.won){ s.wins++; s.streak = (s.lastWin === PZ.day - 1) ? s.streak + 1 : 1; s.best = Math.max(s.best, s.streak); s.lastWin = PZ.day; s.dist[row]++; }
@@ -1027,6 +1119,7 @@ function pzKey(k){
       $('pzSub').textContent = `Played ${s.played} · Won ${s.wins} · Streak ${s.streak} · Best ${s.best}`;
     }
     store.set('wx_pz', st);
+    if (st.done) submitScore();
     return drawPuzzle(row);
   }
   if (/^[a-z]$/.test(k) && cur.length < 5){ cur += k; drawPuzzle(); }
@@ -1219,6 +1312,7 @@ async function pull(){
   const merged = data ? mergeData(data.data || {}, localData()) : localData();
   applyData(merged);
   await push(merged);
+  submitPending();
 }
 async function push(d = localData()){
   if (!sb || !user) return;
@@ -1259,10 +1353,16 @@ function drawAcct(){
       <p class="sub">Your saved places, Neon Coast setting and puzzle progress sync to every phone you sign in on.</p>
       <div class="who"><small>Signed in as</small><b>${esc(user.email)}</b><small>Last synced ${when}</small></div>
       ${msg}
+      <div class="nick"><label for="nk">Leaderboard name</label><div class="rowi"><input id="nk" maxlength="16" placeholder="Your name on the puzzle leaderboard"><button id="nkSave" type="button">Save</button></div></div>
       <button class="btn-p" id="syncBtn">Sync now</button>
       <button class="btn-s" id="outBtn">Sign out</button>
       ${appearanceHTML()}`;
     bindAppearance();
+    sb.rpc('weather_ensure_player').then(({ data }) => { const i = $('nk'); if (i && !i.value && data) i.value = data; });
+    $('nkSave').onclick = async () => { acctErr = acctMsg = '';
+      const { data, error } = await sb.rpc('weather_set_nickname', { p_nickname: $('nk').value });
+      if (error) acctErr = error.message.replace(/^.*?:\s*/, ''); else acctMsg = `Leaderboard name set to ${data}.`;
+      drawAcct(); };
     $('syncBtn').onclick = async () => { acctErr = acctMsg = ''; try { await pull(); acctMsg = 'All synced.'; } catch(e){ acctErr = 'Couldn’t sync. Check your connection.'; } drawAcct(); };
     $('outBtn').onclick = async () => { await sb.auth.signOut(); acctMsg = 'Signed out. Your data stays on this phone.'; acctErr = ''; setUser(null); drawAcct(); };
     return;
