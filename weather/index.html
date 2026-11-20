@@ -862,10 +862,11 @@
   .land{display:none}
   @media (orientation:landscape) and (max-height:520px){
     html,body{overflow:hidden!important;height:100%}
-    .land{display:flex;position:fixed;inset:0;z-index:90;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#fff;text-align:center;
-      background:linear-gradient(180deg,var(--g1,#1b2a4a) 0%,var(--g2,#2d4370) 55%,var(--g3,#4a6aa0) 100%);
-      padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);text-shadow:0 2px 18px rgba(0,0,0,.25)}
-    .land .lt{font-size:min(30vh,22vw);font-weight:200;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+    .land{display:flex;position:fixed;inset:0;z-index:90;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;color:#fff;text-align:center;pointer-events:none;
+      padding:max(14px,env(safe-area-inset-top)) env(safe-area-inset-right) 0 env(safe-area-inset-left);text-shadow:0 2px 18px rgba(0,0,0,.35)}
+    .app,.ptr,#editDone{display:none!important}
+    .scene{position:fixed!important;top:0!important;height:100vh!important}
+    .land .lt{font-size:min(24vh,18vw);font-weight:200;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
     .land .lt small{font-size:.22em;font-weight:500;margin-left:.15em;letter-spacing:0;opacity:.85}
     .land .ld{font-size:min(6vh,18px);font-weight:600;opacity:.9;margin-top:6px}
     .land .lw{font-size:min(8vh,24px);font-weight:500;margin-top:10px;opacity:.95}
@@ -1400,7 +1401,10 @@ function timeJump(){
   if (theme !== 'retro') return;
   const f = $('warp'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
 }
+const LANDSCAPE = () => matchMedia('(orientation:landscape) and (max-height:520px)').matches;
+let wasLand = null;
 function drawLand(){
+  const L = LANDSCAPE(); if (L !== wasLand){ wasLand = L; if (lastData) updateSky(); }
   if (!matchMedia('(orientation:landscape) and (max-height:520px)').matches) return;
   const n = new Date(), h = n.getHours(), m = String(n.getMinutes()).padStart(2, '0');
   $('landT').innerHTML = `${h % 12 || 12}:${m}<small>${h < 12 ? 'am' : 'pm'}</small>`;
@@ -1798,7 +1802,7 @@ function updateSky(){
     sea.style.background = `linear-gradient(180deg, ${seaTop} 0%, ${seaBot} 100%)`;
   } else {
     Object.assign(scene.style, {left:'0', right:'0', width:'', top:'0'});
-    H = hero ? hero.getBoundingClientRect().bottom + Math.max(0, window.scrollY) : 360;
+    H = LANDSCAPE() ? innerHeight : hero ? hero.getBoundingClientRect().bottom + Math.max(0, window.scrollY) : 360;
     scene.style.height = H + 'px';
     W = scene.clientWidth;
   }
@@ -3203,7 +3207,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.81', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.82', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
