@@ -1,9 +1,9 @@
 /* Daily fun content: Magic 8-ball answers, fun facts. All original wording. */
 
 window.EIGHTBALL = {
-  yes: ["Absolutely.", "Yes — go for it.", "The signs say yes.", "Without a doubt.", "Count on it.", "Looking good.", "Most definitely.", "All signs point that way.", "Yes, and sooner than you think.", "It's a safe bet."],
-  maybe: ["Ask again after a cuppa.", "Too cloudy to tell right now.", "Hmm… try again.", "Can't say yet — the forecast is changing.", "Maybe. Sleep on it."],
-  no: ["Not likely.", "I wouldn't count on it.", "The signs say no.", "Nope.", "Forecast says no."]
+  yes: ["Absolutely.", "Yes — go for it.", "The signs say yes.", "Without a doubt.", "Count on it.", "Looking good.", "Most definitely.", "Signs say yes.", "Yes, and soon.", "It's a safe bet."],
+  maybe: ["Ask again after a cuppa.", "Too cloudy to tell.", "Hmm… try again.", "Forecast unclear.", "Maybe. Sleep on it."],
+  no: ["Not likely.", "Don't count on it.", "The signs say no.", "Nope.", "Forecast says no."]
 };
 
 window.FUN_FACTS = [
