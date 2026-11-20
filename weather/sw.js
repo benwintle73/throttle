@@ -1,4 +1,4 @@
-const CACHE = 'wx-v17';
+const CACHE = 'wx-v18';
 const SHELL = ['./', 'index.html', 'quotes.js', 'puzzle-words.js', 'manifest.webmanifest', 'icon.svg'];
 
 self.addEventListener('install', e => {
@@ -13,6 +13,7 @@ self.addEventListener('activate', e => {
 // which would otherwise let the phone reuse a stale copy for 10 minutes). Cache is the offline fallback.
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  if (e.request.url.includes('.supabase.co')) return;   // never cache account data; let it go straight to the network
   const sameOrigin = new URL(e.request.url).origin === location.origin;
   const net = sameOrigin ? fetch(e.request.url, {cache:'no-cache', credentials:'same-origin'}) : fetch(e.request);
   e.respondWith(

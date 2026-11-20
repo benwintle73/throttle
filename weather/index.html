@@ -160,6 +160,34 @@
   body.neon .totd{background:linear-gradient(155deg,#FFB347 0%,#FF5E8A 55%,#C13AD9 100%)}
   body.neon .totd .q{font-family:'Anton',sans-serif;font-weight:400;font-size:24px;line-height:1.25;letter-spacing:.3px;text-transform:uppercase;text-shadow:2px 2px 0 rgba(0,0,0,.4)}
   body.neon .totd .by{color:#fff;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;font-size:11px}
+  /* ===== account ===== */
+  .icon-btn{position:relative}
+  .acct-dot{position:absolute;top:7px;right:7px;width:8px;height:8px;border-radius:50%;background:#2EE68A;box-shadow:0 0 0 2px rgba(0,0,0,.15);display:none}
+  .acct-dot.on{display:block}
+  .acct-card{background:rgba(255,255,255,.97);color:#222;border-radius:22px;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+  .acct-card h3{font-size:20px;font-weight:700;display:flex;align-items:center;gap:10px}
+  .acct-card h3 .x{margin-left:auto;width:34px;height:34px;border-radius:50%;border:0;background:#f0eef6;display:grid;place-items:center;cursor:pointer}
+  .acct-card h3 .x svg{width:16px;height:16px}
+  .acct-card p.sub{font-size:14px;color:#666;margin:6px 0 16px;line-height:1.4}
+  .acct-tabs{display:flex;background:#f0eef6;border-radius:12px;padding:4px;margin-bottom:14px}
+  .acct-tabs button{flex:1;border:0;background:none;padding:9px;border-radius:9px;font:600 14px 'Outfit',sans-serif;color:#666;cursor:pointer}
+  .acct-tabs button.on{background:#fff;color:#222;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+  .acct-card label{display:block;font-size:12px;font-weight:600;color:#666;margin:10px 0 5px;text-transform:uppercase;letter-spacing:.8px}
+  .acct-card input{width:100%;height:48px;border-radius:12px;border:1.5px solid #e2dfeb;padding:0 14px;font:500 16px 'Outfit',sans-serif;outline:none;background:#fff;color:#222}
+  .acct-card input:focus{border-color:#8a6cff}
+  .acct-card .btn-p{width:100%;height:50px;margin-top:16px;border:0;border-radius:14px;background:linear-gradient(90deg,#6A5AE0,#3A7BD5);color:#fff;font:600 16px 'Outfit',sans-serif;cursor:pointer}
+  .acct-card .btn-p:disabled{opacity:.6}
+  .acct-card .btn-s{width:100%;height:46px;margin-top:10px;border:1.5px solid #e2dfeb;border-radius:14px;background:#fff;color:#333;font:600 15px 'Outfit',sans-serif;cursor:pointer}
+  .acct-card .link{display:block;margin:14px auto 0;border:0;background:none;color:#6A5AE0;font:600 14px 'Outfit',sans-serif;cursor:pointer}
+  .acct-card .err{color:#D63B5C;font-size:14px;margin-top:10px;font-weight:500}
+  .acct-card .ok{color:#178A5B;font-size:14px;margin-top:10px;font-weight:500}
+  .acct-card .who{background:#f6f4fb;border-radius:14px;padding:14px;font-size:15px}
+  .acct-card .who b{display:block;font-size:16px;word-break:break-all}
+  .acct-card .who small{color:#777;font-size:13px}
+  body.neon .acct-card{border-radius:3px;border:3px solid #000;box-shadow:8px 8px 0 #FF2E9A}
+  body.neon .acct-card .btn-p{border-radius:2px;background:#000;font-family:'Anton',sans-serif;font-weight:400;letter-spacing:1px;text-transform:uppercase;font-size:18px}
+  body.neon .acct-card input,body.neon .acct-card .btn-s,body.neon .acct-tabs,body.neon .acct-tabs button{border-radius:2px}
+
   /* ===== daily puzzle ===== */
   .pz-card{cursor:pointer}
   .pz-card .row{display:flex;align-items:center;gap:14px}
@@ -389,6 +417,10 @@
     <button class="icon-btn" id="locBtn" aria-label="Use my location">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
     </button>
+    <button class="icon-btn" id="acctBtn" aria-label="Account">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+      <i class="acct-dot" id="acctDot"></i>
+    </button>
     <button class="icon-btn" id="searchBtn" aria-label="Search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
     </button>
@@ -429,15 +461,22 @@
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<div class="sheet" id="acct">
+  <div class="panel">
+    <div class="acct-card" id="acctBody"></div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="quotes.js"></script>
 <script src="puzzle-words.js"></script>
 <script>
 const DEFAULT_PLACE = { name:'Maryborough', sub:'Victoria, Australia', lat:-37.0457, lon:143.7393 };
 
 /* ---------- storage (safe) ---------- */
+const SYNC_KEYS = ['wx_saved','wx_last','wx_neon','wx_pz','wx_pz_stats'];
 const store = {
   get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch{ return d; } },
-  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} }
+  set(k, v, quiet){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} if (!quiet && SYNC_KEYS.includes(k) && window.syncSoon) window.syncSoon(); }
 };
 let saved = store.get('wx_saved', [DEFAULT_PLACE]);
 let current = store.get('wx_last', DEFAULT_PLACE);
@@ -1127,6 +1166,144 @@ async function search(){
 $('results').onclick = e => { const r = e.target.closest('.res[data-i]'); if(r) pick(+r.dataset.i); };
 function pick(i){ closeSheet(); load(lastResults[i]); }
 
+/* ---------- account + sync (Supabase) ---------- */
+const SB_URL = 'https://nkkhbtrrytctpfwjenrz.supabase.co';
+const SB_KEY = 'sb_publishable_1bZLkfdxFTM4w3SWqPklDw_l3leLxxl';   // publishable key: safe in the page, row-level security protects data
+const sb = (window.supabase && window.supabase.createClient) ? window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }) : null;
+let user = null, lastSync = store.get('wx_lastsync', null), acctMode = 'in', acctMsg = '', acctErr = '';
+
+const sameDay = (a,b) => a && b && a.day === b.day;
+function mergeData(remote, local){
+  const out = {};
+  // places: union, remote order first
+  const r = remote.wx_saved || [], l = local.wx_saved || [];
+  out.wx_saved = [...r, ...l.filter(p => !r.some(q => same(p,q)))];
+  out.wx_last  = remote.wx_last ?? local.wx_last;
+  out.wx_neon  = remote.wx_neon ?? local.wx_neon;
+  // today's puzzle: keep the further-along game for the same day, else the newer day
+  const rp = remote.wx_pz, lp = local.wx_pz;
+  if (rp && lp){
+    if (sameDay(rp, lp)) out.wx_pz = (lp.done && !rp.done) || lp.guesses.length > rp.guesses.length ? lp : rp;
+    else out.wx_pz = rp.day > lp.day ? rp : lp;
+  } else out.wx_pz = rp || lp;
+  // stats: keep whichever has played more (ties: better streak)
+  const rs = remote.wx_pz_stats, ls = local.wx_pz_stats;
+  out.wx_pz_stats = !rs ? ls : !ls ? rs : (ls.played > rs.played || (ls.played === rs.played && ls.streak > rs.streak)) ? ls : rs;
+  Object.keys(out).forEach(k => out[k] === undefined && delete out[k]);
+  return out;
+}
+function localData(){ const d = {}; SYNC_KEYS.forEach(k => { const v = store.get(k, undefined); if (v !== undefined) d[k] = v; }); d.wx_saved = saved; d.wx_neon = neon; d.wx_last = current; return d; }
+function applyData(d){
+  SYNC_KEYS.forEach(k => { if (d[k] !== undefined) store.set(k, d[k], true); });
+  saved = store.get('wx_saved', saved); neon = store.get('wx_neon', neon);
+  document.body.classList.toggle('neon', neon);
+  if (lastData) render(lastData); else renderChips();
+}
+async function pull(){
+  if (!sb || !user) return;
+  const { data, error } = await sb.from('weather_profiles').select('data').eq('user_id', user.id).maybeSingle();
+  if (error) throw error;
+  const merged = data ? mergeData(data.data || {}, localData()) : localData();
+  applyData(merged);
+  await push(merged);
+}
+async function push(d = localData()){
+  if (!sb || !user) return;
+  const { error } = await sb.from('weather_profiles').upsert({ user_id: user.id, data: d, updated_at: new Date().toISOString() });
+  if (error) throw error;
+  lastSync = Date.now(); store.set('wx_lastsync', lastSync, true);
+  if ($('acct').classList.contains('open')) drawAcct();
+}
+let syncTimer;
+window.syncSoon = () => { if (!user) return; clearTimeout(syncTimer); syncTimer = setTimeout(() => push().catch(()=>{}), 1200); };
+
+function setUser(u){
+  user = u || null;
+  $('acctDot').classList.toggle('on', !!user);
+  if ($('acct').classList.contains('open')) drawAcct();
+}
+const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
+const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function drawAcct(){
+  const b = $('acctBody');
+  const msg = (acctErr ? `<div class="err">${esc(acctErr)}</div>` : '') + (acctMsg ? `<div class="ok">${esc(acctMsg)}</div>` : '');
+  if (!sb){ b.innerHTML = `<h3>Account <button class="x" onclick="closeAcct()">${X_SVG}</button></h3><p class="sub">Accounts need an internet connection. Try again when you’re online.</p>`; return; }
+  if (user){
+    const when = lastSync ? new Date(lastSync).toLocaleString('en-AU',{hour:'numeric',minute:'2-digit',day:'numeric',month:'short'}) : 'not yet';
+    b.innerHTML = `<h3>Your account <button class="x" onclick="closeAcct()">${X_SVG}</button></h3>
+      <p class="sub">Your saved places, Neon Coast setting and puzzle progress sync to every phone you sign in on.</p>
+      <div class="who"><small>Signed in as</small><b>${esc(user.email)}</b><small>Last synced ${when}</small></div>
+      ${msg}
+      <button class="btn-p" id="syncBtn">Sync now</button>
+      <button class="btn-s" id="outBtn">Sign out</button>`;
+    $('syncBtn').onclick = async () => { acctErr = acctMsg = ''; try { await pull(); acctMsg = 'All synced.'; } catch(e){ acctErr = 'Couldn’t sync. Check your connection.'; } drawAcct(); };
+    $('outBtn').onclick = async () => { await sb.auth.signOut(); acctMsg = 'Signed out. Your data stays on this phone.'; acctErr = ''; setUser(null); drawAcct(); };
+    return;
+  }
+  if (acctMode === 'reset'){
+    b.innerHTML = `<h3>Set a new password <button class="x" onclick="closeAcct()">${X_SVG}</button></h3>
+      <form id="acctForm"><label for="np">New password</label><input id="np" type="password" autocomplete="new-password" minlength="6" required>
+      ${msg}<button class="btn-p" type="submit">Save password</button></form>`;
+    $('acctForm').onsubmit = async e => { e.preventDefault(); acctErr = acctMsg = '';
+      const { error } = await sb.auth.updateUser({ password: $('np').value });
+      if (error) acctErr = error.message; else { acctMsg = 'Password updated.'; acctMode = 'in'; }
+      drawAcct(); };
+    return;
+  }
+  const up = acctMode === 'up', forgot = acctMode === 'forgot';
+  b.innerHTML = `<h3>${forgot ? 'Reset password' : up ? 'Create account' : 'Sign in'} <button class="x" onclick="closeAcct()">${X_SVG}</button></h3>
+    <p class="sub">${forgot ? 'We’ll email you a link to set a new password.' : 'Keep your saved places, Neon Coast setting and puzzle streak when you switch phones.'}</p>
+    ${forgot ? '' : `<div class="acct-tabs"><button type="button" class="${up?'':'on'}" data-m="in">Sign in</button><button type="button" class="${up?'on':''}" data-m="up">Create account</button></div>`}
+    <form id="acctForm">
+      <label for="em">Email</label><input id="em" type="email" autocomplete="email" inputmode="email" required>
+      ${forgot ? '' : `<label for="pw">Password</label><input id="pw" type="password" autocomplete="${up?'new-password':'current-password'}" minlength="6" required>`}
+      ${msg}
+      <button class="btn-p" type="submit">${forgot ? 'Send reset link' : up ? 'Create account' : 'Sign in'}</button>
+    </form>
+    <button class="link" id="altLink">${forgot ? 'Back to sign in' : up ? '' : 'Forgot password?'}</button>`;
+  b.querySelectorAll('.acct-tabs button').forEach(t => t.onclick = () => { acctMode = t.dataset.m; acctErr = acctMsg = ''; drawAcct(); });
+  const alt = $('altLink'); if (!alt.textContent) alt.remove(); else alt.onclick = () => { acctMode = forgot ? 'in' : 'forgot'; acctErr = acctMsg = ''; drawAcct(); };
+  $('acctForm').onsubmit = async e => {
+    e.preventDefault(); acctErr = acctMsg = '';
+    const btn = e.target.querySelector('.btn-p'); btn.disabled = true;
+    const email = $('em').value.trim(), pw = $('pw') ? $('pw').value : '';
+    const back = location.origin + location.pathname;
+    try {
+      if (forgot){
+        const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: back });
+        if (error) throw error; acctMsg = 'Check your email for the reset link.';
+      } else if (up){
+        const { data, error } = await sb.auth.signUp({ email, password: pw, options: { emailRedirectTo: back } });
+        if (error) throw error;
+        if (data.session){ setUser(data.user); await pull(); acctMsg = 'Account created — you’re synced.'; }
+        else { acctMode = 'in'; acctMsg = 'Nearly done — tap the link in the email we just sent, then sign in here.'; }
+      } else {
+        const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+        if (error) throw error;
+        setUser(data.user); await pull(); acctMsg = 'Signed in and synced.';
+      }
+    } catch(err){
+      const m = (err && err.message) || 'Something went wrong';
+      acctErr = /invalid login/i.test(m) ? 'Email or password is incorrect.' : /not confirmed/i.test(m) ? 'Please confirm your email first — check your inbox.' : m;
+    }
+    drawAcct();
+  };
+}
+function openAcct(){ acctErr = ''; drawAcct(); $('acct').classList.add('open'); }
+function closeAcct(){ $('acct').classList.remove('open'); acctMsg = acctErr = ''; }
+$('acctBtn').onclick = openAcct;
+$('acct').onclick = e => { if (e.target === $('acct')) closeAcct(); };
+
+if (sb){
+  sb.auth.getSession().then(({ data }) => { setUser(data.session && data.session.user); if (user) pull().catch(()=>{}); });
+  sb.auth.onAuthStateChange((ev, session) => {
+    setUser(session && session.user);
+    if (ev === 'PASSWORD_RECOVERY'){ acctMode = 'reset'; openAcct(); }
+  });
+  // pick up changes made on another phone when the app comes back to the front
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && user) pull().catch(()=>{}); });
+}
+
 /* ---------- go ---------- */
 document.body.classList.toggle('neon', neon);
 load(current);
@@ -1144,7 +1321,7 @@ window.addEventListener('focus', refreshIfStale);
   const ptr = $('ptr'), TH = 80;
   let y0 = null, dy = 0;
   addEventListener('touchstart', e => {
-    if (scrollY <= 0 && !sheet.classList.contains('open') && !$('pz').classList.contains('open')) { y0 = e.touches[0].clientY; dy = 0; ptr.style.transition = 'none'; }
+    if (scrollY <= 0 && !sheet.classList.contains('open') && !$('pz').classList.contains('open') && !$('acct').classList.contains('open')) { y0 = e.touches[0].clientY; dy = 0; ptr.style.transition = 'none'; }
   }, {passive:true});
   addEventListener('touchmove', e => {
     if (y0 === null) return;
