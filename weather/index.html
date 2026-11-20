@@ -757,14 +757,14 @@
   .beach-only{display:none}
   body.beach .beach-only{display:block}
   body.beach .bg{background:linear-gradient(180deg,var(--g1) 0%,var(--g2) 28%,var(--g3) 46%,var(--earth,#E2C99A) 72%,var(--earth2,#C9AE7E) 100%)}
-  .beach{position:absolute;left:0;right:0;bottom:0;height:262px;pointer-events:none}
-  .beach > svg:first-child{position:absolute;inset:0;width:100%;height:100%}
-  .beach .lap{animation:lap 4s ease-in-out infinite}
+  .bscene{position:absolute;left:0;right:0;bottom:0;height:262px;pointer-events:none}
+  .bscene > svg:first-child{position:absolute;inset:0;width:100%;height:100%}
+  .bscene .lap{animation:lap 4s ease-in-out infinite}
   @keyframes lap{0%,100%{transform:translateY(0);opacity:.75}50%{transform:translateY(3px);opacity:.35}}
-  .beach .bglint{position:absolute;bottom:48px;height:38px;width:120px;margin-left:-60px;transition:left 3s linear,opacity 3s;opacity:0;mix-blend-mode:screen;
+  .bscene .bglint{position:absolute;bottom:48px;height:38px;width:120px;margin-left:-60px;transition:left 3s linear,opacity 3s;opacity:0;mix-blend-mode:screen;
     background:radial-gradient(ellipse 50% 100% at 50% 0%,var(--glint,#fff) 0%,transparent 70%)}
-  .beach .bglint::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0 4px,rgba(0,0,0,.3) 4px 6px)}
-  .beach .yacht{position:absolute;bottom:78px;left:-40px;width:22px;height:25px;animation:sail 360s linear infinite;animation-delay:-90s}
+  .bscene .bglint::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0 4px,rgba(0,0,0,.3) 4px 6px)}
+  .bscene .yacht{position:absolute;bottom:78px;left:-40px;width:22px;height:25px;animation:sail 360s linear infinite;animation-delay:-90s}
   @keyframes sail{0%{transform:translateX(0)}100%{transform:translateX(calc(100vw + 80px))}}
   body.beach .hero{padding-bottom:128px}
   body.beach .place h1{font-family:'Pacifico',cursive;font-weight:400;font-size:24px;letter-spacing:0;line-height:1.4}
@@ -793,7 +793,7 @@
   <svg class="palm r neon-only" viewBox="0 0 150 200"><use href="#palmShape"/></svg>
   <div class="birds murray-only beach-only" id="birds"><svg viewBox="0 0 60 24" fill="none" stroke="var(--bird,#fff)" stroke-width="1.8" stroke-linecap="round"><path d="M2 10q4-5 8 0q4-5 8 0"/><path d="M22 4q3-4 6 0q3-4 6 0"/><path d="M30 16q4-5 8 0q4-5 8 0"/><path d="M46 8q3-4 6 0q3-4 6 0"/></svg></div>
   <div class="river murray-only" id="river"></div>
-  <div class="beach beach-only" id="beach"></div>
+  <div class="bscene beach-only" id="beach"></div>
   <div class="precip" id="precip"></div>
 </div>
 <svg width="0" height="0" style="position:absolute">
@@ -1197,7 +1197,6 @@ function render(d){
 
     <div class="refresh-wrap"><button class="refresh" id="refreshBtn" onclick="refreshNow()">${REFRESH_SVG} Refresh</button></div>
     <p class="foot" style="margin-top:10px">Tip: hold a card to rearrange</p>
-    <p class="foot" id="vpDiag" style="margin-top:6px;font-size:11px;opacity:.7"></p>
     <p class="foot">Updated ${new Date(lastFetch).toLocaleTimeString('en-AU',{hour:'numeric',minute:'2-digit'})} · Data by <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a></p>
   `;
   buildClouds(kind(c.weather_code));
@@ -2946,40 +2945,7 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 window.addEventListener('pageshow', refreshIfStale);
 window.addEventListener('focus', refreshIfStale);
 
-// iPhone home-screen apps can be left nudged up after the keyboard or a sheet closes, so the top
-// of the page can't be reached. Snap the viewport back whenever that happens.
-function unstickViewport(){
-  // iOS 26 bug: the visual viewport can get stuck shifted up after the keyboard closes or after re-rendering.
-  // A real 1px scroll and back forces WebKit to recalculate it.
-  setTimeout(() => {
-    const y = Math.max(0, window.scrollY);
-    window.scrollTo(0, y + 1);
-    requestAnimationFrame(() => { window.scrollTo(0, y); if (lastData) updateSky(); });
-  }, 80);
-}
-function viewportShifted(){
-  const vv = window.visualViewport, top = document.querySelector('.app');
-  if (vv && Math.abs(vv.offsetTop) > 2) return true;
-  if (window.scrollY <= 0 && top){
-    const pad = parseFloat(getComputedStyle(top).paddingTop) || 0, t = top.getBoundingClientRect().top;
-    return t < -2;   // page drawn higher than its own top
-  }
-  return false;
-}
-addEventListener('touchend', () => setTimeout(() => { if (window.scrollY <= 0 && viewportShifted()) unstickViewport(); }, 400), { passive: true });
-function vpDiag(){
-  const el = document.getElementById('vpDiag'); if (!el) return;
-  const vv = window.visualViewport || {}, app = document.querySelector('.app'), probe = document.createElement('div');
-  probe.style.cssText = 'position:fixed;top:env(safe-area-inset-top);left:0;width:1px;height:1px;visibility:hidden'; document.body.appendChild(probe);
-  const sat = probe.getBoundingClientRect().top; probe.remove();
-  el.textContent = `screen check: sy ${Math.round(scrollY)} · vo ${Math.round(vv.offsetTop||0)} · vh ${Math.round(vv.height||0)} · ih ${innerHeight} · ch ${document.documentElement.clientHeight} · sat ${Math.round(sat)} · at ${Math.round(app ? app.getBoundingClientRect().top : 0)} · ${theme}`;
-}
-setInterval(vpDiag, 1000);
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') unstickViewport(); });
-document.addEventListener('focusout', e => { if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) unstickViewport(); });
-if (window.visualViewport) visualViewport.addEventListener('resize', () => { if (!document.activeElement || !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) unstickViewport(); });
-new MutationObserver(muts => { if (muts.some(m => m.oldValue && /\bopen\b/.test(m.oldValue) && !m.target.classList.contains('open'))) unstickViewport(); })
-  .observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'], attributeOldValue: true });
+
 
 // Pull down to refresh (home-screen apps have no browser pull-to-refresh)
 (() => {
