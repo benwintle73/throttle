@@ -210,6 +210,31 @@
   body.neon .acct-card .btn-p{border-radius:2px;background:#000;font-family:'Anton',sans-serif;font-weight:400;letter-spacing:1px;text-transform:uppercase;font-size:18px}
   body.neon .acct-card input,body.neon .acct-card .btn-s,body.neon .acct-tabs,body.neon .acct-tabs button{border-radius:2px}
 
+  /* ===== reminders ===== */
+  .rem .ask{font-size:17px;font-weight:600;margin-bottom:10px}
+  .rem .sugs{display:flex;flex-direction:column;gap:8px}
+  .rem .sug{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:1px solid var(--line);background:rgba(255,255,255,.14);color:#fff;border-radius:14px;padding:11px 12px;font:500 14px 'Outfit',sans-serif;cursor:pointer}
+  .rem .sug b{font-weight:600}
+  .rem .sug small{display:block;color:var(--soft);font-size:12px;margin-top:1px}
+  .rem .sug .plus{margin-left:auto;width:28px;height:28px;border-radius:50%;background:#fff;color:#333;display:grid;place-items:center;font-size:18px;font-weight:700;flex-shrink:0}
+  .rem .sug.done{opacity:.55;pointer-events:none}
+  .rem .sug.done .plus{background:#2EC27E;color:#fff}
+  .rem .custom{display:flex;gap:8px;margin-top:8px}
+  .rem .custom input{min-width:0;height:42px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.9);color:#222;padding:0 10px;font:500 15px 'Outfit',sans-serif}
+  .rem .custom input[type=time]{width:128px;flex-shrink:0}
+  .rem .custom input[type=text]{flex:1}
+  .rem .custom button{height:42px;border:0;border-radius:12px;background:#fff;color:#333;font:700 14px 'Outfit',sans-serif;padding:0 14px;cursor:pointer;flex-shrink:0}
+  .rem .list{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+  .rem .item{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.14);border-radius:12px;padding:9px 12px;font-size:14px}
+  .rem .item time{font-weight:700;min-width:62px}
+  .rem .item span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rem .item button{border:0;background:none;color:#fff;opacity:.7;font-size:18px;cursor:pointer;padding:0 4px}
+  .rem .note{font-size:13px;color:var(--soft);line-height:1.45}
+  .rem .cta{margin-top:10px;border:0;border-radius:999px;padding:10px 18px;background:#fff;color:#333;font:700 14px 'Outfit',sans-serif;cursor:pointer}
+  body.neon .rem{background:linear-gradient(150deg,#FF9A3D,#E5267A)}
+  body.neon .rem .ask{font-family:'Anton',sans-serif;font-weight:400;font-size:22px;text-transform:uppercase;letter-spacing:.5px}
+  body.neon .rem .sug,body.neon .rem .custom input,body.neon .rem .custom button,body.neon .rem .item,body.neon .rem .cta{border-radius:2px}
+
   /* ===== daily puzzle ===== */
   .pz-card{cursor:pointer}
   .pz-card .row{display:flex;align-items:center;gap:14px}
@@ -685,6 +710,8 @@ function render(d){
     ${thoughtCard()}
 
     ${puzzleCard()}
+
+    ${remindersCard(d)}
 
     ${nowcastCard(d)}
 
@@ -1172,6 +1199,97 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'Escape') closePuzzle(); else if (/^[a-zA-Z]$/.test(e.key)) pzKey(e.key.toLowerCase());
 });
 
+/* ---------- reminders (push notifications) ---------- */
+const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+let remList = [], remState = 'unknown';         // unknown | off | on | blocked | unsupported | needs-install
+const hm = d => d.toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' }).replace(' ', '');
+function remSuggestions(d){
+  const out = [], now = new Date(), h = d.hourly, dy = d.daily, c = d.current;
+  const off = (d.utc_offset_seconds || 0) * 1000;
+  const at = iso => new Date(Date.parse(iso + ':00Z') - off);          // location wall time -> real instant
+  const soon = t => t - now > 10 * 60 * 1000;
+  const today = (dy.time[0]);
+  // rain later today
+  const ri = h.time.findIndex((t, i) => t.slice(0,10) === today && at(t) - now > 60 * 60 * 1000 && h.precipitation_probability[i] >= 60);
+  if (ri >= 0){ const due = new Date(at(h.time[ri]) - 45 * 60 * 1000);
+    if (soon(due)) out.push({ key:'rain', icon:'☔', t:`Rain likely from ${hm(at(h.time[ri]))}`, s:'Bring the washing in / grab a jacket', due, title:`☔ Rain from ${hm(at(h.time[ri]))}`, body:`${h.precipitation_probability[ri]}% chance in ${current.name}. Bring the washing in.` }); }
+  // cold tonight
+  if (dy.temperature_2m_min[1] != null && dy.temperature_2m_min[1] <= 8){ const due = new Date(now); due.setHours(17,0,0,0);
+    if (soon(due)) out.push({ key:'cold', icon:'🧥', t:`Down to ${Math.round(dy.temperature_2m_min[1])}° tonight`, s:'Reminder at 5pm to rug up', due, title:`🧥 Cold night ahead`, body:`Down to ${Math.round(dy.temperature_2m_min[1])}° in ${current.name}. Grab a jacket.` }); }
+  // strong UV
+  if ((dy.uv_index_max[0] ?? 0) >= 8 && !['rain','storm'].includes(kind(c.weather_code))){ const due = new Date(now); due.setHours(11,30,0,0);
+    if (soon(due)) out.push({ key:'uv', icon:'🧴', t:`UV ${Math.round(dy.uv_index_max[0])} around midday`, s:'Sunscreen reminder at 11:30am', due, title:'🧴 Sunscreen time', body:`UV hits ${Math.round(dy.uv_index_max[0])} today. Slip, slop, slap.` }); }
+  // daily puzzle not played yet
+  const P = pzState();
+  if (P && P.mode === 'daily' && !P.st.done && !P.st.legacy){ const due = new Date(now); due.setHours(19,0,0,0);
+    if (soon(due)) out.push({ key:'pz', icon:'🧩', t:'Play today’s Daily Word', s:'Reminder at 7pm', due, title:'🧩 Daily Word', body:'Today’s puzzle is waiting — keep your streak alive.' }); }
+  return out.slice(0, 3);
+}
+function remindersCard(d){
+  const head = `<h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg> Reminders</h2>`;
+  if (!sb) return '';
+  if (!user) return `<section class="card rem">${head}<div class="note">Get a phone notification later today — like a heads-up before the rain arrives.</div><button class="cta" onclick="openAcct()">Sign in to set reminders</button></section>`;
+  if (remState === 'unsupported') return `<section class="card rem">${head}<div class="note">This browser can’t show notifications.</div></section>`;
+  if (remState === 'needs-install') return `<section class="card rem">${head}<div class="note">To get reminders on iPhone, add this app to your Home Screen first: tap Share → Add to Home Screen, then open it from there.</div></section>`;
+  if (remState === 'blocked') return `<section class="card rem">${head}<div class="note">Notifications are blocked for this app. Turn them on in your phone’s Settings → Notifications, then reopen the app.</div></section>`;
+  if (remState !== 'on') return `<section class="card rem">${head}<div class="ask">Want reminders later today?</div><div class="note">Turn on notifications and the app can nudge you before rain, cold nights or high UV.</div><button class="cta" onclick="enablePush()">Turn on notifications</button></section>`;
+  const sugs = remSuggestions(d);
+  const taken = k => remList.some(r => r.title && r.key === k) || remList.some(r => r.title === (sugs.find(x => x.key === k) || {}).title);
+  const next = new Date(Date.now() + 60 * 60 * 1000); const defTime = `${String(next.getHours()).padStart(2,'0')}:00`;
+  return `<section class="card rem">${head}
+    <div class="ask">Want a reminder later today?</div>
+    <div class="sugs">${sugs.map(x => `<button class="sug ${taken(x.key)?'done':''}" onclick="addSuggested('${x.key}')"><span style="font-size:20px">${x.icon}</span><span><b>${esc(x.t)}</b><small>${esc(x.s)} · ${hm(x.due)}</small></span><i class="plus">${taken(x.key)?'✓':'+'}</i></button>`).join('')}</div>
+    <form class="custom" onsubmit="addCustom(event)"><input type="time" id="remTime" value="${defTime}" required><input type="text" id="remText" placeholder="Remind me to…" maxlength="100" required><button type="submit">Add</button></form>
+    ${remList.length ? `<div class="list">${remList.map(r => `<div class="item"><time>${hm(new Date(r.due))}</time><span>${esc(r.title)}</span><button aria-label="Delete reminder" onclick="delReminder(${r.id})">✕</button></div>`).join('')}</div>` : ''}
+  </section>`;
+}
+let lastSugs = [];
+async function addReminder(due, title, body){
+  const { error } = await sb.rpc('weather_reminder_add', { p_due: due.toISOString(), p_title: title, p_body: body || '' });
+  if (error){ toast(error.message.replace(/^.*?:\s*/, '')); return false; }
+  toast(`Reminder set for ${hm(due)}`); await loadReminders(); return true;
+}
+function addSuggested(k){ const x = remSuggestions(lastData).find(s => s.key === k); if (x) addReminder(x.due, x.title, x.body); }
+function addCustom(e){
+  e.preventDefault();
+  const [H, M] = $('remTime').value.split(':').map(Number), due = new Date(); due.setHours(H, M, 0, 0);
+  if (due < new Date()) due.setDate(due.getDate() + 1);       // a time that's passed means tomorrow
+  addReminder(due, '⏰ ' + $('remText').value.trim(), current.name ? `Weather in ${current.name}` : '');
+}
+async function delReminder(id){ await sb.rpc('weather_reminder_delete', { p_id: id }); await loadReminders(); }
+async function loadReminders(){
+  if (!serverMode()) return;
+  const { data } = await sb.rpc('weather_reminder_list'); remList = data || [];
+  if (lastData && !$('pz').classList.contains('open')) render(lastData);
+}
+function b64ToBytes(b64){ const p = '='.repeat((4 - b64.length % 4) % 4); const raw = atob((b64 + p).replace(/-/g,'+').replace(/_/g,'/')); return Uint8Array.from([...raw].map(c => c.charCodeAt(0))); }
+async function checkPush(){
+  if (!pushSupported()){ remState = /iPhone|iPad/.test(navigator.userAgent) && !isStandalone() ? 'needs-install' : 'unsupported'; return; }
+  if (Notification.permission === 'denied'){ remState = 'blocked'; return; }
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    remState = sub && Notification.permission === 'granted' ? 'on' : 'off';
+    if (sub && user) { const j = sub.toJSON(); sb.rpc('weather_push_subscribe', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth }); }
+  } catch { remState = 'off'; }
+}
+async function enablePush(){
+  try {
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted'){ remState = perm === 'denied' ? 'blocked' : 'off'; if (lastData) render(lastData); return; }
+    const { data: key, error } = await sb.rpc('weather_push_key');
+    if (error || !key){ toast('Couldn’t set up notifications — try again'); return; }
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription() || await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(key) });
+    const j = sub.toJSON();
+    const r = await sb.rpc('weather_push_subscribe', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth });
+    if (r.error){ toast('Couldn’t save notification settings'); return; }
+    remState = 'on'; toast('Notifications on'); await loadReminders();
+  } catch (e) { toast('Notifications aren’t available here'); }
+}
+async function initReminders(){ if (!serverMode()) return; await checkPush(); await loadReminders(); }
+
 /* ---------- what to wear ---------- */
 function wearTips(d, start){
   const c = d.current, h = d.hourly, dy = d.daily;
@@ -1380,6 +1498,8 @@ window.syncSoon = () => { if (!user) return; clearTimeout(syncTimer); syncTimer 
 function setUser(u){
   const was = user && user.id;
   user = u || null;
+  if (user && user.id !== was) initReminders();
+  if (!user) remList = [];
   if ((user && user.id) !== was && lastData) render(lastData);
   $('acctDot').classList.toggle('on', !!user);
   if ($('acct').classList.contains('open')) drawAcct();
@@ -1503,6 +1623,7 @@ const STALE = 5*60*1000;
 const refreshIfStale = () => { if (document.visibilityState==='visible' && Date.now()-lastFetch > STALE){ if (useLoc && current.here) locateAndLoad(true); else load(current, true); } };
 setInterval(() => { if (document.visibilityState==='visible') load(current, true); }, 10*60*1000);
 document.addEventListener('visibilitychange', refreshIfStale);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && user) loadReminders(); });
 window.addEventListener('pageshow', refreshIfStale);
 window.addEventListener('focus', refreshIfStale);
 

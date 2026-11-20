@@ -1,4 +1,4 @@
-const CACHE = 'wx-v22';
+const CACHE = 'wx-v23';
 const SHELL = ['./', 'index.html', 'quotes.js', 'puzzle-words.js', 'manifest.webmanifest', 'icon.svg'];
 
 self.addEventListener('install', e => {
@@ -23,4 +23,20 @@ self.addEventListener('fetch', e => {
       })
       .catch(() => caches.match(e.request, {ignoreSearch:true}))
   );
+});
+
+// ---- reminders: show push notifications, open the app when tapped ----
+self.addEventListener('push', e => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch { d = { title: 'Weather', body: e.data ? e.data.text() : '' }; }
+  e.waitUntil(self.registration.showNotification(d.title || 'Weather reminder', {
+    body: d.body || '', tag: d.tag || 'wx', icon: 'icon.svg', badge: 'icon.svg', data: { url: './' }
+  }));
+});
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    for (const c of list) { if ('focus' in c) return c.focus(); }
+    return self.clients.openWindow('./');
+  }));
 });
