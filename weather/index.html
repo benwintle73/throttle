@@ -776,6 +776,12 @@
   body.beach .tmrw{background:rgba(10,90,110,.3)}
   .appear .pv-beach{background:linear-gradient(180deg,#0E7FE8 0%,#62C3F5 45%,#36C2C9 46%,#1FA6B8 66%,#F6E3BE 67%);position:relative}
   .appear .pv-beach::after{content:'';position:absolute;left:8%;bottom:14%;width:12%;height:22%;background:#E8505B;box-shadow:16px 0 0 #2BB3C0,32px 0 0 #F7C548,48px 0 0 #3A6EA5}
+  /* header: town name gets the whole first line; buttons sit beside the region line */
+  .top{display:grid;grid-template-columns:1fr repeat(4,auto);column-gap:8px;row-gap:2px;align-items:center}
+  .top .place{display:contents}
+  .top .place h1{grid-column:1/-1;grid-row:1}
+  .top .place p{grid-column:1;grid-row:2;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .top > .icon-btn{grid-row:2}
 </style>
 </head>
 <body>
