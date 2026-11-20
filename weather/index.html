@@ -1430,12 +1430,24 @@ function buildRiver(){
     ${farG('')}
     <rect x="0" y="${HOR}" width="${W}" height="${WAT-HOR+1}" fill="var(--bank)"/>
     <g id="tinny" opacity="var(--day,1)"><g transform="translate(146 222) scale(1.35) translate(-146 -222)"><g class="bob">
-      <path d="M150 226 q30 -6 60 0" stroke="#EDEFF2" stroke-width=".5" fill="none" opacity=".6"/>
-      <path d="M122 214 L170 214 L164 222 L128 222Z" fill="var(--hull2)"/><path d="M122 214 L170 214" stroke="#E9EDF2" stroke-width="1.2"/>
-      <circle cx="140" cy="205.5" r="3" fill="var(--angler)"/><path d="M135 205 h10 l-1.5 -1.6 h-7z" fill="var(--hat)"/><path d="M137.5 209 h5.5 l1.5 5 h-8.5z" fill="var(--shirt)"/>
-      <path d="M143 210 Q168 186 198 194" stroke="var(--rod)" stroke-width="1" fill="none"/>
-      <path d="M198 194 L201 226" stroke="#ffffff" stroke-width=".4" opacity=".7"/><circle cx="201" cy="226.5" r="1.2" fill="#E8505B"/>
-      <rect x="160" y="210" width="5" height="4" fill="#3A6EA5"/></g></g></g>
+      <path d="M116 214 L176 214 L170 222 L122 222Z" fill="var(--hull2)"/><path d="M116 214 L176 214" stroke="#E9EDF2" stroke-width="1.2"/>
+      <rect x="143" y="210.5" width="5" height="3.5" fill="#3A6EA5"/>
+      <!-- him: hat, red shirt -->
+      <path d="M128.5 214 v-3.6 q4 -2.2 8 0 v3.6z" fill="var(--shirt)"/>
+      <circle cx="132.5" cy="206.3" r="2.7" fill="var(--angler)"/><path d="M128 205.6 h9 l-1.4 -1.3 h-6.2z" fill="var(--hat)"/><rect x="130.2" y="202.6" width="4.6" height="2" rx=".8" fill="var(--hat)"/>
+      <!-- her: ponytail, teal top -->
+      <path d="M154.5 214 v-3.4 q3.6 -2 7.2 0 v3.4z" fill="#1F9AA0"/>
+      <circle cx="158.1" cy="206.6" r="2.5" fill="var(--angler)"/>
+      <path d="M155.6 206.4 q.3 -3.4 2.6 -3.3 q2.5 .1 2.4 3.1 q-1.6 -1.6 -5 .2z" fill="#5A3A22"/><path d="M155.8 205.6 q-2.6 .6 -2.4 3.4 q1.2 -1.2 1.9 -2.2z" fill="#5A3A22"/>
+      <!-- short rods -->
+      <path d="M129.5 210.5 L113 199" stroke="var(--rod)" stroke-width=".9" stroke-linecap="round"/>
+      <path d="M161 210.5 L178 199.5" stroke="var(--rod)" stroke-width=".9" stroke-linecap="round"/>
+      <g class="lineA"><path d="M113 199 L111.5 226" stroke="#fff" stroke-width=".35" opacity=".7"/><circle cx="111.5" cy="226.3" r="1" fill="#E8505B"/></g>
+      <g class="lineB"><path d="M178 199.5 L180 226" stroke="#fff" stroke-width=".35" opacity=".7"/><circle cx="180" cy="226.3" r="1" fill="#E8505B"/></g>
+      <g id="catchGrp" style="display:none"><path id="catchLine" stroke="#fff" stroke-width=".4" fill="none"/>
+        <ellipse id="catchSplash" rx="3" ry="1" fill="none" stroke="#fff" stroke-width=".5"/>
+        <g id="catchFish"><path d="M-2.5 0 q2.5 -2.2 5 0 q-2.5 2.2 -5 0z" fill="#E2B64B"/><path d="M2.5 0 l2.2 -1.6 v3.2z" fill="#C99A2E"/><circle cx="-1.3" cy="-.3" r=".35" fill="#222"/></g></g>
+      </g></g></g>
     <path d="M0 246 C60 240 140 249 220 244 C300 239 360 247 400 243 L400 262 L0 262Z" fill="var(--nbank)"/>
     <g id="camp" opacity="var(--night,0)" transform="translate(262 252) scale(1.75) translate(-262 -252)">
       <ellipse cx="262" cy="232" rx="70" ry="30" fill="url(#fireGlow)"/>
@@ -1455,6 +1467,36 @@ function buildRiver(){
 `;
 }
 buildRiver();
+// Murray: every 20–50 seconds one of the two anglers lands a fish (animated frame by frame so it works everywhere)
+const ANGLERS = { A: { tip: [113, 199], water: [111.5, 226], line: 'lineA' }, B: { tip: [178, 199.5], water: [180, 226], line: 'lineB' } };
+function landFish(who){
+  const a = ANGLERS[who], grp = $('catchGrp'), ln = $('catchLine'), sp = $('catchSplash'), fish = $('catchFish');
+  const normal = document.querySelector('#tinny .' + a.line); if (!grp || !normal) return;
+  normal.style.opacity = 0; grp.style.display = '';
+  const T = 3000, t0 = performance.now(), ease = x => x < 0 ? 0 : x > 1 ? 1 : x * x * (3 - 2 * x);
+  const frame = now => {
+    const t = (now - t0) / T;
+    if (t >= 1){ grp.style.display = 'none'; normal.style.opacity = ''; return; }
+    const r = ease((t - .12) / .43);                       // reel in
+    const ex = a.water[0] + (a.tip[0] - a.water[0]) * r * .6, ey = a.water[1] - r * 16.5;
+    ln.setAttribute('d', `M${a.tip[0]} ${a.tip[1]} L${ex.toFixed(2)} ${ey.toFixed(2)}`);
+    const sT = Math.min(1, t / .33);                      // splash ring
+    sp.setAttribute('cx', a.water[0]); sp.setAttribute('cy', a.water[1] + .4);
+    sp.setAttribute('transform', `translate(${a.water[0]} ${a.water[1] + .4}) scale(${.4 + sT * 2.2}) translate(${-a.water[0]} ${-(a.water[1] + .4)})`);
+    sp.setAttribute('opacity', (1 - sT) * .9);
+    const wig = t > .55 ? Math.sin((t - .55) * 40) * 22 * (1 - (t - .55) / .45) : 0;
+    fish.setAttribute('transform', `translate(${ex.toFixed(2)} ${(ey + 2.6).toFixed(2)}) rotate(${(90 * r + wig).toFixed(1)})`);
+    fish.setAttribute('opacity', t < .15 ? 0 : t > .85 ? (1 - t) / .15 : 1);
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+}
+function goFishing(){
+  setTimeout(goFishing, 20000 + Math.random() * 30000);
+  if (!$('tinny') || theme !== 'murray' || document.hidden || skyNow.night > .5) return;
+  landFish(Math.random() < .5 ? 'A' : 'B');
+}
+setTimeout(goFishing, 6000 + Math.random() * 8000);
 function buildBeach(){
   // original bay-side beach: calm bay, long timber pier, a row of striped bathing boxes, umbrella
   const W = 400, H = 262, HOR = 176, SH = 214;   // horizon, shoreline
@@ -2994,7 +3036,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.74', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.75', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
