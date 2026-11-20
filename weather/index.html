@@ -196,13 +196,17 @@
   .pz-key i.c{background:#14C8B4}.pz-key i.p{background:#FF9F43}.pz-key i.a{background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.2)}
   body.neon .pz-key i{border-radius:2px}
   body.neon .pz-key i.p{background:#FF3F8E}
-  .pz-msg{text-align:center;min-height:52px;font-size:15px;font-weight:600;padding:4px 10px}
+  .pz-msg{text-align:center;min-height:52px;font-size:15px;font-weight:600;padding:4px 10px;margin-bottom:16px}
   .pz-msg b{display:block;font-size:22px;margin-bottom:2px}
   .kb{display:flex;flex-direction:column;gap:7px;padding:0 2px}
   .kb div{display:flex;gap:5px;justify-content:center}
   .kb button{flex:1;max-width:40px;height:54px;border:0;border-radius:8px;background:rgba(255,255,255,.22);color:#fff;
     font:700 16px 'Outfit',sans-serif;text-transform:uppercase;cursor:pointer;touch-action:manipulation}
   .kb button.wide{max-width:64px;flex:1.5;font-size:12px}
+  .kb button.del{display:grid;place-items:center}
+  .kb button.del svg{width:28px;height:28px}
+  .kb button.del{pointer-events:auto}
+  .kb button.del svg{pointer-events:none}
   .kb button.c{background:#14C8B4}.kb button.p{background:#FF9F43}.kb button.a{background:rgba(0,0,0,.35);color:rgba(255,255,255,.55)}
   .toast{position:fixed;left:50%;top:22%;transform:translateX(-50%);background:#fff;color:#222;padding:10px 16px;border-radius:12px;font-weight:600;font-size:14px;z-index:40;opacity:0;transition:opacity .2s;pointer-events:none}
   .toast.show{opacity:1}
@@ -943,7 +947,7 @@ function drawPuzzle(revealRow = -1){
   st.guesses.forEach(g => score(g, word).forEach((c,i) => { if (!keys[g[i]] || rank[c] > rank[keys[g[i]]]) keys[g[i]] = c; }));
   const rows = ['qwertyuiop','asdfghjkl','↵zxcvbnm⌫'];
   $('kb').innerHTML = rows.map(r => `<div>${[...r].map(k => k==='↵' ? `<button class="wide" data-k="enter">Enter</button>`
-    : k==='⌫' ? `<button class="wide" data-k="back" aria-label="Delete">⌫</button>` : `<button class="${keys[k]||''}" data-k="${k}">${k}</button>`).join('')}</div>`).join('');
+    : k==='⌫' ? `<button class="wide del" data-k="back" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M21 5H9l-6 7 6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z"/><path d="M18 9l-6 6M12 9l6 6"/></svg></button>` : `<button class="${keys[k]||''}" data-k="${k}">${k}</button>`).join('')}</div>`).join('');
   let msg = '';
   if (st.done){
     const stats = pzStats();
