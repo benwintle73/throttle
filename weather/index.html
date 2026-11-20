@@ -1316,23 +1316,29 @@ window.addEventListener('resize', updateSky);
 
 /* ---------- thought of the day ---------- */
 // One per day, changes at local midnight. Shuffled order with no repeats until the whole list is used.
+function thoughtSlot(){
+  // Two a day: a day thought from 6am, a night thought from 6pm (until 6am next morning).
+  const now = new Date(), h = now.getHours();
+  if (h >= 18) return { key: `${localDay(now)}pm`, pm: true };
+  if (h < 6){ const y = new Date(now); y.setDate(y.getDate() - 1); return { key: `${localDay(y)}pm`, pm: true }; }
+  return { key: `${localDay(now)}am`, pm: false };
+}
 function thoughtOfTheDay(){
-  // One thought a day, picked at random for each person, from thoughts that suit any time of day.
-  // Remembers recent picks so the same one doesn't come back for months.
+  // Random for each person, from the day pool or the evening pool; recent picks are skipped so nothing repeats for months.
   const all = window.THOUGHTS || []; if (!all.length) return null;
-  const TIMED = /\b(morning|evening|tonight|afternoon|bedtime|sunrise|sunset|night|lunch|breakfast|dinner)\b|before bed|end of the day|day ends/i;
-  const pool = all.map((t, i) => i).filter(i => !TIMED.test(all[i].x));
-  const day = localDay(), cur = store.get('wx_thought', null);
-  if (cur && cur.day === day && all[cur.i]) return all[cur.i];
+  const slot = thoughtSlot(), cur = store.get('wx_thought', null);
+  if (cur && cur.key === slot.key && all[cur.i]) return all[cur.i];
+  let pool = all.map((t, i) => i).filter(i => all[i].w === (slot.pm ? 'pm' : 'am'));
+  if (!pool.length) pool = all.map((t, i) => i);
   const recent = (cur && cur.recent) || [];
   const fresh = pool.filter(i => !recent.includes(i)), from = fresh.length ? fresh : pool;
   const pick = from[Math.floor(Math.random() * from.length)];
-  store.set('wx_thought', { day, i: pick, recent: [...recent, pick].slice(-300) });
+  store.set('wx_thought', { key: slot.key, i: pick, recent: [...recent, pick].slice(-600) });
   return all[pick];
 }
 function thoughtCard(){
   const t = thoughtOfTheDay(); if (!t) return '';
-  const when = 'Thought for today';
+  const when = thoughtSlot().pm ? 'Evening thought' : 'Thought for today';
   const q = t.t === 'q' ? `“${t.x}”` : t.x;
   const by = t.t === 'q' ? `<div class="by">— ${t.by}</div>` : '';
   return `<section class="card totd">
