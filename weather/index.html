@@ -925,6 +925,7 @@
   .appear .pv-seoul{background:linear-gradient(180deg,#7FB2F0 0%,#F7DDE8 55%,#8A93B8 56%,#4E7FAE 75%,#3A3F4A 76%);position:relative}
   .appear .pv-seoul::after{content:'';position:absolute;right:12%;top:18%;width:3px;height:40%;background:#EDEFF5;box-shadow:-1px 6px 0 2px #EDEFF5}
   @media (orientation:landscape) and (max-height:520px){ .kscene{height:100vh!important} }
+  .updpill{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:99;border:0;border-radius:999px;padding:11px 18px;background:#fff;color:#222;font:700 14px 'Outfit',sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.3);cursor:pointer;animation:popIn .3s ease}
 </style>
 </head>
 <body>
@@ -1250,6 +1251,7 @@ async function load(p, quiet=false){ climPick = null;
   if (queued){ const q = queued; queued = null; load(q[0], q[1]); }
 }
 async function refreshNow(){
+  checkForUpdate();
   const b = $('refreshBtn'); if (b) b.classList.add('spinning');
   await load(current, true);
 }
@@ -3416,7 +3418,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.92', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.93', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
@@ -3579,14 +3581,33 @@ window.addEventListener('focus', refreshIfStale);
   });
 })();
 
-// App updates: when a new version is deployed, swap to it automatically
+// App updates: check for a new version when the app comes to the front, every 5 minutes while open,
+// and on refresh. When one arrives, switch to it straight away — unless you're in the middle of something,
+// in which case a small "tap to update" pill appears instead.
+var swReg = null;
+function checkForUpdate(){ if (swReg) swReg.update().catch(()=>{}); }
+function busyNow(){
+  const a = document.activeElement;
+  return (a && /INPUT|TEXTAREA/.test(a.tagName)) || document.querySelector('.pz.open, .sheet.open, .tp.open, .defpop.open') || (typeof editLayout !== 'undefined' && editLayout);
+}
+function applyUpdate(){ try{ sessionStorage.setItem('wx_updated', '1'); }catch(e){} location.reload(); }
+function offerUpdate(){
+  if (!busyNow()) return applyUpdate();
+  if ($('updPill')) return;
+  const b = document.createElement('button'); b.id = 'updPill'; b.className = 'updpill'; b.textContent = '✨ New version ready · tap to update';
+  b.onclick = applyUpdate; document.body.appendChild(b);
+  const t = setInterval(() => { if (!busyNow()){ clearInterval(t); applyUpdate(); } }, 3000);
+}
+try{ if (sessionStorage.getItem('wx_updated')){ sessionStorage.removeItem('wx_updated'); setTimeout(() => toast(`Updated to v${APP_VERSION}`), 800); } }catch(e){}
 if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   navigator.serviceWorker.register('sw.js', {updateViaCache:'none'}).then(reg => {
-    document.addEventListener('visibilitychange', () => { if (document.visibilityState==='visible') reg.update().catch(()=>{}); });
+    swReg = reg;
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState==='visible') checkForUpdate(); });
+    setInterval(checkForUpdate, 5 * 60 * 1000);
   }).catch(()=>{});
-  let reloaded = false;
+  let offered = false;
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (reloaded || !hadController) return; reloaded = true; location.reload();
+    if (offered || !hadController) return; offered = true; offerUpdate();
   });
   var hadController = !!navigator.serviceWorker.controller;
 }
