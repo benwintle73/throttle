@@ -1,4 +1,4 @@
-const CACHE = 'wx-v41';
+const CACHE = 'wx-v42';
 const SHELL = ['./', 'index.html', 'suncalc.js', 'quotes.js', 'puzzle-words.js', 'manifest.webmanifest', 'icon.svg'];
 
 self.addEventListener('install', e => {
