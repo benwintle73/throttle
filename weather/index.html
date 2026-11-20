@@ -160,6 +160,53 @@
   body.neon .totd{background:linear-gradient(155deg,#FFB347 0%,#FF5E8A 55%,#C13AD9 100%)}
   body.neon .totd .q{font-family:'Anton',sans-serif;font-weight:400;font-size:24px;line-height:1.25;letter-spacing:.3px;text-transform:uppercase;text-shadow:2px 2px 0 rgba(0,0,0,.4)}
   body.neon .totd .by{color:#fff;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;font-size:11px}
+  /* ===== daily puzzle ===== */
+  .pz-card{cursor:pointer}
+  .pz-card .row{display:flex;align-items:center;gap:14px}
+  .pz-card .mini{display:grid;grid-template-columns:repeat(5,12px);gap:3px;flex-shrink:0}
+  .pz-card .mini i{width:12px;height:12px;border-radius:3px;background:rgba(255,255,255,.22)}
+  .pz-card .mini i.c{background:#14C8B4}.pz-card .mini i.p{background:#FF9F43}.pz-card .mini i.a{background:rgba(0,0,0,.25)}
+  .pz-card .t1{font-size:18px;font-weight:600}
+  .pz-card .t2{font-size:13px;color:var(--soft);margin-top:3px}
+  .pz-card .go{margin-left:auto;padding:9px 16px;border-radius:999px;background:#fff;color:#333;font-weight:600;font-size:14px;flex-shrink:0}
+  .pz{position:fixed;inset:0;z-index:30;background:rgba(12,10,30,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    display:flex;flex-direction:column;align-items:center;opacity:0;pointer-events:none;transition:opacity .25s;
+    padding:calc(env(safe-area-inset-top) + 12px) 10px calc(env(safe-area-inset-bottom) + 12px)}
+  .pz.open{opacity:1;pointer-events:auto}
+  .pz-in{width:100%;max-width:440px;height:100%;display:flex;flex-direction:column}
+  .pz-head{display:flex;align-items:center;gap:10px;padding:4px 6px}
+  .pz-head h3{flex:1;font-size:20px;font-weight:700}
+  .pz-head small{display:block;font-size:12px;color:var(--soft);font-weight:500}
+  .pz-grid{flex:1;display:flex;flex-direction:column;justify-content:center;gap:7px;padding:8px 26px}
+  .pz-row{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+  .pz-row.shake{animation:shake .45s}
+  @keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+  .tile{aspect-ratio:1;border-radius:12px;display:grid;place-items:center;font-size:30px;font-weight:700;text-transform:uppercase;
+    background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.22);color:#fff}
+  .tile.f{border-color:rgba(255,255,255,.6);animation:pop .1s}
+  @keyframes pop{50%{transform:scale(1.08)}}
+  .tile.c,.tile.p,.tile.a{border-color:transparent;animation:flip .5s ease both}
+  .tile.c{background:#14C8B4}.tile.p{background:#FF9F43}.tile.a{background:rgba(0,0,0,.32)}
+  @keyframes flip{0%{transform:rotateX(0)}50%{transform:rotateX(90deg)}100%{transform:rotateX(0)}}
+  .pz-msg{text-align:center;min-height:52px;font-size:15px;font-weight:600;padding:4px 10px}
+  .pz-msg b{display:block;font-size:22px;margin-bottom:2px}
+  .kb{display:flex;flex-direction:column;gap:7px;padding:0 2px}
+  .kb div{display:flex;gap:5px;justify-content:center}
+  .kb button{flex:1;max-width:40px;height:54px;border:0;border-radius:8px;background:rgba(255,255,255,.22);color:#fff;
+    font:700 16px 'Outfit',sans-serif;text-transform:uppercase;cursor:pointer;touch-action:manipulation}
+  .kb button.wide{max-width:64px;flex:1.5;font-size:12px}
+  .kb button.c{background:#14C8B4}.kb button.p{background:#FF9F43}.kb button.a{background:rgba(0,0,0,.35);color:rgba(255,255,255,.55)}
+  .toast{position:fixed;left:50%;top:22%;transform:translateX(-50%);background:#fff;color:#222;padding:10px 16px;border-radius:12px;font-weight:600;font-size:14px;z-index:40;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  body.neon .pz-card{background:linear-gradient(150deg,#14C8B4,#0F6FB8)}
+  body.neon .pz-card .t1{font-family:'Anton',sans-serif;font-weight:400;font-size:22px;letter-spacing:.5px;text-transform:uppercase}
+  body.neon .pz-card .go{border-radius:2px;background:#000;color:#fff;border:2px solid #fff;text-transform:uppercase;font-weight:800;font-size:12px;letter-spacing:1px}
+  body.neon .pz{background:rgba(7,7,7,.92)}
+  body.neon .tile{border-radius:2px;font-family:'Anton',sans-serif;font-weight:400;border-color:rgba(255,255,255,.35)}
+  body.neon .tile.c{background:#14C8B4}.neon .tile.p{background:#FF3F8E}
+  body.neon .kb button{border-radius:2px}
+  body.neon .kb button.p,body.neon .pz-card .mini i.p{background:#FF3F8E}
+  body.neon .pz-head h3{font-family:'Anton',sans-serif;font-weight:400;font-size:26px;letter-spacing:1px;text-transform:uppercase}
   .moon-ico{width:46px;height:46px;float:right;margin-left:6px}
   body.neon .wear span{background:#000;border:2px solid #fff;border-radius:2px;text-transform:uppercase;font-size:11px;font-weight:800;letter-spacing:1px}
   body.neon .nowcast{background:linear-gradient(160deg,#2EE6D6 0%,#1C8FD1 60%,#2A3FA8 100%)}
@@ -348,7 +395,20 @@
   </div>
 </div>
 
+<div class="pz" id="pz">
+  <div class="pz-in">
+    <div class="pz-head">
+      <h3 id="pzTitle">Daily Word<small id="pzSub"></small></h3>
+      <button class="icon-btn" id="pzClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="pz-grid" id="pzGrid"></div>
+    <div class="pz-msg" id="pzMsg"></div>
+    <div class="kb" id="kb"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
 <script src="quotes.js"></script>
+<script src="puzzle-words.js"></script>
 <script>
 const DEFAULT_PLACE = { name:'Maryborough', sub:'Victoria, Australia', lat:-37.0457, lon:143.7393 };
 
@@ -508,6 +568,8 @@ function render(d){
     </section>
 
     ${thoughtCard()}
+
+    ${puzzleCard()}
 
     ${nowcastCard(d)}
 
@@ -791,6 +853,118 @@ function thoughtCard(){
   </section>`;
 }
 
+/* ---------- daily word puzzle ---------- */
+const PZ_EPOCH = new Date(2026, 10, 20);                 // puzzle #1
+function localDay(d = new Date()){ return Math.round((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - new Date(2000,0,1)) / 864e5); }
+function puzzleToday(){
+  const A = window.PUZZLE_ANSWERS || []; if (!A.length) return null;
+  const now = new Date(), y = now.getFullYear();
+  const doy = Math.round((new Date(y, now.getMonth(), now.getDate()) - new Date(y,0,1)) / 864e5);
+  let seed = (y * 2246822519 + 31) >>> 0;
+  const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+  const o = [...Array(A.length).keys()];
+  for (let i = o.length-1; i > 0; i--){ const j = Math.floor(rnd()*(i+1)); [o[i],o[j]] = [o[j],o[i]]; }
+  const num = Math.round((new Date(y, now.getMonth(), now.getDate()) - PZ_EPOCH) / 864e5) + 1;
+  return { word: A[o[doy % A.length]], day: localDay(now), num };
+}
+function pzState(){
+  const t = puzzleToday(); if (!t) return null;
+  let st = store.get('wx_pz', null);
+  if (!st || st.day !== t.day) st = { day: t.day, guesses: [], done: false, won: false };
+  return { ...t, st };
+}
+function pzStats(){ return store.get('wx_pz_stats', { played:0, wins:0, streak:0, best:0, lastWin:null, dist:[0,0,0,0,0,0] }); }
+function score(guess, word){
+  const res = Array(5).fill('a'), left = {};
+  for (let i=0;i<5;i++){ if (guess[i] === word[i]) res[i] = 'c'; else left[word[i]] = (left[word[i]]||0) + 1; }
+  for (let i=0;i<5;i++){ if (res[i] !== 'c' && left[guess[i]] > 0){ res[i] = 'p'; left[guess[i]]--; } }
+  return res;
+}
+function puzzleCard(){
+  const P = pzState(); if (!P) return '';
+  const { st, word } = P, stats = pzStats();
+  const last = st.guesses.length ? score(st.guesses[st.guesses.length-1], word) : null;
+  const mini = (last || Array(5).fill('')).map(c => `<i class="${c}"></i>`).join('');
+  let t1, t2, go;
+  if (st.done && st.won){ t1 = `Solved in ${st.guesses.length}`; t2 = `🔥 ${stats.streak}-day streak · new word tomorrow`; go = 'View'; }
+  else if (st.done){ t1 = `The word was ${word.toUpperCase()}`; t2 = 'New word tomorrow'; go = 'View'; }
+  else if (st.guesses.length){ t1 = `${6 - st.guesses.length} guesses left`; t2 = 'Keep going'; go = 'Play'; }
+  else { t1 = `Daily Word #${P.num}`; t2 = stats.streak ? `🔥 ${stats.streak}-day streak — keep it alive` : 'Guess today’s 5-letter word'; go = 'Play'; }
+  return `<section class="card pz-card" onclick="openPuzzle()">
+    <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg> Daily puzzle</h2>
+    <div class="row"><div class="mini">${mini}</div><div><div class="t1">${t1}</div><div class="t2">${t2}</div></div><div class="go">${go}</div></div>
+  </section>`;
+}
+
+let PZ = null, cur = '';
+function openPuzzle(){
+  PZ = pzState(); if (!PZ) return; cur = '';
+  $('pzTitle').firstChild.textContent = `Daily Word #${PZ.num}`;
+  const stats = pzStats();
+  $('pzSub').textContent = `Played ${stats.played} · Won ${stats.wins} · Streak ${stats.streak} · Best ${stats.best}`;
+  drawPuzzle(); $('pz').classList.add('open');
+}
+function closePuzzle(){ $('pz').classList.remove('open'); if (lastData) render(lastData); }
+$('pzClose').onclick = closePuzzle;
+
+function drawPuzzle(revealRow = -1){
+  const { st, word } = PZ; let html = '';
+  for (let r=0;r<6;r++){
+    const g = st.guesses[r], live = r === st.guesses.length && !st.done;
+    const sc = g ? score(g, word) : null;
+    html += `<div class="pz-row" id="pzr${r}">`;
+    for (let i=0;i<5;i++){
+      const ch = g ? g[i] : live ? (cur[i]||'') : '';
+      const cls = sc ? sc[i] : (ch ? 'f' : '');
+      const delay = (sc && r === revealRow) ? `style="animation-delay:${i*.18}s"` : (sc ? 'style="animation:none"' : '');
+      html += `<div class="tile ${cls}" ${delay}>${ch}</div>`;
+    }
+    html += `</div>`;
+  }
+  $('pzGrid').innerHTML = html;
+  // keyboard colours: best result seen per letter
+  const rank = {c:3,p:2,a:1}, keys = {};
+  st.guesses.forEach(g => score(g, word).forEach((c,i) => { if (!keys[g[i]] || rank[c] > rank[keys[g[i]]]) keys[g[i]] = c; }));
+  const rows = ['qwertyuiop','asdfghjkl','↵zxcvbnm⌫'];
+  $('kb').innerHTML = rows.map(r => `<div>${[...r].map(k => k==='↵' ? `<button class="wide" data-k="enter">Enter</button>`
+    : k==='⌫' ? `<button class="wide" data-k="back" aria-label="Delete">⌫</button>` : `<button class="${keys[k]||''}" data-k="${k}">${k}</button>`).join('')}</div>`).join('');
+  let msg = '';
+  if (st.done){
+    const stats = pzStats();
+    msg = st.won ? `<b>${['Genius!','Brilliant!','Great work!','Nice one!','Solid!','Phew!'][st.guesses.length-1]}</b>🔥 ${stats.streak}-day streak · new word tomorrow`
+                 : `<b>${word.toUpperCase()}</b>Streak reset — back tomorrow`;
+  }
+  $('pzMsg').innerHTML = msg;
+}
+function toast(t){ const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove('show'), 1400); }
+function pzKey(k){
+  if (!PZ || PZ.st.done || !$('pz').classList.contains('open')) return;
+  if (k === 'back'){ cur = cur.slice(0,-1); return drawPuzzle(); }
+  if (k === 'enter'){
+    if (cur.length < 5){ shakeRow(); return toast('Not enough letters'); }
+    if (!window.PUZZLE_VALID.has(cur)){ shakeRow(); return toast('Not in word list'); }
+    const st = PZ.st; st.guesses.push(cur); const row = st.guesses.length-1; cur = '';
+    if (st.guesses[row] === PZ.word || st.guesses.length === 6){
+      st.done = true; st.won = st.guesses[row] === PZ.word;
+      const s = pzStats(); s.played++;
+      if (st.won){ s.wins++; s.streak = (s.lastWin === PZ.day - 1) ? s.streak + 1 : 1; s.best = Math.max(s.best, s.streak); s.lastWin = PZ.day; s.dist[row]++; }
+      else s.streak = 0;
+      store.set('wx_pz_stats', s);
+      $('pzSub').textContent = `Played ${s.played} · Won ${s.wins} · Streak ${s.streak} · Best ${s.best}`;
+    }
+    store.set('wx_pz', st);
+    return drawPuzzle(row);
+  }
+  if (/^[a-z]$/.test(k) && cur.length < 5){ cur += k; drawPuzzle(); }
+}
+function shakeRow(){ const r = $('pzr' + PZ.st.guesses.length); if (r){ r.classList.remove('shake'); void r.offsetWidth; r.classList.add('shake'); } }
+$('kb').addEventListener('click', e => { const b = e.target.closest('button'); if (b) pzKey(b.dataset.k); });
+document.addEventListener('keydown', e => {
+  if (!$('pz').classList.contains('open')) return;
+  if (e.key === 'Enter') pzKey('enter'); else if (e.key === 'Backspace') pzKey('back');
+  else if (e.key === 'Escape') closePuzzle(); else if (/^[a-zA-Z]$/.test(e.key)) pzKey(e.key.toLowerCase());
+});
+
 /* ---------- what to wear ---------- */
 function wearTips(d, start){
   const c = d.current, h = d.hourly, dy = d.daily;
@@ -948,7 +1122,7 @@ window.addEventListener('focus', refreshIfStale);
   const ptr = $('ptr'), TH = 80;
   let y0 = null, dy = 0;
   addEventListener('touchstart', e => {
-    if (scrollY <= 0 && !sheet.classList.contains('open')) { y0 = e.touches[0].clientY; dy = 0; ptr.style.transition = 'none'; }
+    if (scrollY <= 0 && !sheet.classList.contains('open') && !$('pz').classList.contains('open')) { y0 = e.touches[0].clientY; dy = 0; ptr.style.transition = 'none'; }
   }, {passive:true});
   addEventListener('touchmove', e => {
     if (y0 === null) return;
