@@ -1,5 +1,5 @@
-const CACHE = 'wx-v51';
-const SHELL = ['./', 'index.html', 'suncalc.js', 'quotes.js', 'puzzle-words.js', 'manifest.webmanifest', 'icon.svg'];
+const CACHE = 'wx-v52';
+const SHELL = ['./', 'index.html', 'suncalc.js', 'quotes.js', 'fortunes.js', 'fun.js', 'puzzle-words.js', 'manifest.webmanifest', 'icon.svg'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL.map(u => new Request(u, {cache:'reload'})))).then(() => self.skipWaiting()));

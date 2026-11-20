@@ -613,6 +613,43 @@
   .err{text-align:center;padding:60px 20px;font-size:16px}
   .err button{margin-top:16px}
   .btn{padding:12px 20px;border-radius:14px;border:0;background:#fff;color:#333;font:600 15px 'Outfit',sans-serif;cursor:pointer}
+
+  /* ---- just for fun card ---- */
+  .fun .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+  .fun .tile2{background:rgba(255,255,255,.12);border-radius:16px;padding:12px;cursor:pointer;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:4px;-webkit-tap-highlight-color:transparent}
+  .fun .tile2 .em{font-size:38px;line-height:1}
+  .fun .tile2.wide{grid-column:1/-1;flex-direction:row;min-height:0;padding:10px 14px;gap:12px;justify-content:flex-start;text-align:left}
+  .fun .tile2.wide .em{font-size:28px}
+  .fun .tile2.wide small{margin-left:auto}
+  .fun .tile2 b{font-size:14px}
+  .fun .tile2 small{font-size:12px;color:var(--soft);font-weight:500}
+  .fun .tile2.cracking .em{animation:wobble .7s ease-in-out}
+  @keyframes wobble{0%,100%{transform:rotate(0)}20%{transform:rotate(-14deg) scale(1.05)}40%{transform:rotate(12deg)}60%{transform:rotate(-8deg) scale(1.1)}80%{transform:rotate(5deg)}}
+  .fun .fortune{grid-column:1/-1;background:#FFF8E7;color:#3a2d12;border-radius:14px;padding:14px 16px;text-align:center;animation:unroll .5s ease both;cursor:default}
+  @keyframes unroll{from{opacity:0;transform:scaleX(.3)}to{opacity:1;transform:none}}
+  .fun .fortune p{font-size:16px;font-weight:600;line-height:1.35}
+  .fun .fortune .nums{margin-top:8px;font-size:12px;font-weight:600;color:#8a6d2b;letter-spacing:.5px}
+  .fun .fortune .nums span{display:inline-block;min-width:26px;padding:3px 0;margin:2px;border-radius:999px;background:#F4E2B5;color:#5a4410;font-size:13px}
+  .fun .row2{padding-top:10px;border-top:1px solid rgba(255,255,255,.15);margin-top:10px}
+  .fun .row2:first-of-type{border-top:0;margin-top:0;padding-top:0}
+  .fun .lbl{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--soft);margin-bottom:4px}
+  .fun .txt{font-size:15px;line-height:1.4;font-weight:500}
+  .fun .txt a{color:inherit}
+  .fun .yr{font-weight:800;margin-right:4px}
+  body.neon .fun .tile2,body.neon .fun .fortune{border-radius:3px}
+  body.neon .fun .tile2{background:rgba(0,0,0,.35)}
+  /* 8-ball */
+  .eb .tp-in{align-items:center;justify-content:center;padding:20px;gap:18px;text-align:center}
+  .eb .pz-head{position:absolute;top:calc(env(safe-area-inset-top) + 10px);left:0;right:0;max-width:480px;margin:0 auto;padding:0 14px}
+  .ball{width:min(72vw,280px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 32% 28%,#555 0%,#1a1a1a 38%,#000 70%);box-shadow:0 20px 50px rgba(0,0,0,.5),inset -12px -16px 40px rgba(255,255,255,.06);display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .ball.shake{animation:bshake .8s ease-in-out}
+  @keyframes bshake{0%,100%{transform:none}15%{transform:translate(-14px,6px) rotate(-6deg)}30%{transform:translate(12px,-8px) rotate(5deg)}45%{transform:translate(-10px,-4px) rotate(-4deg)}60%{transform:translate(8px,6px) rotate(3deg)}80%{transform:translate(-4px,2px)}}
+  .ball .win{width:52%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#0b1640 0%,#050a1f 75%);display:grid;place-items:center;box-shadow:inset 0 0 18px rgba(0,0,0,.9)}
+  .ball .eight{width:46%;aspect-ratio:1;border-radius:50%;background:#fff;color:#000;display:grid;place-items:center;font:800 64px 'Outfit',sans-serif}
+  .ball .ans{width:86%;aspect-ratio:1.1;clip-path:polygon(50% 100%,0 8%,100% 8%);background:linear-gradient(#2a4bd7,#1a2f9a);color:#dfe8ff;display:flex;align-items:flex-start;justify-content:center;padding:18% 16% 0;font:700 13px/1.2 'Outfit',sans-serif;text-transform:uppercase;letter-spacing:.3px;opacity:0;transition:opacity 1.2s ease .2s}
+  .ball .ans.show{opacity:1}
+  .eb input{width:min(86vw,360px);font:500 16px 'Outfit',sans-serif;padding:12px 14px;border-radius:12px;border:0;background:rgba(255,255,255,.92);color:#222;text-align:center}
+  .eb .hint{font-size:13px;color:var(--soft)}
 </style>
 </head>
 <body>
@@ -706,6 +743,14 @@
 </div>
 <div class="toast" id="toast"></div>
 <button class="edit-done" id="editDone" onclick="toggleLayoutEdit(false)">Done</button>
+<div class="tp eb" id="ebPage">
+  <div class="tp-in">
+    <div class="pz-head"><h3>Magic 8-ball</h3><button class="icon-btn" id="ebClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <input id="ebQ" maxlength="80" placeholder="Ask a yes-or-no question…" autocomplete="off">
+    <div class="ball" id="ball"><div class="win"><div class="eight" id="ebEight">8</div></div></div>
+    <div class="hint" id="ebHint">Shake your phone or tap the ball</div>
+  </div>
+</div>
 <div class="tp rp" id="radarPage">
   <div class="tp-in">
     <div class="pz-head">
@@ -738,6 +783,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="suncalc.js"></script>
 <script src="quotes.js"></script>
+<script src="fortunes.js"></script>
+<script src="fun.js"></script>
 <script src="puzzle-words.js"></script>
 <script>
 const DEFAULT_PLACE = { name:'Maryborough', sub:'Victoria, Australia', lat:-37.0457, lon:143.7393 };
@@ -921,7 +968,7 @@ function render(d){
   const arrow = `<svg viewBox="0 0 24 24"><path d="M12 2l5 14-5-3-5 3z" fill="#fff"/></svg>`;
 
   const SECTIONS = {
-    thought: thoughtCard(), todo: todoCard(), puzzle: puzzleCard(), rain: nowcastCard(d), radar: radarCard(),
+    thought: thoughtCard(), todo: todoCard(), puzzle: puzzleCard(), fun: funCard(), rain: nowcastCard(d), radar: radarCard(),
     hourly: `<section class="card hourly-card">
       <h2>${svgClock()} Next 24 hours</h2>
       <div class="hourly">${hours}</div>
@@ -1251,6 +1298,89 @@ function thoughtCard(){
     ${by}
   </section>`;
 }
+
+/* ---------- just for fun: fortune cookie, 8-ball, on this day, fun fact ---------- */
+function cookieToday(){ const c = store.get('wx_cookie', null); return c && c.day === localDay() ? c : null; }
+function luckyNums(){ const n = new Set(); while (n.size < 6) n.add(1 + Math.floor(Math.random() * 45)); return [...n].sort((a,b) => a-b); }
+function crackCookie(el){
+  if (cookieToday()) return;
+  const F = window.FORTUNES || []; if (!F.length) return;
+  el.classList.add('cracking');
+  setTimeout(() => {
+    store.set('wx_cookie', { day: localDay(), text: F[Math.floor(Math.random() * F.length)], nums: luckyNums() });
+    const c = $('funCard'); if (c) c.outerHTML = funCard();
+  }, 700);
+}
+function funFact(){ const F = window.FUN_FACTS || []; return F.length ? F[(localDay() * 7) % F.length] : ''; }
+const OTD_DARK = /\b(kill|killed|killing|bomb|murder|massacre|war|wars|attack|terror|shot|shooting|assassin|execut|genocide|died|death|dead|serial|crash|disaster|earthquake|tsunami|famine|hijack|riot|invad|invasion|battle|siege|slave|rape|abuse|suicide|hostage|explos|sank|sinking|holocaust|nazi|coup|arrest|prison|plague|epidemic|pandemic|victim|injur)/i;
+let otdLoading = false;
+async function loadOTD(){
+  const now = new Date(), mm = String(now.getMonth()+1).padStart(2,'0'), dd = String(now.getDate()).padStart(2,'0'), key = `${mm}-${dd}`;
+  const c = store.get('wx_otd', null); if ((c && c.key === key) || otdLoading) return;
+  otdLoading = true;
+  try{
+    let pick = null;
+    for (const kind of ['selected','events']){
+      const r = await fetch(`https://api.wikimedia.org/feed/v1/wikipedia/en/onthisday/${kind}/${mm}/${dd}`);
+      if (!r.ok) continue;
+      const j = await r.json(), list = (j[kind] || []).filter(e => e.text && !OTD_DARK.test(e.text) && !(e.pages||[]).some(p => OTD_DARK.test(p.description||'')));
+      if (list.length){ pick = list[localDay() % list.length]; break; }
+    }
+    if (pick){
+      const page = (pick.pages || [])[0];
+      store.set('wx_otd', { key, year: pick.year, text: pick.text, url: page && page.content_urls ? page.content_urls.mobile.page : '' });
+      const el = $('funCard'); if (el) el.outerHTML = funCard();
+    }
+  }catch(e){}
+  otdLoading = false;
+}
+function funCard(){
+  const ck = cookieToday();
+  const now = new Date(), key = `${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const otd = store.get('wx_otd', null), hasOtd = otd && otd.key === key;
+  if (!hasOtd) setTimeout(loadOTD, 0);
+  const cookie = ck
+    ? `<div class="fortune"><p>${esc(ck.text)}</p><div class="nums">LUCKY NUMBERS<br>${ck.nums.map(n => `<span>${n}</span>`).join('')}</div></div>`
+    : `<div class="tile2" onclick="crackCookie(this)"><div class="em">🥠</div><b>Fortune cookie</b><small>Tap to crack today’s</small></div>`;
+  const ball = `<div class="tile2" onclick="openEightBall()"><div class="em">🎱</div><b>Magic 8-ball</b><small>Ask a question</small></div>`;
+  return `<section class="card fun" id="funCard">
+    <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.6 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg> Just for fun</h2>
+    <div class="tiles">${ck ? cookie + ball.replace('class="tile2"','class="tile2 wide"') : cookie + ball}</div>
+    ${hasOtd ? `<div class="row2"><div class="lbl">On this day</div><div class="txt"><span class="yr">${otd.year}</span>${otd.url ? `<a href="${esc(otd.url)}" target="_blank" rel="noopener">${esc(otd.text)}</a>` : esc(otd.text)}</div></div>` : ''}
+    <div class="row2"><div class="lbl">Fun fact</div><div class="txt">${esc(funFact())}</div></div>
+  </section>`;
+}
+// 8-ball
+let ebBusy = false, ebMotion = false, ebLast = 0;
+function openEightBall(){
+  $('ebPage').classList.add('open'); $('ebQ').value = '';
+  $('ebEight').outerHTML = '<div class="eight" id="ebEight">8</div>';
+  $('ebHint').textContent = 'Shake your phone or tap the ball';
+  try{
+    if (typeof DeviceMotionEvent !== 'undefined' && DeviceMotionEvent.requestPermission && !ebMotion)
+      DeviceMotionEvent.requestPermission().then(r => { if (r === 'granted') addShake(); }).catch(() => {});
+    else addShake();
+  }catch(e){}
+}
+function addShake(){
+  if (ebMotion) return; ebMotion = true;
+  window.addEventListener('devicemotion', e => {
+    if (!$('ebPage').classList.contains('open')) return;
+    const a = e.accelerationIncludingGravity || e.acceleration; if (!a) return;
+    const m = Math.sqrt((a.x||0)**2 + (a.y||0)**2 + (a.z||0)**2);
+    if (m > 24 && Date.now() - ebLast > 1500){ ebLast = Date.now(); askBall(); }
+  });
+}
+function askBall(){
+  if (ebBusy) return; ebBusy = true;
+  const E = window.EIGHTBALL, all = [...E.yes, ...E.maybe, ...E.no], a = all[Math.floor(Math.random() * all.length)];
+  const ball = $('ball'); ball.classList.remove('shake'); void ball.offsetWidth; ball.classList.add('shake');
+  $('ebEight').outerHTML = `<div class="ans" id="ebEight"></div>`;
+  if (navigator.vibrate) navigator.vibrate(60);
+  setTimeout(() => { const el = $('ebEight'); el.textContent = a; el.classList.add('show'); $('ebHint').textContent = 'Shake or tap again for another answer'; ebBusy = false; }, 800);
+}
+$('ball').onclick = askBall;
+$('ebClose').onclick = () => $('ebPage').classList.remove('open');
 
 /* ---------- daily word puzzle ---------- */
 // Signed in: the Daily Word lives on the server — the word, guess checking, timing and scoring all happen there,
@@ -1673,12 +1803,12 @@ function closeRadar(){ stopRadar(); $('radarPage').classList.remove('open'); }
 $('rpClose').onclick = closeRadar;
 
 /* ---------- card layout (reorderable) ---------- */
-const CARD_KEYS = ['thought','todo','puzzle','rain','radar','hourly','daily','details'];
-const CARD_NAMES = { thought:'Thought', todo:'To-do', puzzle:'Daily puzzle', rain:'Next 2 hours', radar:'Rain radar', hourly:'Next 24 hours', daily:'7-day forecast', details:'Wind, UV & more' };
+const CARD_KEYS = ['thought','todo','puzzle','fun','rain','radar','hourly','daily','details'];
+const CARD_NAMES = { thought:'Thought', todo:'To-do', puzzle:'Daily puzzle', fun:'Just for fun', rain:'Next 2 hours', radar:'Rain radar', hourly:'Next 24 hours', daily:'7-day forecast', details:'Wind, UV & more' };
 let editLayout = false;
 function layoutOrder(){
   const o = (store.get('wx_order', []) || []).filter(k => CARD_KEYS.includes(k));
-  CARD_KEYS.forEach(k => { if (!o.includes(k)) o.push(k); });
+  CARD_KEYS.forEach((k, i) => { if (!o.includes(k)){ const prev = CARD_KEYS[i-1], at = prev ? o.indexOf(prev) : -1; o.splice(at + 1, 0, k); } });
   return o;
 }
 function layoutHTML(S){
