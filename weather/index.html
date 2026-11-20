@@ -54,9 +54,9 @@
   .cloud::after{width:36%;height:140%;left:50%;bottom:25%}
   @keyframes drift{from{transform:translateX(-140px)}to{transform:translateX(calc(100vw + 140px))}}
   .precip{position:absolute;inset:0;opacity:0;transition:opacity 3s}
-  .precip.rain{background:repeating-linear-gradient(105deg,transparent 0 13px,rgba(255,255,255,.4) 13px 14px);background-size:40px 60px;animation:fall .45s linear infinite}
+  .precip.rain{background:repeating-linear-gradient(105deg,transparent 0 27px,rgba(255,255,255,.45) 27px 28px);background-size:80px 90px;animation:fall .9s linear infinite}
   .precip.snow{background-image:radial-gradient(circle,#fff 1.5px,transparent 2px),radial-gradient(circle,rgba(255,255,255,.8) 1px,transparent 1.5px);background-size:46px 46px,30px 30px;animation:snowfall 6s linear infinite}
-  @keyframes fall{to{background-position:-16px 60px}}
+  @keyframes fall{to{background-position:-24px 90px}}
   @keyframes snowfall{to{background-position:20px 184px,-10px 120px}}
 
   .app{
@@ -1055,7 +1055,7 @@ function updateSky(){
     c.style.opacity = k==='clear' ? 0 : k==='partly' ? .75 : .92;
   });
   // normal mode: no falling rain/snow overlay (clouds and greyer sky show the weather); Neon Coast keeps it
-  $('precip').style.opacity = neon && (k==='rain'||k==='storm'||k==='snow') ? .55 : 0;
+  $('precip').style.opacity = (k==='rain'||k==='storm'||k==='snow') ? (neon ? .3 : .22) : 0;   // subtle in both looks
 }
 setInterval(updateSky, 30000);
 window.addEventListener('resize', updateSky);
