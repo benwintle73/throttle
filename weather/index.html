@@ -832,6 +832,14 @@
   .fav.on{background:rgba(255,255,255,.06)}
   .search input{background:rgba(18,20,34,.72)!important;color:#fff!important;border:1px solid rgba(255,255,255,.14)!important;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
   .search input::placeholder{color:rgba(255,255,255,.5)}
+  .pzdef{margin:10px auto 0;max-width:340px;text-align:left;background:rgba(0,0,0,.25);border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.4}
+  .pzdef b{display:inline;font-size:16px;letter-spacing:1px}
+  .pzdef .ph{color:rgba(255,255,255,.6);font-size:13px}
+  .pzdef p{margin:6px 0 0}
+  .pzdef i{color:#FFD38A;font-style:italic;margin-right:4px}
+  .pzdef .ex{display:block;color:rgba(255,255,255,.6);font-size:13px;margin-top:2px}
+  .pzdef small{display:block;margin-top:8px;color:rgba(255,255,255,.5);font-size:11px}
+  .pzdef a{color:inherit}
 </style>
 </head>
 <body>
@@ -2023,18 +2031,26 @@ function setPzTitle(){
     : 'Practice round — doesn’t count. Sign in to play the Daily Word and join the leaderboard.';
 }
 async function openPuzzle(){
-  PZ = pzState(); if (!PZ) return; cur = ''; pzBusy = false;
+  PZ = pzState(); if (!PZ) return; cur = ''; pzBusy = false; PZ.def = '';
   $('pz').classList.remove('board','howto');
   setPzTitle(); drawPuzzle(); $('pz').classList.add('open');
   if (PZ.mode === 'daily'){
     const { data, error } = await sb.rpc('weather_puzzle_state');
     if (error || !data){ toast('Can’t reach the Daily Word — check your connection'); return; }
     PZ.st = fromServer(data); PZ.day = data.day; PZ.num = data.num;
-    store.set('wx_pz_srv', PZ.st, true); setPzTitle(); drawPuzzle();
+    store.set('wx_pz_srv', PZ.st, true); setPzTitle(); drawPuzzle(); pzResume();
     if (PZ.st.done && PZ.st.rank == null) fetchRank();
   }
 }
-function closePuzzle(){ $('pz').classList.remove('open','board','howto'); if (lastData) render(lastData); }
+function pzInPlay(){ return PZ && PZ.mode === 'daily' && PZ.st && !PZ.st.done && !PZ.st.legacy && PZ.st.guesses.length > 0 && serverMode(); }
+function pzPause(){ if (pzInPlay()) sb.rpc('weather_pause').then(() => {}, () => {}); }
+function pzResume(){ if (pzInPlay()) sb.rpc('weather_resume').then(() => {}, () => {}); }
+// the clock only runs while the puzzle is open on screen
+document.addEventListener('visibilitychange', () => {
+  if (!$('pz').classList.contains('open')) return;
+  document.visibilityState === 'hidden' ? pzPause() : pzResume();
+});
+function closePuzzle(){ pzPause(); $('pz').classList.remove('open','board','howto'); if (lastData) render(lastData); }
 $('pzClose').onclick = closePuzzle;
 
 function drawPuzzle(revealRow = -1){
@@ -2068,11 +2084,11 @@ function drawPuzzle(revealRow = -1){
     msg = st.won ? `<b>${['Genius!','Brilliant!','Great work!','Nice one!','Solid!','Phew!'][st.guesses.length-1]}</b>🔥 ${stats.streak}-day streak · new word tomorrow`
                  : `<b>${(st.word||'').toUpperCase()}</b>Streak reset — back tomorrow`;
     if (daily){
-      const sc = st.score != null ? `Score <b style="display:inline;font-size:inherit">${st.score}</b>${st.seconds != null && st.won ? ` (${mmss(st.seconds)})` : ''}${st.rank ? ` · #${st.rank} of ${st.players} today` : ''}` : '';
-      msg += `<div style="margin-top:6px;font-size:13px">${sc}</div><div class="pz-actions"><button onclick="showBoard()">Leaderboard</button></div>`;
+      const sc = st.score != null ? `Score <b style="display:inline;font-size:inherit">${st.score}</b>${st.seconds != null && st.won ? ` · ⏱ ${mmss(st.seconds)}` : ''}${st.rank ? ` · #${st.rank} of ${st.players} today` : ''}` : '';
+      msg += `<div style="margin-top:6px;font-size:13px">${sc}</div><div class="pz-actions"><button onclick="showBoard()">Leaderboard</button><button class="ghost" onclick="showMeaning()">📖 Meaning</button></div><div id="pzDef">${PZ.def || ''}</div>`;
     } else {
       msg += `<div style="margin-top:6px;font-size:13px">Practice round — sign in for the Daily Word and leaderboard</div>
-        <div class="pz-actions"><button onclick="closePuzzle();openAcct()">Sign in</button></div>`;
+        <div class="pz-actions"><button onclick="closePuzzle();openAcct()">Sign in</button><button class="ghost" onclick="showMeaning()">📖 Meaning</button></div><div id="pzDef">${PZ.def || ''}</div>`;
     }
   }
   $('pzMsg').innerHTML = msg;
@@ -2100,6 +2116,26 @@ async function pzGiveUp(){
     store.set('wx_pz', { day: st.day, guesses: st.guesses, done: true, won: false, hints: st.hints, hintRows: st.hintRows }, true);
   }
   cur = ''; drawPuzzle();
+}
+async function showMeaning(){
+  const st = PZ && PZ.st; if (!st || !st.done) return;
+  const word = (st.won ? st.guesses[st.guesses.length - 1] : (st.word || PZ.word || '')).toLowerCase();
+  if (!word) return;
+  const box = $('pzDef'); if (box) box.innerHTML = '<div class="pzdef"><small>Looking it up…</small></div>';
+  let html;
+  try{
+    const r = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+    if (!r.ok) throw 0;
+    const j = await r.json(), e = j[0] || {}, ph = e.phonetic || ((e.phonetics || []).find(p => p.text) || {}).text || '';
+    const parts = (e.meanings || []).slice(0, 2).map(m => {
+      const d = (m.definitions || [])[0] || {};
+      return `<p><i>${esc(m.partOfSpeech || '')}</i> ${esc(d.definition || '')}${d.example ? `<span class="ex">“${esc(d.example)}”</span>` : ''}</p>`;
+    }).join('');
+    html = `<div class="pzdef"><b>${esc(word.toUpperCase())}</b>${ph ? ` <span class="ph">${esc(ph)}</span>` : ''}${parts}<small>From <a href="https://en.wiktionary.org/wiki/${encodeURIComponent(word)}" target="_blank" rel="noopener">Wiktionary</a></small></div>`;
+  }catch(e){
+    html = `<div class="pzdef"><b>${esc(word.toUpperCase())}</b><p>Couldn’t find a definition.</p><small><a href="https://en.wiktionary.org/wiki/${encodeURIComponent(word)}" target="_blank" rel="noopener">Look it up on Wiktionary</a></small></div>`;
+  }
+  PZ.def = html; const b2 = $('pzDef'); if (b2) b2.innerHTML = html;
 }
 async function pzHint(){
   if (!PZ || pzBusy || PZ.st.done) return;
@@ -2259,7 +2295,7 @@ const HOW_HTML = `
     <tr><td>Each hint used</td><td>−25</td></tr>
     <tr><td>Not solved / gave up</td><td>0</td></tr>
   </table>
-  <p>The speed bonus starts at 100 and drops 1 point every 6 seconds, timed from your first guess to your last. Hints only unlock from your 4th guess, so even the toughest solve with all 3 hints still scores at least 25.</p>
+  <p>The speed bonus starts at 100 and drops 1 point every 6 seconds, timed from your first guess to your last — the clock pauses whenever you close the puzzle or leave the app. Hints only unlock from your 4th guess, so even the toughest solve with all 3 hints still scores at least 25.</p>
   <h4>Leaderboards</h4>
   <ul>
     <li><b>This week</b> — your points added up Monday to Sunday; it resets every Monday.</li>
@@ -3036,7 +3072,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.75', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.76', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
