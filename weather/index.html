@@ -213,14 +213,16 @@
   body.neon .acct-card .btn-p{border-radius:2px;background:#000;font-family:'Anton',sans-serif;font-weight:400;letter-spacing:1px;text-transform:uppercase;font-size:18px}
   body.neon .acct-card input,body.neon .acct-card .btn-s,body.neon .acct-tabs,body.neon .acct-tabs button{border-radius:2px}
 
-  .mv{position:relative;margin-top:14px;border-radius:28px;outline:2px dashed rgba(255,255,255,.55);outline-offset:4px;padding-top:2px}
-  .mv > section,.mv > .card{pointer-events:none;margin-top:8px}
-  .mv-bar{display:flex;align-items:center;gap:8px;padding:2px 4px}
-  .mv-bar span{flex:1;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
-  .mv-bar button{width:44px;height:36px;border-radius:12px;border:0;background:#fff;color:#333;font-size:16px;cursor:pointer}
-  .mv-bar button:disabled{opacity:.35}
-  body.neon .mv{border-radius:3px}
-  body.neon .mv-bar button{border-radius:2px;background:#000;color:#fff;border:2px solid #fff}
+  .mv{position:relative;margin-top:14px;animation:jig .26s ease-in-out infinite alternate;touch-action:pan-y;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  .mv:nth-child(even){animation-delay:-.13s;animation-direction:alternate-reverse}
+  .mv > *{pointer-events:none;margin-top:0!important}
+  .mv.dragging{animation:none;z-index:25;filter:drop-shadow(0 16px 26px rgba(0,0,0,.35))}
+  @keyframes jig{from{transform:rotate(-.7deg)}to{transform:rotate(.7deg)}}
+  #content > section.card,#content > section.grid{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+  .edit-done{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 18px);transform:translateX(-50%) translateY(120px);z-index:40;
+    border:0;border-radius:999px;padding:14px 34px;background:#fff;color:#222;font:700 16px 'Outfit',sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.3);transition:transform .25s;cursor:pointer}
+  .edit-done.show{transform:translateX(-50%) translateY(0)}
+  body.neon .edit-done{border-radius:2px;background:#000;color:#fff;border:2px solid #fff;font-family:'Anton',sans-serif;font-weight:400;letter-spacing:1px;text-transform:uppercase}
   .refresh-wrap .refresh + .refresh{margin-left:8px}
   /* ===== to-do ===== */
   .tp{position:fixed;inset:0;z-index:30;background:rgba(12,10,30,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
@@ -602,6 +604,7 @@
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<button class="edit-done" id="editDone" onclick="toggleLayoutEdit(false)">Done</button>
 <div class="tp" id="todoPage">
   <div class="tp-in">
     <div class="pz-head">
@@ -831,7 +834,8 @@ function render(d){
 
     ${cardsHTML}
 
-    <div class="refresh-wrap"><button class="refresh" id="refreshBtn" onclick="refreshNow()">${REFRESH_SVG} Refresh</button> <button class="refresh" onclick="toggleLayoutEdit()">${editLayout ? 'Done' : '↕ Edit layout'}</button></div>
+    <div class="refresh-wrap"><button class="refresh" id="refreshBtn" onclick="refreshNow()">${REFRESH_SVG} Refresh</button></div>
+    <p class="foot" style="margin-top:10px">Tip: hold a card to rearrange</p>
     <p class="foot">Updated ${new Date(lastFetch).toLocaleTimeString('en-AU',{hour:'numeric',minute:'2-digit'})} · Data by <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a></p>
   `;
   buildClouds(kind(c.weather_code));
@@ -1300,25 +1304,68 @@ function layoutOrder(){
   return o;
 }
 function layoutHTML(S){
-  return layoutOrder().map((k, i, arr) => {
+  return layoutOrder().map(k => {
     const html = S[k]; if (!html) return '';
-    if (!editLayout) return html;
-    return `<div class="mv" id="mv-${k}"><div class="mv-bar"><span>${CARD_NAMES[k]}</span>
-      <button ${i===0?'disabled':''} aria-label="Move up" onclick="moveCard('${k}',-1)">▲</button>
-      <button ${i===arr.length-1?'disabled':''} aria-label="Move down" onclick="moveCard('${k}',1)">▼</button></div>${html}</div>`;
+    return editLayout ? `<div class="mv" data-k="${k}">${html}</div>` : html.replace(/^(\s*<section class="[^"]*)"/, `$1" data-k="${k}"`);
   }).join('\n');
 }
-function moveCard(k, dir){
-  const o = layoutOrder(), i = o.indexOf(k), j = i + dir;
-  if (j < 0 || j >= o.length) return;
-  [o[i], o[j]] = [o[j], o[i]];
-  store.set('wx_order', o); render(lastData);
-  const el = $('mv-' + k); if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+function saveDomOrder(){
+  const shown = [...$('content').querySelectorAll('.mv')].map(n => n.dataset.k);
+  const o = layoutOrder(); let i = 0;
+  const merged = o.map(k => shown.includes(k) ? shown[i++] : k);   // keep hidden cards (e.g. no rain card) in place
+  store.set('wx_order', merged);
 }
-function toggleLayoutEdit(){
-  editLayout = !editLayout; render(lastData);
-  if (editLayout){ const el = document.querySelector('.mv'); if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); }
+function toggleLayoutEdit(on = !editLayout){
+  editLayout = on; render(lastData);
+  $('editDone').classList.toggle('show', editLayout);
 }
+
+// Long-press any card to start jiggle mode; in jiggle mode, press-and-hold briefly then drag to reorder.
+(() => {
+  const C = $('content');
+  let lp = null, lpXY = null, eatClick = false, drag = null;
+  const cardAt = el => el && el.closest('#content > section.card, #content > section.grid');
+  C.addEventListener('touchstart', e => {
+    const t = e.touches[0];
+    if (!editLayout){
+      if (!cardAt(e.target) || e.target.closest('input,button.ck,.hourly')) return;
+      lpXY = { x: t.clientX, y: t.clientY };
+      lp = setTimeout(() => { lp = null; eatClick = true; toggleLayoutEdit(true); }, 500);
+      return;
+    }
+    const mv = e.target.closest('.mv'); if (!mv) return;
+    drag = { el: mv, y0: t.clientY, armed: false };
+    drag.timer = setTimeout(() => { if (drag){ drag.armed = true; drag.base = drag.y0; mv.classList.add('dragging'); } }, 160);
+  }, { passive: true });
+  document.addEventListener('touchmove', e => {
+    const t = e.touches[0];
+    if (lp && Math.hypot(t.clientX - lpXY.x, t.clientY - lpXY.y) > 10){ clearTimeout(lp); lp = null; }
+    if (!drag) return;
+    if (!drag.armed){ if (Math.abs(t.clientY - drag.y0) > 8){ clearTimeout(drag.timer); drag = null; } return; }   // it's a scroll
+    e.preventDefault();
+    // auto-scroll near the edges
+    const edge = 90; let sc = 0;
+    if (t.clientY < edge) sc = -10; else if (t.clientY > innerHeight - edge) sc = 10;
+    if (sc){ const y0 = scrollY; scrollBy(0, sc); drag.base -= (scrollY - y0); }
+    const el = drag.el, off = () => t.clientY - drag.base;
+    el.style.transform = `translateY(${off()}px) scale(1.03)`;
+    const r = el.getBoundingClientRect(), mid = r.top + r.height / 2;
+    const prev = el.previousElementSibling, next = el.nextElementSibling;
+    const swap = (fn) => { const before = el.getBoundingClientRect().top - off(); fn(); el.style.transform = 'none'; const after = el.getBoundingClientRect().top; drag.base += after - before; el.style.transform = `translateY(${off()}px) scale(1.03)`; };
+    if (next && next.classList.contains('mv')){ const n = next.getBoundingClientRect(); if (mid > n.top + n.height / 2) swap(() => el.parentNode.insertBefore(next, el)); }
+    if (prev && prev.classList.contains('mv')){ const p = prev.getBoundingClientRect(); if (mid < p.top + p.height / 2) swap(() => el.parentNode.insertBefore(el, prev)); }
+  }, { passive: false });
+  const end = () => {
+    if (lp){ clearTimeout(lp); lp = null; }
+    if (!drag) return;
+    clearTimeout(drag.timer);
+    if (drag.armed){ drag.el.classList.remove('dragging'); drag.el.style.transform = ''; saveDomOrder(); }
+    drag = null;
+  };
+  document.addEventListener('touchend', end); document.addEventListener('touchcancel', end);
+  document.addEventListener('click', e => { if (eatClick){ e.stopPropagation(); e.preventDefault(); eatClick = false; } }, true);
+  C.addEventListener('contextmenu', e => { if (cardAt(e.target) || editLayout) e.preventDefault(); });
+})();
 
 /* ---------- daily to-do list ---------- */
 // Items live in wx_todo (synced with the account). At the start of each new day, ticked items are archived under
@@ -1850,7 +1897,7 @@ window.addEventListener('focus', refreshIfStale);
   const ptr = $('ptr'), TH = 80;
   let y0 = null, dy = 0;
   addEventListener('touchstart', e => {
-    if (scrollY <= 0 && !sheet.classList.contains('open') && !$('pz').classList.contains('open') && !$('acct').classList.contains('open') && !$('todoPage').classList.contains('open')) { y0 = e.touches[0].clientY; dy = 0; ptr.style.transition = 'none'; }
+    if (scrollY <= 0 && !editLayout && !sheet.classList.contains('open') && !$('pz').classList.contains('open') && !$('acct').classList.contains('open') && !$('todoPage').classList.contains('open')) { y0 = e.touches[0].clientY; dy = 0; ptr.style.transition = 'none'; }
   }, {passive:true});
   addEventListener('touchmove', e => {
     if (y0 === null) return;
