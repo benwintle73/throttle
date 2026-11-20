@@ -698,7 +698,7 @@
     background:radial-gradient(ellipse 50% 100% at 50% 0%,var(--glint,#FFE9B0) 0%,transparent 70%);opacity:0;mix-blend-mode:screen}
   .river .rglint::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0 5px,rgba(0,0,0,.35) 5px 7px)}
   @keyframes steam{0%{transform:translateX(0)}60%,100%{transform:translateX(calc(100vw + 180px))}}
-  .birds{position:absolute;top:110px;left:-60px;width:60px;height:24px;animation:fly 150s linear infinite;animation-delay:-40s;transition:opacity 3s}
+  .birds{position:absolute;top:auto;bottom:215px;left:-60px;width:60px;height:24px;animation:fly 150s linear infinite;animation-delay:-40s;transition:opacity 3s}
   .birds svg{width:100%;height:100%}
   .birds path{animation:flap .7s ease-in-out infinite alternate;transform-origin:center}
   .birds path:nth-child(2){animation-delay:-.3s}.birds path:nth-child(3){animation-delay:-.5s}.birds path:nth-child(4){animation-delay:-.15s}
@@ -3119,7 +3119,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.77', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.78', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
