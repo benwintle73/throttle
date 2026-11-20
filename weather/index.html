@@ -75,6 +75,7 @@
   .icon-btn:active{transform:scale(.92)}
   .icon-btn svg{width:20px;height:20px}
   .icon-btn.on svg{fill:#fff}
+  .icon-btn.here{background:rgba(255,255,255,.4)}
 
   .chips{display:flex;gap:8px;overflow-x:auto;margin:14px -18px 0;padding:0 18px 2px;scrollbar-width:none}
   .chips::-webkit-scrollbar{display:none}
@@ -184,6 +185,14 @@
   .acct-card .who{background:#f6f4fb;border-radius:14px;padding:14px;font-size:15px}
   .acct-card .who b{display:block;font-size:16px;word-break:break-all}
   .acct-card .who small{color:#777;font-size:13px}
+  .acct-card .sw-row{display:flex;align-items:center;gap:12px;cursor:pointer;font-size:15px;font-weight:600;color:#222;text-transform:none;letter-spacing:0;margin:0}
+  .sw-row span{flex:1}
+  .sw-row small{display:block;font-size:12px;font-weight:500;color:#777;margin-top:2px}
+  .sw-row input{display:none}
+  .sw-row .sw{width:50px;height:30px;border-radius:999px;background:#d9d6e3;position:relative;flex-shrink:0;transition:background .2s}
+  .sw-row .sw::after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+  .sw-row input:checked + .sw{background:#2EC27E}
+  .sw-row input:checked + .sw::after{transform:translateX(20px)}
   .appear{margin-top:18px;padding-top:16px;border-top:1px solid #eee}
   .appear h4{font-size:12px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
   .appear .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -490,7 +499,7 @@
       <button class="icon-btn" id="pzClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <div class="pz-help">
-      <p>Guess the 5-letter word in 6 tries, then press Enter.</p>
+      <p id="pzHelpText">Guess the 5-letter word in 6 tries, then press Enter.</p>
       <div class="pz-key">
         <span><i class="c"></i>Right letter,<br>right spot</span>
         <span><i class="p"></i>Right letter,<br>wrong spot</span>
@@ -516,7 +525,7 @@
 const DEFAULT_PLACE = { name:'Maryborough', sub:'Victoria, Australia', lat:-37.0457, lon:143.7393 };
 
 /* ---------- storage (safe) ---------- */
-const SYNC_KEYS = ['wx_saved','wx_last','wx_neon','wx_pz','wx_pz_stats'];
+const SYNC_KEYS = ['wx_saved','wx_last','wx_neon','wx_pz_stats'];
 const store = {
   get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch{ return d; } },
   set(k, v, quiet){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} if (!quiet && SYNC_KEYS.includes(k) && window.syncSoon) window.syncSoon(); }
@@ -597,8 +606,9 @@ async function getWeather(p){
 
 let lastFetch = 0, busy = false;
 const REFRESH_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg>`;
+let queued = null;
 async function load(p, quiet=false){
-  if (busy) return; busy = true;
+  if (busy){ queued = [p, quiet]; return; } busy = true;
   current = p; store.set('wx_last', p);
   if (!quiet) $('app').classList.add('loading');
   $('placeName').textContent = p.name;
@@ -614,6 +624,7 @@ async function load(p, quiet=false){
   }
   $('app').classList.remove('loading');
   busy = false;
+  if (queued){ const q = queued; queued = null; load(q[0], q[1]); }
 }
 async function refreshNow(){
   const b = $('refreshBtn'); if (b) b.classList.add('spinning');
@@ -958,9 +969,11 @@ function thoughtCard(){
 }
 
 /* ---------- daily word puzzle ---------- */
+// Signed in: the Daily Word lives on the server — the word, guess checking, timing and scoring all happen there,
+// so results can't be faked. Signed out: a local practice puzzle that never touches the leaderboard.
 const PZ_EPOCH = new Date(2026, 10, 20);                 // puzzle #1
 function localDay(d = new Date()){ return Math.round((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - new Date(2000,0,1)) / 864e5); }
-function puzzleToday(){
+function puzzleToday(){                                   // practice word (local)
   const A = window.PUZZLE_ANSWERS || []; if (!A.length) return null;
   const now = new Date(), y = now.getFullYear();
   const doy = Math.round((new Date(y, now.getMonth(), now.getDate()) - new Date(y,0,1)) / 864e5);
@@ -971,56 +984,78 @@ function puzzleToday(){
   const num = Math.round((new Date(y, now.getMonth(), now.getDate()) - PZ_EPOCH) / 864e5) + 1;
   return { word: A[o[doy % A.length]], day: localDay(now), num };
 }
-function pzState(){
-  const t = puzzleToday(); if (!t) return null;
-  let st = store.get('wx_pz', null);
-  if (!st || st.day !== t.day) st = { day: t.day, guesses: [], done: false, won: false };
-  return { ...t, st };
-}
 function pzStats(){ return store.get('wx_pz_stats', { played:0, wins:0, streak:0, best:0, lastWin:null, dist:[0,0,0,0,0,0] }); }
 function score(guess, word){
   const res = Array(5).fill('a'), left = {};
   for (let i=0;i<5;i++){ if (guess[i] === word[i]) res[i] = 'c'; else left[word[i]] = (left[word[i]]||0) + 1; }
   for (let i=0;i<5;i++){ if (res[i] !== 'c' && left[guess[i]] > 0){ res[i] = 'p'; left[guess[i]]--; } }
-  return res;
+  return res.join('');
+}
+const serverMode = () => !!(sb && user);
+function pzCached(){ const c = store.get('wx_pz_srv', null); return c && c.day === localDay() ? c : null; }
+function fromServer(d){
+  const c = pzCached() || {};
+  return { day:d.day, num:d.num, guesses:d.guesses||[], pats:d.patterns||[], done:!!d.done, won:!!d.won, word:d.word,
+           score:d.score, seconds:d.seconds, legacy:!!d.legacy, legacyGuesses:d.legacy_guesses, rank:c.rank, players:c.players };
+}
+function pzState(){
+  const t = puzzleToday(); if (!t) return null;
+  if (serverMode()){
+    const c = pzCached() || { day: t.day, num: t.num, guesses: [], pats: [], done: false, won: false };
+    return { mode:'daily', day:c.day, num:c.num, st:c };
+  }
+  let st = store.get('wx_pz', null);
+  if (!st || st.day !== t.day) st = { day: t.day, guesses: [], done: false, won: false };
+  st.pats = st.guesses.map(g => score(g, t.word));
+  if (st.done) st.word = t.word;
+  return { mode:'practice', day:t.day, num:t.num, word:t.word, st };
 }
 function puzzleCard(){
   const P = pzState(); if (!P) return '';
-  const { st, word } = P, stats = pzStats();
-  const last = st.guesses.length ? score(st.guesses[st.guesses.length-1], word) : null;
-  const mini = (last || Array(5).fill('')).map(c => `<i class="${c}"></i>`).join('');
+  const { st } = P, stats = pzStats(), daily = P.mode === 'daily';
+  const last = st.pats && st.pats.length ? st.pats[st.pats.length-1].split('') : null;
+  const mini = (last || Array(5).fill(st.legacy ? 'c' : '')).map(c => `<i class="${c}"></i>`).join('');
   let t1, t2, go;
-  if (st.done && st.won){ t1 = `Solved in ${st.guesses.length}`; t2 = st.score != null ? `${st.score} pts${st.rank ? ` · #${st.rank} today` : ''} · 🔥 ${stats.streak}-day streak` : `🔥 ${stats.streak}-day streak · new word tomorrow`; go = 'View'; }
-  else if (st.done){ t1 = `The word was ${word.toUpperCase()}`; t2 = 'New word tomorrow'; go = 'View'; }
-  else if (st.guesses.length){ t1 = `${6 - st.guesses.length} guesses left`; t2 = 'Keep going'; go = 'Play'; }
-  else { t1 = `Daily Word #${P.num}`; t2 = stats.streak ? `🔥 ${stats.streak}-day streak — keep it alive` : 'Guess today’s 5-letter word'; go = 'Play'; }
+  if (st.legacy){ t1 = `Solved in ${st.legacyGuesses}`; t2 = `${st.score} pts · new Daily Word tomorrow`; go = 'View'; }
+  else if (st.done && st.won){ t1 = `Solved in ${st.guesses.length}`; t2 = daily ? (st.score != null ? `${st.score} pts${st.rank ? ` · #${st.rank} today` : ''} · 🔥 ${stats.streak}` : `🔥 ${stats.streak}-day streak`) : 'Practice · sign in for the leaderboard'; go = 'View'; }
+  else if (st.done){ t1 = `The word was ${(st.word||'').toUpperCase()}`; t2 = 'New word tomorrow'; go = 'View'; }
+  else if (st.guesses.length){ t1 = `${6 - st.guesses.length} guesses left`; t2 = daily ? 'Keep going' : 'Practice puzzle'; go = 'Play'; }
+  else if (daily){ t1 = `Daily Word #${P.num}`; t2 = stats.streak ? `🔥 ${stats.streak}-day streak — keep it alive` : 'Guess today’s 5-letter word'; go = 'Play'; }
+  else { t1 = 'Practice puzzle'; t2 = 'Sign in for the Daily Word and leaderboard'; go = 'Play'; }
   return `<section class="card pz-card" onclick="openPuzzle()">
     <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg> Daily puzzle</h2>
     <div class="row"><div class="mini">${mini}</div><div><div class="t1">${t1}</div><div class="t2">${t2}</div></div><div class="go">${go}</div></div>
   </section>`;
 }
 
-let PZ = null, cur = '';
-function openPuzzle(){
-  PZ = pzState(); if (!PZ) return; cur = '';
-  $('pz').classList.remove('board');
-  if (!PZ.st.done) PZ.t0 = Date.now();
-  $('pzTitle').firstChild.textContent = `Daily Word #${PZ.num}`;
-  const stats = pzStats();
-  $('pzSub').textContent = `Played ${stats.played} · Won ${stats.wins} · Streak ${stats.streak} · Best ${stats.best}`;
-  drawPuzzle(); $('pz').classList.add('open');
+let PZ = null, cur = '', pzBusy = false;
+function setPzTitle(){
+  $('pzTitle').firstChild.textContent = PZ.mode === 'daily' ? `Daily Word #${PZ.num}` : 'Practice puzzle';
+  const s = pzStats();
+  $('pzSub').textContent = `Played ${s.played} · Won ${s.wins} · Streak ${s.streak} · Best ${s.best}`;
+  $('pzHelpText').textContent = PZ.mode === 'daily' ? 'Guess the 5-letter word in 6 tries, then press Enter.'
+    : 'Practice round — doesn’t count. Sign in to play the Daily Word and join the leaderboard.';
 }
-function bankTime(){ if (PZ && PZ.t0 && !PZ.st.done){ PZ.st.ms = (PZ.st.ms||0) + (Date.now() - PZ.t0); PZ.t0 = Date.now(); store.set('wx_pz', PZ.st, true); } }
-function closePuzzle(){ bankTime(); if (PZ) PZ.t0 = 0; $('pz').classList.remove('open','board'); if (lastData) render(lastData); }
-document.addEventListener('visibilitychange', () => { if (!PZ || !$('pz').classList.contains('open')) return;
-  if (document.visibilityState === 'hidden'){ bankTime(); PZ.t0 = 0; } else if (!PZ.st.done) PZ.t0 = Date.now(); });
+async function openPuzzle(){
+  PZ = pzState(); if (!PZ) return; cur = ''; pzBusy = false;
+  $('pz').classList.remove('board');
+  setPzTitle(); drawPuzzle(); $('pz').classList.add('open');
+  if (PZ.mode === 'daily'){
+    const { data, error } = await sb.rpc('weather_puzzle_state');
+    if (error || !data){ toast('Can’t reach the Daily Word — check your connection'); return; }
+    PZ.st = fromServer(data); PZ.day = data.day; PZ.num = data.num;
+    store.set('wx_pz_srv', PZ.st, true); setPzTitle(); drawPuzzle();
+    if (PZ.st.done && PZ.st.rank == null) fetchRank();
+  }
+}
+function closePuzzle(){ $('pz').classList.remove('open','board'); if (lastData) render(lastData); }
 $('pzClose').onclick = closePuzzle;
 
 function drawPuzzle(revealRow = -1){
-  const { st, word } = PZ; let html = '';
+  const { st } = PZ; let html = '';
   for (let r=0;r<6;r++){
     const g = st.guesses[r], live = r === st.guesses.length && !st.done;
-    const sc = g ? score(g, word) : null;
+    const sc = g && st.pats[r] ? st.pats[r] : null;
     html += `<div class="pz-row" id="pzr${r}">`;
     for (let i=0;i<5;i++){
       const ch = g ? g[i] : live ? (cur[i]||'') : '';
@@ -1031,53 +1066,54 @@ function drawPuzzle(revealRow = -1){
     html += `</div>`;
   }
   $('pzGrid').innerHTML = html;
-  // keyboard colours: best result seen per letter
   const rank = {c:3,p:2,a:1}, keys = {};
-  st.guesses.forEach(g => score(g, word).forEach((c,i) => { if (!keys[g[i]] || rank[c] > rank[keys[g[i]]]) keys[g[i]] = c; }));
+  st.guesses.forEach((g,r) => (st.pats[r]||'').split('').forEach((c,i) => { if (!keys[g[i]] || rank[c] > rank[keys[g[i]]]) keys[g[i]] = c; }));
   const rows = ['qwertyuiop','asdfghjkl','↵zxcvbnm⌫'];
   $('kb').innerHTML = rows.map(r => `<div>${[...r].map(k => k==='↵' ? `<button class="wide" data-k="enter">Enter</button>`
     : k==='⌫' ? `<button class="wide del" data-k="back" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M21 5H9l-6 7 6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z"/><path d="M18 9l-6 6M12 9l6 6"/></svg></button>` : `<button class="${keys[k]||''}" data-k="${k}">${k}</button>`).join('')}</div>`).join('');
   let msg = '';
-  if (st.done){
+  const daily = PZ.mode === 'daily';
+  if (st.legacy){
+    msg = `<b>Solved in ${st.legacyGuesses}</b>${st.score} pts today · the new Daily Word starts tomorrow
+      <div class="pz-actions"><button onclick="showBoard()">Leaderboard</button></div>`;
+  } else if (st.done){
     const stats = pzStats();
     msg = st.won ? `<b>${['Genius!','Brilliant!','Great work!','Nice one!','Solid!','Phew!'][st.guesses.length-1]}</b>🔥 ${stats.streak}-day streak · new word tomorrow`
-                 : `<b>${word.toUpperCase()}</b>Streak reset — back tomorrow`;
-  }
-  if (st.done){
-    const sc = st.score != null ? `Score <b style="display:inline;font-size:inherit">${st.score}</b>${st.rank ? ` · #${st.rank} of ${st.players} today` : ''}` : '';
-    msg += `<div style="margin-top:6px;font-size:13px">${user ? (sc || 'Saving your score…') : 'Sign in to get on the leaderboard'}</div>
-      <div class="pz-actions">${user ? `<button onclick="showBoard()">Leaderboard</button>` : `<button onclick="closePuzzle();openAcct()">Sign in</button>`}</div>`;
+                 : `<b>${(st.word||'').toUpperCase()}</b>Streak reset — back tomorrow`;
+    if (daily){
+      const sc = st.score != null ? `Score <b style="display:inline;font-size:inherit">${st.score}</b>${st.seconds != null && st.won ? ` (${mmss(st.seconds)})` : ''}${st.rank ? ` · #${st.rank} of ${st.players} today` : ''}` : '';
+      msg += `<div style="margin-top:6px;font-size:13px">${sc}</div><div class="pz-actions"><button onclick="showBoard()">Leaderboard</button></div>`;
+    } else {
+      msg += `<div style="margin-top:6px;font-size:13px">Practice round — sign in for the Daily Word and leaderboard</div>
+        <div class="pz-actions"><button onclick="closePuzzle();openAcct()">Sign in</button></div>`;
+    }
   }
   $('pzMsg').innerHTML = msg;
+}
+function finishStats(won, n){
+  const s = pzStats(); s.played++;
+  if (won){ s.wins++; s.streak = (s.lastWin === PZ.day - 1) ? s.streak + 1 : 1; s.best = Math.max(s.best, s.streak); s.lastWin = PZ.day; s.dist[n-1]++; }
+  else s.streak = 0;
+  store.set('wx_pz_stats', s); setPzTitle();
+}
+async function fetchRank(){
+  if (!serverMode() || !PZ) return;
+  const { data, error } = await sb.rpc('weather_board', { p_day: PZ.day });
+  if (error || !data) return;
+  boardData = data;
+  if (data.today.me){ PZ.st.rank = data.today.me.rank; PZ.st.players = data.today.players; store.set('wx_pz_srv', PZ.st, true); }
+  if ($('pz').classList.contains('open') && !$('pz').classList.contains('board')) drawPuzzle();
 }
 
 /* ---------- leaderboard ---------- */
 let boardTab = 'all', boardData = null;
-async function submitScore(){
-  if (!sb || !user || !PZ) return;
-  const st = PZ.st; if (!st.done || st.submitted) return;
-  const secs = Math.round((st.ms || 0) / 1000);
-  const { data, error } = await sb.rpc('weather_submit', { p_day: PZ.day, p_guesses: st.guesses.length, p_won: st.won, p_seconds: secs });
-  if (error) return;
-  st.submitted = true; st.score = data;
-  try {
-    const b = await sb.rpc('weather_board', { p_day: PZ.day });
-    if (!b.error && b.data && b.data.today.me){ st.rank = b.data.today.me.rank; st.players = b.data.today.players; boardData = b.data; }
-  } catch {}
-  store.set('wx_pz', st);
-  if ($('pz').classList.contains('open') && !$('pz').classList.contains('board')) drawPuzzle();
-  if (lastData && !$('pz').classList.contains('open')) render(lastData);
-}
-// a game finished while signed out (or offline) gets submitted after sign-in
-function submitPending(){ const P = pzState(); if (P && P.st.done && !P.st.submitted && user){ PZ = PZ && PZ.day === P.day ? PZ : P; submitScore(); } }
-
 const ord = n => n + (['th','st','nd','rd'][((n%100)-20)%10] || ['th','st','nd','rd'][n%100] || 'th');
 const mmss = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
 async function showBoard(){
   if (!PZ) PZ = pzState();
   $('pz').classList.add('board');
   const lb = $('lb');
-  if (!user){ lb.innerHTML = `<div class="lb-empty">Sign in to see the leaderboard and add your scores.<div class="pz-actions" style="margin-top:14px"><button onclick="closePuzzle();openAcct()">Sign in</button></div></div>`; return; }
+  if (!serverMode()){ lb.innerHTML = `<div class="lb-empty">Sign in to play the Daily Word and see the leaderboard.<div class="pz-actions" style="margin-top:14px"><button onclick="closePuzzle();openAcct()">Sign in</button></div></div>`; return; }
   lb.innerHTML = `<div class="lb-empty">Loading…</div>`;
   const { data, error } = await sb.rpc('weather_board', { p_day: PZ.day });
   if (error){ lb.innerHTML = `<div class="lb-empty">Couldn’t load the leaderboard. Check your connection.</div>`; return; }
@@ -1096,30 +1132,34 @@ function drawBoard(){
     <div class="lb-tabs"><button class="${boardTab==='all'?'on':''}" data-t="all">Overall</button><button class="${boardTab==='today'?'on':''}" data-t="today">Today</button></div>
     ${rows || `<div class="lb-empty">No scores yet — be the first.</div>`}
     ${meBox}
-    <div class="lb-rules"><b>Scoring</b> — solved in 1 guess: 600 · 2: 500 · 3: 400 · 4: 300 · 5: 200 · 6: 100. Speed bonus up to +100 (drops 1 point every 6 seconds; the clock only runs while the puzzle is open). Not solved: 0. Daily scores add up for the Overall board.<br>Playing as <b>${esc(d.nickname || '—')}</b> — change your name in your account.</div>
+    <div class="lb-rules"><b>Scoring</b> — solved in 1 guess: 600 · 2: 500 · 3: 400 · 4: 300 · 5: 200 · 6: 100. Speed bonus up to +100, dropping 1 point every 6 seconds from your first guess to your last. Not solved: 0. Daily scores add up for the Overall board. Every guess is checked and timed on the server.<br>Playing as <b>${esc(d.nickname || '—')}</b> — change your name in your account.</div>
     <div class="pz-actions" style="margin-top:12px"><button class="ghost" onclick="$('pz').classList.remove('board')">Back to puzzle</button></div>`;
   lb.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { boardTab = b.dataset.t; drawBoard(); });
 }
 $('pzBoardBtn').onclick = () => $('pz').classList.contains('board') ? $('pz').classList.remove('board') : showBoard();
-function toast(t){ const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove('show'), 1400); }
-function pzKey(k){
-  if (!PZ || PZ.st.done || !$('pz').classList.contains('open')) return;
+function toast(t){ const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove('show'), 1600); }
+async function pzKey(k){
+  if (!PZ || pzBusy || PZ.st.done || PZ.st.legacy || !$('pz').classList.contains('open')) return;
   if (k === 'back'){ cur = cur.slice(0,-1); return drawPuzzle(); }
   if (k === 'enter'){
     if (cur.length < 5){ shakeRow(); return toast('Not enough letters'); }
     if (!window.PUZZLE_VALID.has(cur)){ shakeRow(); return toast('Not in word list'); }
-    const st = PZ.st; st.guesses.push(cur); const row = st.guesses.length-1; cur = '';
-    if (st.guesses[row] === PZ.word || st.guesses.length === 6){
-      bankTime(); PZ.t0 = 0;
-      st.done = true; st.won = st.guesses[row] === PZ.word;
-      const s = pzStats(); s.played++;
-      if (st.won){ s.wins++; s.streak = (s.lastWin === PZ.day - 1) ? s.streak + 1 : 1; s.best = Math.max(s.best, s.streak); s.lastWin = PZ.day; s.dist[row]++; }
-      else s.streak = 0;
-      store.set('wx_pz_stats', s);
-      $('pzSub').textContent = `Played ${s.played} · Won ${s.wins} · Streak ${s.streak} · Best ${s.best}`;
+    if (PZ.mode === 'daily'){
+      pzBusy = true;
+      const { data, error } = await sb.rpc('weather_guess', { p_guess: cur });
+      pzBusy = false;
+      if (error){ shakeRow(); return toast(/word list/i.test(error.message) ? 'Not in word list' : /already/i.test(error.message) ? 'Already played today' : 'Couldn’t reach the server — try again'); }
+      const wasDone = PZ.st.done; PZ.st = fromServer(data); cur = '';
+      store.set('wx_pz_srv', PZ.st, true);
+      if (PZ.st.done && !wasDone){ finishStats(PZ.st.won, PZ.st.guesses.length); fetchRank(); }
+      return drawPuzzle(PZ.st.guesses.length - 1);
     }
-    store.set('wx_pz', st);
-    if (st.done) submitScore();
+    const st = PZ.st; st.guesses.push(cur); st.pats.push(score(cur, PZ.word)); const row = st.guesses.length-1; cur = '';
+    if (st.guesses[row] === PZ.word || st.guesses.length === 6){
+      st.done = true; st.won = st.guesses[row] === PZ.word; st.word = PZ.word;
+      finishStats(st.won, st.guesses.length);
+    }
+    store.set('wx_pz', { day: st.day, guesses: st.guesses, done: st.done, won: st.won }, true);
     return drawPuzzle(row);
   }
   if (/^[a-z]$/.test(k) && cur.length < 5){ cur += k; drawPuzzle(); }
@@ -1223,7 +1263,7 @@ const same = (a,b) => Math.abs(a.lat-b.lat)<0.01 && Math.abs(a.lon-b.lon)<0.01;
 function renderChips(){
   $('chips').innerHTML = saved.map((p,i)=>`<button class="chip ${same(p,current)?'active':''}" data-i="${i}">${p.name}</button>`).join('');
 }
-function renderSave(){ $('saveBtn').classList.toggle('on', saved.some(p=>same(p,current))); }
+function renderSave(){ $('saveBtn').classList.toggle('on', saved.some(p=>same(p,current))); $('locBtn').classList.toggle('here', !!current.here); }
 $('chips').onclick = e => {
   const b = e.target.closest('.chip'); if(!b) return;
   if (b.id === 'modeBtn'){ neon = !neon; store.set('wx_neon', neon); applyMode(); return; }
@@ -1236,15 +1276,29 @@ $('saveBtn').onclick = () => {
 };
 
 /* ---------- location ---------- */
-$('locBtn').onclick = () => {
-  if(!navigator.geolocation) return;
-  $('placeName').textContent = 'Locating…';
-  navigator.geolocation.getCurrentPosition(
-    pos => load({ name:'My location', sub:`${pos.coords.latitude.toFixed(2)}, ${pos.coords.longitude.toFixed(2)}`, lat:pos.coords.latitude, lon:pos.coords.longitude }),
-    () => { $('placeName').textContent = current.name; },
-    { timeout:10000, maximumAge:600000 }
-  );
-};
+// Default: show the weather where you are now. Can be turned off in the account screen (per phone).
+let useLoc = store.get('wx_useloc', true);
+async function placeName(lat, lon){
+  try {
+    const r = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
+    const j = await r.json();
+    const name = j.locality || j.city || j.principalSubdivision;
+    if (name) return { name, sub: [j.principalSubdivision, j.countryName].filter(Boolean).filter(x => x !== name).join(', ') };
+  } catch {}
+  return { name: 'My location', sub: `${lat.toFixed(2)}, ${lon.toFixed(2)}` };
+}
+function locateAndLoad(quiet = false, explicit = false){
+  if (!navigator.geolocation){ if (explicit) toast('Location isn’t available on this device'); return; }
+  if (explicit) $('placeName').textContent = 'Locating…';
+  navigator.geolocation.getCurrentPosition(async pos => {
+    const { latitude: lat, longitude: lon } = pos.coords;
+    const n = await placeName(lat, lon);
+    load({ ...n, lat, lon, here: true }, quiet);
+  }, () => {
+    if (explicit){ $('placeName').textContent = current.name; toast('Location is off — allow it in your phone settings'); }
+  }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 5 * 60 * 1000 });
+}
+$('locBtn').onclick = () => locateAndLoad(false, true);
 
 /* ---------- search ---------- */
 const sheet = $('sheet');
@@ -1312,7 +1366,6 @@ async function pull(){
   const merged = data ? mergeData(data.data || {}, localData()) : localData();
   applyData(merged);
   await push(merged);
-  submitPending();
 }
 async function push(d = localData()){
   if (!sb || !user) return;
@@ -1325,19 +1378,26 @@ let syncTimer;
 window.syncSoon = () => { if (!user) return; clearTimeout(syncTimer); syncTimer = setTimeout(() => push().catch(()=>{}), 1200); };
 
 function setUser(u){
+  const was = user && user.id;
   user = u || null;
+  if ((user && user.id) !== was && lastData) render(lastData);
   $('acctDot').classList.toggle('on', !!user);
   if ($('acct').classList.contains('open')) drawAcct();
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function appearanceHTML(){
-  return `<div class="appear"><h4>Appearance</h4><div class="opts">
+  return `<div class="appear"><h4>Location</h4>
+    <label class="sw-row"><span>Show weather where I am when the app opens<small>Uses your phone’s location. Turn off to open on your last viewed place.</small></span>
+      <input type="checkbox" id="locToggle" ${useLoc ? 'checked' : ''}><i class="sw"></i></label></div>
+  <div class="appear"><h4>Appearance</h4><div class="opts">
     <button type="button" data-theme="classic" class="${neon?'':'on'}"><i class="pv-classic"></i><span>Classic<b></b></span></button>
     <button type="button" data-theme="neon" class="${neon?'on':''}"><i class="pv-neon"></i><span>🌴 Neon Coast<b></b></span></button>
   </div></div>`;
 }
 function bindAppearance(){
+  const lt = $('locToggle');
+  if (lt) lt.onchange = () => { useLoc = lt.checked; store.set('wx_useloc', useLoc, true); if (useLoc) locateAndLoad(false, true); };
   $('acctBody').querySelectorAll('[data-theme]').forEach(b => b.onclick = () => {
     const want = b.dataset.theme === 'neon'; if (want === neon) return;
     neon = want; store.set('wx_neon', neon); applyMode(); drawAcct();
@@ -1436,10 +1496,11 @@ if (sb){
 /* ---------- go ---------- */
 document.body.classList.toggle('neon', neon);
 load(current);
+if (useLoc) locateAndLoad(true);
 
 // Auto refresh: every 10 min while open, and whenever the app comes back to the foreground
 const STALE = 5*60*1000;
-const refreshIfStale = () => { if (document.visibilityState==='visible' && Date.now()-lastFetch > STALE) load(current, true); };
+const refreshIfStale = () => { if (document.visibilityState==='visible' && Date.now()-lastFetch > STALE){ if (useLoc && current.here) locateAndLoad(true); else load(current, true); } };
 setInterval(() => { if (document.visibilityState==='visible') load(current, true); }, 10*60*1000);
 document.addEventListener('visibilitychange', refreshIfStale);
 window.addEventListener('pageshow', refreshIfStale);
