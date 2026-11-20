@@ -906,6 +906,8 @@
   .tile{container-type:size;min-height:34px}
   .tile{font-size:min(clamp(18px,5.4vw,28px),58cqh)}
   @media (max-height:700px){ .pz .pz-help{display:none} }
+  .river,.bscene,.lhills,.lgrid,.skyline,.sea,.palm{transition:opacity .6s}
+  body:not(.skyready) .river,body:not(.skyready) .bscene,body:not(.skyready) .lhills,body:not(.skyready) .lgrid,body:not(.skyready) .skyline,body:not(.skyready) .sea,body:not(.skyready) .palm{opacity:0}
 </style>
 </head>
 <body>
@@ -1237,6 +1239,7 @@ async function refreshNow(){
 function render(d){
   const c = d.current, h = d.hourly, dy = d.daily;
   lastData = d;
+  try{ localStorage.setItem('wx_snap', JSON.stringify({ k: `${current.lat},${current.lon}`, t: Date.now(), d })); }catch(e){}
 
   // hourly: from current hour, 24 entries
   const nowKey = c.time.slice(0,13);
@@ -1829,6 +1832,7 @@ function moonArc(lat, lon){
 const parseLocal = s => Date.parse(s + ':00Z'); // location-local wall time as a UTC timestamp
 function updateSky(){
   const d = lastData; if (!d) return;
+  requestAnimationFrame(() => document.body.classList.add('skyready'));
   const dy = d.daily;
   const now = Date.now() + (d.utc_offset_seconds||0)*1000;
   const today = new Date(now).toISOString().slice(0,10);
@@ -3322,7 +3326,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.90', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.91', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
@@ -3435,7 +3439,12 @@ if (sb){
 
 /* ---------- go ---------- */
 setThemeClass();
-load(current);
+// draw straight away from the last forecast we had (same place, under 12 hours old), then refresh in the background
+try{
+  const sn = JSON.parse(localStorage.getItem('wx_snap') || 'null');
+  if (sn && sn.k === `${current.lat},${current.lon}` && Date.now() - sn.t < 12 * 36e5){ render(sn.d); $('app').classList.remove('loading'); }
+}catch(e){}
+load(current, !!lastData);
 if (useLoc) locateAndLoad(true);
 
 // Auto refresh: every 10 min while open, and whenever the app comes back to the foreground
