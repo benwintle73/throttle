@@ -1449,13 +1449,11 @@ function wearTips(d, start){
   const f = c.apparent_temperature, tips = [];
   const next3 = h.precipitation_probability.slice(start, start+3);
   const wet = ['rain','storm'].includes(kind(c.weather_code)) || (c.precipitation||0) > 0 || Math.max(0, ...next3) >= 50;
-  const storm = kind(c.weather_code) === 'storm';
   if (wet){
     // one sensible tip for wet weather instead of "T-shirt" next to "Umbrella"
     tips.push(f <= 11 ? '🧥 Cold and wet — warm waterproof jacket'
             : f <= 18 ? '🧥 Rain jacket over a warm layer'
             : '☔ Warm but wet — rain jacket or umbrella');
-    if (storm) tips.push('⚡ Storms about — stay off open ground');
   } else {
     tips.push(f <= 5 ? '🧣 Beanie + heavy jacket' : f <= 11 ? '🧥 Proper jacket' : f <= 16 ? '🧥 Hoodie or light jacket'
             : f <= 21 ? '👕 Long sleeves' : f <= 27 ? '👕 T-shirt weather' : '🩳 Shorts + singlet');
