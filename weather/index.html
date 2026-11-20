@@ -866,6 +866,7 @@
       padding:max(14px,env(safe-area-inset-top)) env(safe-area-inset-right) 0 env(safe-area-inset-left);text-shadow:0 2px 18px rgba(0,0,0,.35)}
     .app,.ptr,#editDone{display:none!important}
     .scene{position:fixed!important;top:0!important;height:100vh!important}
+    .river{height:100vh!important}
     .land .lt{font-size:min(24vh,18vw);font-weight:200;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
     .land .lt small{font-size:.22em;font-weight:500;margin-left:.15em;letter-spacing:0;opacity:.85}
     .land .ld{font-size:min(6vh,18px);font-weight:600;opacity:.9;margin-top:6px}
@@ -1408,7 +1409,7 @@ function timeJump(){
 const LANDSCAPE = () => matchMedia('(orientation:landscape) and (max-height:520px)').matches;
 let wasLand = null;
 function drawLand(){
-  const L = LANDSCAPE(); if (L !== wasLand){ wasLand = L; if (lastData) updateSky(); }
+  const L = LANDSCAPE(); if (L !== wasLand){ const first = wasLand === null; wasLand = L; if (!first || L){ buildRiver(); } if (lastData) updateSky(); }
   if (!matchMedia('(orientation:landscape) and (max-height:520px)').matches) return;
   const n = new Date(), h = n.getHours(), m = String(n.getMinutes()).padStart(2, '0');
   $('landT').innerHTML = `${h % 12 || 12}:${m}<small>${h < 12 ? 'am' : 'pm'}</small>`;
@@ -1447,13 +1448,14 @@ function buildSkyline(){
     <g id="winLights" fill="#FFE27A">${win}</g></svg>`;
 }
 buildSkyline();
-let PERCHES = [], TRUNKS = [];
+let PERCHES = [], TRUNKS = [], RIVER_W = 400;
 function buildRiver(){
   PERCHES = []; TRUNKS = [];
   // original river red gum scene: seeded so it looks the same every time
   let seed = 7;
   const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  const W = 400, HOR = 198, WAT = 202;
+  const LAND = matchMedia('(orientation:landscape) and (max-height:520px)').matches;
+  const W = RIVER_W = LAND ? 640 : 400, HOR = 198, WAT = 202, DX = (W - 400) / 2;
   // distant tree line along the far bank, plus its reflection
   // soft rounded crowns of distant gums, in clumps with gaps
   let crowns = '';
@@ -1497,7 +1499,7 @@ function buildRiver(){
     ${farG(`transform="translate(0 ${2*WAT}) scale(1 -1)" opacity=".3"`)}
     ${farG('')}
     <rect x="0" y="${HOR}" width="${W}" height="${WAT-HOR+1}" fill="var(--bank)"/>
-    <g id="tinny" opacity="var(--day,1)"><g transform="translate(146 222) scale(1.35) translate(-146 -222)"><g class="bob">
+    <g transform="translate(${DX} 0)"><g id="tinny" opacity="var(--day,1)"><g transform="translate(146 222) scale(1.35) translate(-146 -222)"><g class="bob">
       <path d="M116 214 L176 214 L170 222 L122 222Z" fill="var(--hull2)"/><path d="M116 214 L176 214" stroke="#E9EDF2" stroke-width="1.2"/>
       <rect x="143" y="210.5" width="5" height="3.5" fill="#3A6EA5"/>
       <!-- him: hat, red shirt -->
@@ -1516,7 +1518,8 @@ function buildRiver(){
         <ellipse id="catchSplash" rx="3" ry="1" fill="none" stroke="#fff" stroke-width=".5"/>
         <g id="catchFish"><path d="M-2.5 0 q2.5 -2.2 5 0 q-2.5 2.2 -5 0z" fill="#E2B64B"/><path d="M2.5 0 l2.2 -1.6 v3.2z" fill="#C99A2E"/><circle cx="-1.3" cy="-.3" r=".35" fill="#222"/></g></g>
       </g></g></g>
-    <path d="M0 246 C60 240 140 249 220 244 C300 239 360 247 400 243 L400 262 L0 262Z" fill="var(--nbank)"/>
+    </g><path d="M0 246 C60 240 140 249 220 244 C300 239 360 247 400 243 L400 262 L0 262Z" fill="var(--nbank)" transform="scale(${W/400} 1)"/>
+    <g transform="translate(${DX} 0)">
     <g id="camp" opacity="var(--night,0)" transform="translate(262 252) scale(1.75) translate(-262 -252)">
       <ellipse cx="262" cy="232" rx="70" ry="30" fill="url(#fireGlow)"/>
       <ellipse cx="262" cy="214" rx="46" ry="6" fill="#FF8A3D" opacity=".18" class="fireflick"/>
@@ -1527,8 +1530,9 @@ function buildRiver(){
       <g class="sparks" fill="#FFD27A"><circle cx="260" cy="236" r=".9"/><circle cx="265" cy="232" r=".7"/><circle cx="258" cy="230" r=".6"/></g>
       <g fill="#20160F"><rect x="226" y="242" width="16" height="5" rx="2"/><rect x="284" y="243" width="14" height="5" rx="2"/></g>
     </g>
-    ${gum(34, 262, 1.15, .5)}
-    ${gum(378, 262, .85, -.6)}
+    </g>
+    ${gum(LAND ? 70 : 34, 262, 1.15, .5)}
+    ${gum(LAND ? W - 60 : 378, 262, .85, -.6)}
     <g stroke="var(--gum)" stroke-width="1.2" fill="none" opacity=".8">${reeds}</g>
   </svg>
   <div class="ripple"></div><div class="rglint" id="rglint"></div>
@@ -1580,7 +1584,7 @@ function birdVisit(){
   setTimeout(birdVisit, 25000 + Math.random() * 35000);
   const river = $('river');
   if (!river || theme !== 'murray' || document.hidden || skyNow.night > .25 || skyNow.cloud > .85 || !PERCHES.length) return;
-  const W = river.clientWidth, H = river.clientHeight, sc = Math.max(W / 400, H / 262), ox = (W - 400 * sc) / 2;
+  const W = river.clientWidth, H = river.clientHeight, sc = Math.max(W / RIVER_W, H / 262), ox = (W - RIVER_W * sc) / 2;
   const spots = PERCHES.map(([x, y]) => [ox + x * sc, H - (262 - y) * sc]).filter(([x, y]) => x > 14 && x < W - 14 && y > 6);
   if (!spots.length) return;
   const [px, py] = spots[Math.floor(Math.random() * spots.length)];
@@ -1607,7 +1611,7 @@ function lizardRun(){
   setTimeout(lizardRun, 30000 + Math.random() * 40000);
   const river = $('river');
   if (!river || theme !== 'murray' || document.hidden || skyNow.night > .3 || !TRUNKS.length) return;
-  const W = river.clientWidth, H = river.clientHeight, sc = Math.max(W / 400, H / 262), ox = (W - 400 * sc) / 2;
+  const W = river.clientWidth, H = river.clientHeight, sc = Math.max(W / RIVER_W, H / 262), ox = (W - RIVER_W * sc) / 2;
   const pt = (x, y) => [ox + x * sc, H - (262 - y) * sc];
   const vis = TRUNKS.map(c => c.map(([x, y]) => pt(x, y))).filter(c => c[0][0] > 0 && c[0][0] < W);
   if (!vis.length) return;
@@ -3216,7 +3220,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.83', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.84', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
