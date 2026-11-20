@@ -432,6 +432,21 @@
   .pz-actions button.ghost{background:rgba(255,255,255,.18);color:#fff}
   .lb{flex:1 1 auto;min-height:0;overflow:auto;padding:6px 6px 10px;display:none}
   .pz.board .lb{display:block}
+  .how{flex:1 1 auto;min-height:0;overflow:auto;padding:6px 8px 14px;display:none;-webkit-overflow-scrolling:touch}
+  .pz.howto .how{display:block}
+  .pz.howto .pz-help,.pz.howto .pz-grid,.pz.howto .pz-msg,.pz.howto .pz-hint,.pz.howto .kb,.pz.howto .lb{display:none!important}
+  .how h4{font-size:15px;font-weight:700;margin:16px 0 6px}
+  .how h4:first-child{margin-top:4px}
+  .how p,.how li{font-size:14px;line-height:1.45;color:rgba(255,255,255,.88)}
+  .how ul{padding-left:18px;margin:4px 0}
+  .how li{margin:3px 0}
+  .how .ex{display:flex;gap:5px;margin:8px 0 4px}
+  .how .ex span{width:34px;height:34px;border-radius:7px;display:grid;place-items:center;font-weight:800;font-size:16px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.22)}
+  .how .ex .c{background:#14C8B4;border-color:transparent}.how .ex .p{background:#FF9F43;border-color:transparent}.how .ex .a{background:rgba(0,0,0,.32);border-color:transparent}
+  body.neon .how .ex .p{background:#FF3F8E}
+  .how table{width:100%;border-collapse:collapse;margin:6px 0;font-size:14px}
+  .how td{padding:5px 2px;border-bottom:1px solid rgba(255,255,255,.1)}
+  .how td:last-child{text-align:right;font-weight:700}
   .pz.board .pz-grid,.pz.board .pz-help,.pz.board .pz-msg,.pz.board .kb{display:none}
   .lb-tabs{display:flex;background:rgba(255,255,255,.14);border-radius:12px;padding:4px;margin:6px 0 12px}
   .lb-tabs button{flex:1;border:0;background:none;color:#fff;padding:9px;border-radius:9px;font:700 14px 'Outfit',sans-serif;cursor:pointer;opacity:.75}
@@ -894,6 +909,7 @@
   <div class="pz-in">
     <div class="pz-head">
       <h3 id="pzTitle">Daily Word<small id="pzSub"></small></h3>
+      <button class="icon-btn" id="pzHowBtn" aria-label="How to play"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M9.5 9.3a2.6 2.6 0 0 1 5 .9c0 1.8-2.5 2.2-2.5 3.8"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg></button>
       <button class="icon-btn" id="pzBoardBtn" aria-label="Leaderboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M8 21V11H3v10zM15 21V4h-6v17zM21 21v-7h-6v7z"/></svg></button>
       <button class="icon-btn" id="pzClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
@@ -910,6 +926,7 @@
     <div class="pz-hint" id="pzHint"></div>
     <div class="kb" id="kb"></div>
     <div class="lb" id="lb"></div>
+    <div class="how" id="pzHow"></div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -1965,7 +1982,7 @@ function setPzTitle(){
 }
 async function openPuzzle(){
   PZ = pzState(); if (!PZ) return; cur = ''; pzBusy = false;
-  $('pz').classList.remove('board');
+  $('pz').classList.remove('board','howto');
   setPzTitle(); drawPuzzle(); $('pz').classList.add('open');
   if (PZ.mode === 'daily'){
     const { data, error } = await sb.rpc('weather_puzzle_state');
@@ -1975,7 +1992,7 @@ async function openPuzzle(){
     if (PZ.st.done && PZ.st.rank == null) fetchRank();
   }
 }
-function closePuzzle(){ $('pz').classList.remove('open','board'); if (lastData) render(lastData); }
+function closePuzzle(){ $('pz').classList.remove('open','board','howto'); if (lastData) render(lastData); }
 $('pzClose').onclick = closePuzzle;
 
 function drawPuzzle(revealRow = -1){
@@ -2163,7 +2180,53 @@ function drawBoard(){
   lb.querySelectorAll('[data-lg]').forEach(b => b.onclick = () => pickLeague(b.dataset.lg || null));
   const add = lb.querySelector('[data-lgadd]'); if (add) add.onclick = () => { lgForm = !lgForm; lgErr = ''; drawBoard(); };
 }
-$('pzBoardBtn').onclick = () => $('pz').classList.contains('board') ? $('pz').classList.remove('board') : showBoard();
+$('pzBoardBtn').onclick = () => { $('pz').classList.remove('howto'); $('pz').classList.contains('board') ? $('pz').classList.remove('board') : showBoard(); };
+$('pzHowBtn').onclick = () => {
+  const pz = $('pz'); if (pz.classList.contains('howto')){ pz.classList.remove('howto'); return; }
+  pz.classList.remove('board'); $('pzHow').innerHTML = HOW_HTML; pz.classList.add('howto'); $('pzHow').scrollTop = 0;
+};
+const HOW_HTML = `
+  <h4>The goal</h4>
+  <p>Guess today’s 5-letter word in 6 tries. Everyone gets the same word, and a new one arrives at midnight.</p>
+  <h4>How to guess</h4>
+  <p>Type any real 5-letter word and press <b>Enter</b>. After each guess the tiles change colour:</p>
+  <div class="ex"><span class="c">S</span><span class="a">T</span><span class="p">O</span><span class="a">R</span><span class="a">M</span></div>
+  <ul>
+    <li><b>Green</b> — right letter, right spot (S).</li>
+    <li><b>Orange</b> — the letter is in the word, but in a different spot (O).</li>
+    <li><b>Dark</b> — the letter isn’t in the word at all.</li>
+  </ul>
+  <p>The keyboard colours up the same way, so you can see which letters you’ve ruled out.</p>
+  <h4>Hints</h4>
+  <ul>
+    <li>Tap <b>💡 Hint</b> to light up a letter that’s in the word on the keyboard — it doesn’t say where it goes.</li>
+    <li>Hints unlock after your 3rd guess, one per line, up to 3 per game.</li>
+    <li>Each hint costs <b>75 points</b>.</li>
+  </ul>
+  <h4>Giving up</h4>
+  <p>Stuck? <b>Give up</b> shows the word straight away. You score 0 for the day and your streak resets.</p>
+  <h4>Scoring</h4>
+  <table>
+    <tr><td>Solved in 1 guess</td><td>600</td></tr>
+    <tr><td>2 guesses</td><td>500</td></tr>
+    <tr><td>3 guesses</td><td>400</td></tr>
+    <tr><td>4 guesses</td><td>300</td></tr>
+    <tr><td>5 guesses</td><td>200</td></tr>
+    <tr><td>6 guesses</td><td>100</td></tr>
+    <tr><td>Speed bonus</td><td>up to +100</td></tr>
+    <tr><td>Each hint used</td><td>−75</td></tr>
+    <tr><td>Not solved / gave up</td><td>0</td></tr>
+  </table>
+  <p>The speed bonus starts at 100 and drops 1 point every 6 seconds, timed from your first guess (or first hint) to your last. A solved game always scores at least 25.</p>
+  <h4>Leaderboards</h4>
+  <ul>
+    <li><b>This week</b> — your points added up Monday to Sunday; it resets every Monday.</li>
+    <li><b>Today</b> — today’s scores only.</li>
+    <li><b>All time</b> — every game you’ve ever played, added up.</li>
+    <li><b>Leagues</b> — make a private league and share its 6-letter code with friends or family to have your own leaderboard.</li>
+  </ul>
+  <p>Every guess is checked and timed on the server, so scores can’t be faked. Sign in to play the Daily Word and join the leaderboard — signed out, you get a practice puzzle that doesn’t count.</p>
+  <div class="pz-actions" style="margin-top:14px"><button onclick="$('pz').classList.remove('howto')">Back to puzzle</button></div>`;
 function toast(t){ const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove('show'), 1600); }
 async function pzKey(k){
   if (!PZ || pzBusy || PZ.st.done || PZ.st.legacy || !$('pz').classList.contains('open')) return;
@@ -2931,7 +2994,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.72', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.73', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
