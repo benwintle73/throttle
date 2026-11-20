@@ -860,6 +860,7 @@
   .lizard:not(.run) .l2{opacity:0}
   /* landscape on a phone: a simple bedside-clock view instead of the full app */
   .land{display:none}
+  .lhills,.lgrid{display:none}
   @media (orientation:landscape) and (max-height:520px){
     html,body{overflow:hidden!important;height:100%}
     .land{display:flex;position:fixed;inset:0;z-index:90;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;color:#fff;text-align:center;pointer-events:none;
@@ -867,6 +868,16 @@
     .app,.ptr,#editDone{display:none!important}
     .scene{position:fixed!important;top:0!important;height:100vh!important}
     .river{height:100vh!important}
+    body:not(.neon):not(.murray):not(.beach):not(.retro) .lhills{display:block;position:absolute;left:0;right:0;bottom:0;height:42%}
+    .lhills svg{width:100%;height:100%;display:block}
+    body.retro .lgrid{display:block;position:absolute;left:0;right:0;bottom:0;height:44%}
+    .lgrid .mtn{position:absolute;left:0;right:0;bottom:62%;width:100%;height:38%;opacity:var(--mtn,1)}
+    .lgrid .floor{position:absolute;left:-50%;right:-50%;top:38%;height:170%;transform:perspective(220px) rotateX(58deg);transform-origin:50% 0;
+      background:linear-gradient(180deg,rgba(255,63,142,.0),rgba(255,63,142,.12)),
+        repeating-linear-gradient(90deg,rgba(255,63,142,.85) 0 2px,transparent 2px 60px),
+        repeating-linear-gradient(0deg,rgba(255,63,142,.85) 0 2px,transparent 2px 40px),#140A2E;
+      background-position:0 0,0 0,0 0,0 0;animation:gridrun 2.5s linear infinite}
+    @keyframes gridrun{to{background-position:0 0,0 0,0 40px,0 0}}
     .land .lt{font-size:min(24vh,18vw);font-weight:200;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
     .land .lt small{font-size:.22em;font-weight:500;margin-left:.15em;letter-spacing:0;opacity:.85}
     .land .ld{font-size:min(6vh,18px);font-weight:600;opacity:.9;margin-top:6px}
@@ -895,6 +906,13 @@
   <svg class="palm l neon-only" viewBox="0 0 150 200"><use href="#palmShape"/></svg>
   <svg class="palm r neon-only" viewBox="0 0 150 200"><use href="#palmShape"/></svg>
   <div class="birds murray-only beach-only" id="birds"><svg viewBox="0 0 60 24" fill="none" stroke="var(--bird,#fff)" stroke-width="1.8" stroke-linecap="round"><path d="M2 10q4-5 8 0q4-5 8 0"/><path d="M22 4q3-4 6 0q3-4 6 0"/><path d="M30 16q4-5 8 0q4-5 8 0"/><path d="M46 8q3-4 6 0q3-4 6 0"/></svg></div>
+  <div class="lhills" id="lhills"><svg viewBox="0 0 800 200" preserveAspectRatio="none">
+    <path d="M0 120 C90 70 170 95 250 80 C340 62 420 100 520 82 C610 66 700 92 800 74 L800 200 L0 200Z" fill="var(--hl1,#8FB39A)"/>
+    <path d="M0 150 C120 118 210 140 320 128 C430 116 520 146 640 132 C710 124 760 136 800 130 L800 200 L0 200Z" fill="var(--hl2,#6E9878)"/>
+    <g fill="var(--hl3,#4F7A5A)"><circle cx="90" cy="142" r="11"/><rect x="88.5" y="142" width="3" height="10"/><circle cx="118" cy="146" r="8"/><rect x="117" y="146" width="2.4" height="8"/>
+      <circle cx="610" cy="128" r="12"/><rect x="608.5" y="128" width="3" height="11"/><circle cx="640" cy="132" r="8"/><rect x="639" y="132" width="2.4" height="8"/><circle cx="700" cy="130" r="10"/><rect x="698.6" y="130" width="2.8" height="9"/></g>
+    <path d="M0 172 C160 160 300 176 450 168 C590 160 700 174 800 166 L800 200 L0 200Z" fill="var(--hl3,#4F7A5A)"/></svg></div>
+  <div class="lgrid" id="lgrid"><svg class="mtn" viewBox="0 0 800 120" preserveAspectRatio="none"><path d="M0 120 L60 70 L110 95 L190 30 L260 88 L330 52 L400 100 L470 46 L540 84 L620 22 L700 80 L760 58 L800 76 L800 120Z" fill="#2A1450"/><path d="M0 120 L60 70 L110 95 L190 30 L260 88 L330 52 L400 100 L470 46 L540 84 L620 22 L700 80 L760 58 L800 76" fill="none" stroke="#FF3F8E" stroke-width="2"/></svg><div class="floor"></div></div>
   <div class="river murray-only" id="river"></div>
   <div class="bscene beach-only" id="beach"></div>
   <div class="precip" id="precip"></div>
@@ -1800,9 +1818,9 @@ function updateSky(){
   const scene = $('scene');
   let H, W;
   if (neon && hero){
-    const rc = hero.getBoundingClientRect();
+    const LS = LANDSCAPE(), rc = LS ? { top: -scrollY, left: 0, width: innerWidth, height: innerHeight } : hero.getBoundingClientRect();
     Object.assign(scene.style, {top:(rc.top+scrollY)+'px', left:rc.left+'px', right:'auto', width:rc.width+'px', height:rc.height+'px'});
-    W = rc.width; H = rc.height*0.8;                       // horizon line where sky meets sea
+    W = rc.width; H = rc.height*(LS ? .72 : 0.8);                       // horizon line where sky meets sea
     const sea = $('sea'); sea.style.top = H+'px';
     $('skyline').style.top = (H-70)+'px'; $('skyline').style.bottom = 'auto';
     const seaTop = mix(mix(cols[2], '#2EE6D6', .55), '#2A0F4A', night*.8);
@@ -1917,6 +1935,10 @@ function updateSky(){
   else moon.style.opacity = 0;
   // clear nights: full stars; cloudy/stormy nights: a faint sparkle peeking through so it still reads as night
   skyNow = { night, cloud };
+  { const R = document.documentElement.style;   // classic landscape hills follow the sky
+    R.setProperty('--hl1', mix(mix(cols[2], '#9DBF8E', .65), '#141A26', night*.85));
+    R.setProperty('--hl2', mix(mix(cols[2], '#6F9C68', .7), '#0E1320', night*.88));
+    R.setProperty('--hl3', mix('#4C7A4C', '#090D16', night*.9)); }
   { // how pale is the sky behind the content? pale + white text = hard to read, so shade the cards
     const L = c => { const [R, G, B] = hex2rgb(c); return (0.2126*R + 0.7152*G + 0.0722*B) / 255; };
     const pale = Math.max(L(cols[1]), L(cols[2]));
@@ -3220,7 +3242,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.85', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.86', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
