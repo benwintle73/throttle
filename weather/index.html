@@ -90,7 +90,7 @@
   .chip.active{background:#fff;color:#333}
 
   /* hero */
-  .hero{text-align:center;padding:70px 0 6px;text-shadow:0 2px 20px rgba(0,0,0,.22)}
+  .hero{text-align:center;padding:30px 0 6px;text-shadow:0 2px 20px rgba(0,0,0,.22)}
   .temp{font-size:104px;font-weight:300;line-height:1;letter-spacing:-5px;margin-top:4px}
   .temp sup{font-size:44px;vertical-align:top;position:relative;top:12px;letter-spacing:0;margin-left:4px}
   .cond{font-size:21px;font-weight:500;margin-top:6px}
@@ -608,6 +608,7 @@
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="suncalc.js"></script>
 <script src="quotes.js"></script>
 <script src="puzzle-words.js"></script>
 <script>
@@ -921,6 +922,22 @@ function buildStars(){
 }
 buildStars();
 
+// Actual moon rise/set for the location (SunCalc). q is 0 at moonrise and 1 at moonset.
+function moonArc(lat, lon){
+  if (!window.SunCalc || lat == null) return null;
+  const now = new Date(), ev = [];
+  for (const off of [-1, 0, 1]){
+    const d = new Date(now); d.setDate(d.getDate() + off); d.setHours(12, 0, 0, 0);
+    const t = SunCalc.getMoonTimes(d, lat, lon);
+    if (t.rise) ev.push({ k: 'r', t: +t.rise }); if (t.set) ev.push({ k: 's', t: +t.set });
+  }
+  ev.sort((a, b) => a.t - b.t);
+  if (SunCalc.getMoonPosition(now, lat, lon).altitude <= 0) return { up: false };
+  let rise = null; ev.forEach(e => { if (e.k === 'r' && e.t <= +now) rise = e.t; });
+  const set = ev.find(e => e.k === 's' && e.t > +now);
+  if (!rise || !set) return { up: true, q: .5 };
+  return { up: true, q: (+now - rise) / (set.t - rise) };
+}
 const parseLocal = s => Date.parse(s + ':00Z'); // location-local wall time as a UTC timestamp
 function updateSky(){
   const d = lastData; if (!d) return;
@@ -1009,10 +1026,15 @@ function updateSky(){
 
   // moon + stars
   const moon = $('moon');
-  const mp = moonPhase();
-  if (moon.dataset.f !== mp.f.toFixed(3)){ moon.innerHTML = moonSVG(mp.f, current.lat); moon.dataset.f = mp.f.toFixed(3); }
-  moon.style.boxShadow = `0 0 30px 8px rgba(255,244,200,${.35*mp.illum/100}),0 0 90px 30px rgba(255,244,200,${.12*mp.illum/100})`;
-  if (q >= 0){ place(moon, q); moon.style.opacity = night * (1 - cloud*0.7); }
+  const mp = moonPhase(), dk = night.toFixed(1);
+  if (moon.dataset.f !== mp.f.toFixed(3) + dk){ moon.innerHTML = moonSVG(mp.f, current.lat, night); moon.dataset.f = mp.f.toFixed(3) + dk; }
+  moon.style.boxShadow = night > .3 ? `0 0 30px 8px rgba(255,244,200,${.35*mp.illum/100}),0 0 90px 30px rgba(255,244,200,${.12*mp.illum/100})` : 'none';
+  const ma = moonArc(current.lat, current.lon);
+  if (ma && ma.up){
+    // real position: from its actual rise to its actual set; faint in daylight like the real thing
+    place(moon, Math.min(.97, Math.max(.03, ma.q)));
+    moon.style.opacity = (0.35 + 0.65 * night) * (1 - cloud * 0.7) * (mp.illum < 3 ? 0 : 1);
+  } else if (!ma && q >= 0){ place(moon, q); moon.style.opacity = night * (1 - cloud*0.7); }
   else moon.style.opacity = 0;
   $('stars').style.opacity = night * (1 - cloud*1.4);
 
@@ -1505,7 +1527,7 @@ function svgDrop(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="current
 /* ---------- moon phase ---------- */
 function moonPhase(when = Date.now()){
   const SYN = 29.530588853, ref = Date.UTC(2000,0,6,18,14);
-  const f = (((when - ref)/864e5) / SYN % 1 + 1) % 1;           // 0 new, .5 full
+  const f = window.SunCalc ? SunCalc.getMoonIllumination(new Date(when)).phase : (((when - ref)/864e5) / SYN % 1 + 1) % 1;   // 0 new, .5 full
   const illum = Math.round((1 - Math.cos(2*Math.PI*f)) / 2 * 100);
   const names = ['New moon','Waxing crescent','First quarter','Waxing gibbous','Full moon','Waning gibbous','Last quarter','Waning crescent'];
   return { f, illum, name: names[Math.round(f*8) % 8] };
@@ -1515,12 +1537,12 @@ function moonPath(f){
   const s1 = waxing ? 1 : 0, s2 = waxing ? (f < .25 ? 0 : 1) : (f < .75 ? 0 : 1);
   return `M0 -1 A1 1 0 0 ${s1} 0 1 A${rx} 1 0 0 ${s2} 0 -1Z`;
 }
-function moonSVG(f, lat){
+function moonSVG(f, lat, dark = 1){
   // southern hemisphere sees the moon flipped (waxing lit on the left)
   const flip = lat < 0 ? 'scale(-1 1)' : '';
   return `<svg viewBox="-1.1 -1.1 2.2 2.2" width="100%" height="100%">
     <defs><radialGradient id="mg" cx="-.3" cy="-.3" r="1.4" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFFCEB"/><stop offset="1" stop-color="#E9D79A"/></radialGradient></defs>
-    <circle r="1" fill="rgba(20,24,60,.55)"/>
+    <circle r="1" fill="rgba(20,24,60,${(.55*dark).toFixed(2)})"/>
     <g transform="${flip}"><path d="${moonPath(f)}" fill="url(#mg)"/></g>
     <circle cx=".28" cy="-.2" r=".14" fill="rgba(160,140,90,.25)"/><circle cx="-.3" cy=".32" r=".1" fill="rgba(160,140,90,.2)"/>
   </svg>`;
