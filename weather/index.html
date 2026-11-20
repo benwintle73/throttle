@@ -188,6 +188,14 @@
   .tile.c,.tile.p,.tile.a{border-color:transparent;animation:flip .5s ease both}
   .tile.c{background:#14C8B4}.tile.p{background:#FF9F43}.tile.a{background:rgba(0,0,0,.32)}
   @keyframes flip{0%{transform:rotateX(0)}50%{transform:rotateX(90deg)}100%{transform:rotateX(0)}}
+  .pz-help{padding:6px 14px 0;text-align:center}
+  .pz-help p{font-size:13px;color:var(--soft);font-weight:500}
+  .pz-key{display:flex;justify-content:center;gap:16px;margin-top:10px}
+  .pz-key span{display:flex;align-items:center;gap:7px;font-size:12px;line-height:1.2;text-align:left;font-weight:600}
+  .pz-key i{width:22px;height:22px;border-radius:6px;flex-shrink:0}
+  .pz-key i.c{background:#14C8B4}.pz-key i.p{background:#FF9F43}.pz-key i.a{background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.2)}
+  body.neon .pz-key i{border-radius:2px}
+  body.neon .pz-key i.p{background:#FF3F8E}
   .pz-msg{text-align:center;min-height:52px;font-size:15px;font-weight:600;padding:4px 10px}
   .pz-msg b{display:block;font-size:22px;margin-bottom:2px}
   .kb{display:flex;flex-direction:column;gap:7px;padding:0 2px}
@@ -400,6 +408,14 @@
     <div class="pz-head">
       <h3 id="pzTitle">Daily Word<small id="pzSub"></small></h3>
       <button class="icon-btn" id="pzClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="pz-help">
+      <p>Guess the 5-letter word in 6 tries. Type a word and press Enter.</p>
+      <div class="pz-key">
+        <span><i class="c"></i>Right letter,<br>right spot</span>
+        <span><i class="p"></i>Right letter,<br>wrong spot</span>
+        <span><i class="a"></i>Not in<br>the word</span>
+      </div>
     </div>
     <div class="pz-grid" id="pzGrid"></div>
     <div class="pz-msg" id="pzMsg"></div>
