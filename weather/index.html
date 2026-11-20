@@ -1369,7 +1369,7 @@ function drawPuzzle(revealRow = -1){
   // hint button: up to 3 per game, one per line, 75 points each
   const used = (st.hints || []).length, rowNow = st.guesses.length, usedHere = (st.hintRows || []).includes(rowNow);
   $('pzHint').innerHTML = st.done || st.legacy ? '' :
-    `<button id="hintBtn" ${used >= 3 || usedHere ? 'disabled' : ''}>💡 ${used >= 3 ? 'No hints left' : usedHere ? 'One hint per line' : `Hint · ${3 - used} left${daily ? ' · −75 pts' : ''}`}</button>`;
+    `<button id="hintBtn" ${used >= 3 || usedHere || rowNow < 3 ? 'disabled' : ''}>💡 ${rowNow < 3 ? 'Hints unlock after 3 guesses' : used >= 3 ? 'No hints left' : usedHere ? 'One hint per line' : `Hint · ${3 - used} left${daily ? ' · −75 pts' : ''}`}</button>`;
   const hb = $('hintBtn'); if (hb) hb.onclick = pzHint;
 }
 async function pzHint(){
@@ -1379,10 +1379,10 @@ async function pzHint(){
     pzBusy = true;
     const { data, error } = await sb.rpc('weather_hint');
     pzBusy = false;
-    if (error) return toast(/per line/i.test(error.message) ? 'One hint per line' : /left|new letters/i.test(error.message) ? 'No hints left' : 'Couldn’t reach the server — try again');
+    if (error) return toast(/unlock/i.test(error.message) ? 'Hints unlock after 3 guesses' : /per line/i.test(error.message) ? 'One hint per line' : /left|new letters/i.test(error.message) ? 'No hints left' : 'Couldn’t reach the server — try again');
     PZ.st = fromServer(data); store.set('wx_pz_srv', PZ.st, true);
   } else {
-    if (st.hints.length >= 3 || st.hintRows.includes(st.guesses.length)) return;
+    if (st.guesses.length < 3 || st.hints.length >= 3 || st.hintRows.includes(st.guesses.length)) return;
     const seen = st.guesses.join(''), w = PZ.word;
     let opts = [...new Set(w)].filter(c => !seen.includes(c) && !st.hints.includes(c));
     if (!opts.length) opts = [...new Set(w)].filter(c => !st.hints.includes(c));
@@ -1487,7 +1487,7 @@ function drawBoard(){
     <div class="lb-tabs"><button class="${boardTab==='week'?'on':''}" data-t="week">This week</button><button class="${boardTab==='today'?'on':''}" data-t="today">Today</button><button class="${boardTab==='all'?'on':''}" data-t="all">All time</button></div>
     ${rows || `<div class="lb-empty">No scores yet — be the first.</div>`}
     ${meBox}
-    <div class="lb-rules"><b>Scoring</b> — solved in 1 guess: 600 · 2: 500 · 3: 400 · 4: 300 · 5: 200 · 6: 100. Speed bonus up to +100, dropping 1 point every 6 seconds from your first guess to your last. Each hint costs 75 (up to 3, one per line). Not solved: 0. The week runs Monday to Sunday and resets each Monday; All time keeps adding up. Every guess is checked and timed on the server.<br>Playing as <b>${esc(d.nickname || '—')}</b> — change your name in your account.</div>
+    <div class="lb-rules"><b>Scoring</b> — solved in 1 guess: 600 · 2: 500 · 3: 400 · 4: 300 · 5: 200 · 6: 100. Speed bonus up to +100, dropping 1 point every 6 seconds from your first guess to your last. Hints unlock after 3 guesses; each costs 75 (up to 3, one per line). Not solved: 0. The week runs Monday to Sunday and resets each Monday; All time keeps adding up. Every guess is checked and timed on the server.<br>Playing as <b>${esc(d.nickname || '—')}</b> — change your name in your account.</div>
     <div class="pz-actions" style="margin-top:12px"><button class="ghost" onclick="$('pz').classList.remove('board')">Back to puzzle</button></div>`;
   lb.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { boardTab = b.dataset.t; drawBoard(); });
   lb.querySelectorAll('[data-lg]').forEach(b => b.onclick = () => pickLeague(b.dataset.lg || null));
