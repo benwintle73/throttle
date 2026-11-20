@@ -847,6 +847,12 @@
   @keyframes wflap{to{transform:scaleY(-.6)}}
   .visitor .hd{transform-box:fill-box;transform-origin:70% 90%;animation:peck 4s ease-in-out infinite}
   @keyframes peck{0%,70%,100%{transform:rotate(0)}76%{transform:rotate(-18deg)}82%{transform:rotate(6deg)}88%{transform:rotate(-10deg)}}
+  .lizard{position:absolute;left:0;top:0;pointer-events:none;z-index:2;will-change:transform}
+  .lizard svg{display:block}
+  .lizard .lg{transform-box:fill-box;transform-origin:50% 50%}
+  .lizard.run .l1{animation:lgA .14s steps(1) infinite}.lizard.run .l2{animation:lgB .14s steps(1) infinite}
+  @keyframes lgA{50%{opacity:0}}@keyframes lgB{0%{opacity:0}50%{opacity:1}}
+  .lizard:not(.run) .l2{opacity:0}
 </style>
 </head>
 <body>
@@ -1398,9 +1404,9 @@ function buildSkyline(){
     <g id="winLights" fill="#FFE27A">${win}</g></svg>`;
 }
 buildSkyline();
-let PERCHES = [];
+let PERCHES = [], TRUNKS = [];
 function buildRiver(){
-  PERCHES = [];
+  PERCHES = []; TRUNKS = [];
   // original river red gum scene: seeded so it looks the same every time
   let seed = 7;
   const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
@@ -1419,6 +1425,7 @@ function buildRiver(){
   const gum = (bx, by, s, lean) => {
     let limbs = '', leaves = '';
     const fx = bx + lean*30*s, fy = by - 70*s;
+    TRUNKS.push([[bx + s, by], [bx + s, by - 29*s], [fx, fy + 22*s], [fx, fy]]);
     const trunk = `M${bx-16*s} ${by} C${bx-12*s} ${by-30*s} ${fx-10*s} ${fy+20*s} ${fx-7*s} ${fy} L${fx+7*s} ${fy} C${fx+10*s} ${fy+24*s} ${bx+14*s} ${by-28*s} ${bx+18*s} ${by}Z`;
     const ends = [[-70,-60],[-25,-115],[30,-125],[78,-70],[5,-80]];
     ends.forEach(([dx, dy], k) => {
@@ -1529,7 +1536,7 @@ function birdSVG(kind){
 function birdVisit(){
   setTimeout(birdVisit, 25000 + Math.random() * 35000);
   const river = $('river');
-  if (!river || theme !== 'murray' || document.hidden || skyNow.night > .25 || skyNow.cloud > .75 || !PERCHES.length) return;
+  if (!river || theme !== 'murray' || document.hidden || skyNow.night > .25 || skyNow.cloud > .85 || !PERCHES.length) return;
   const W = river.clientWidth, H = river.clientHeight, sc = Math.max(W / 400, H / 262), ox = (W - 400 * sc) / 2;
   const spots = PERCHES.map(([x, y]) => [ox + x * sc, H - (262 - y) * sc]).filter(([x, y]) => x > 14 && x < W - 14 && y > 6);
   if (!spots.length) return;
@@ -1551,7 +1558,42 @@ function birdVisit(){
     setTimeout(() => { b.classList.add('flying'); fly(px, py, ex, ey, 3000, () => b.remove()); }, 7000 + Math.random() * 9000);
   });
 }
-setTimeout(birdVisit, 10000 + Math.random() * 15000);
+setTimeout(birdVisit, 4000 + Math.random() * 4000);
+// Murray, daytime: now and then a little lizard scurries up a gum trunk, stops, then carries on into the canopy
+function lizardRun(){
+  setTimeout(lizardRun, 30000 + Math.random() * 40000);
+  const river = $('river');
+  if (!river || theme !== 'murray' || document.hidden || skyNow.night > .3 || !TRUNKS.length) return;
+  const W = river.clientWidth, H = river.clientHeight, sc = Math.max(W / 400, H / 262), ox = (W - 400 * sc) / 2;
+  const pt = (x, y) => [ox + x * sc, H - (262 - y) * sc];
+  const vis = TRUNKS.map(c => c.map(([x, y]) => pt(x, y))).filter(c => c[0][0] > 0 && c[0][0] < W);
+  if (!vis.length) return;
+  const [P0, P1, P2, P3] = vis[Math.floor(Math.random() * vis.length)];
+  // follow the curve of the trunk (cubic bezier), from just above the grass to the fork
+  const bz = (u, i) => { const v = 1 - u; return v*v*v*P0[i] + 3*v*v*u*P1[i] + 3*v*u*u*P2[i] + u*u*u*P3[i]; };
+  const dz = (u, i) => { const v = 1 - u; return 3*v*v*(P1[i]-P0[i]) + 6*v*u*(P2[i]-P1[i]) + 3*u*u*(P3[i]-P2[i]); };
+  const U0 = .2, U1 = .92;
+  const L = document.createElement('div'); L.className = 'lizard';
+  L.style.width = Math.round(22 * Math.min(1.4, sc)) + 'px'; L.style.height = Math.round(9 * Math.min(1.4, sc)) + 'px';
+  L.innerHTML = `<svg viewBox="0 0 26 10" width="${Math.round(22 * Math.min(1.4, sc))}" height="${Math.round(9 * Math.min(1.4, sc))}">
+    <path d="M1 5 Q6 3.4 10 4.4 L19 4 Q24 4.2 25 5 Q24 5.8 19 6 L10 5.6 Q6 6.6 1 5Z" fill="#6E6046"/>
+    <path d="M10 4.6 L19 4.3" stroke="#8C7B58" stroke-width=".7"/><circle cx="22.6" cy="4.6" r=".55" fill="#111"/>
+    <g class="lg l1" stroke="#5B4F39" stroke-width="1.1" stroke-linecap="round"><path d="M17 4.3 l1.6 -2.8"/><path d="M11 5.7 l-1.6 2.8"/></g>
+    <g class="lg l2" stroke="#5B4F39" stroke-width="1.1" stroke-linecap="round"><path d="M17 5.7 l1.6 2.8"/><path d="M11 4.3 l-1.6 -2.8"/></g></svg>`;
+  river.appendChild(L);
+  const at = (t, op = 1) => { const u = U0 + (U1 - U0) * t, a = Math.atan2(dz(u, 1), dz(u, 0)) * 180 / Math.PI;
+    L.style.transform = `translate(${bz(u, 0)}px,${bz(u, 1)}px) rotate(${a}deg) translate(-50%,-50%)`; L.style.opacity = op; };
+  const legs = on => L.classList.toggle('run', on);
+  const run = (a, b, ms, done) => { const t0 = performance.now(); legs(true);
+    const step = now => { const k = Math.min(1, (now - t0) / ms); at(a + (b - a) * k, a === 0 ? Math.min(1, k * 4) : 1); k < 1 ? requestAnimationFrame(step) : (legs(false), done()); };
+    requestAnimationFrame(step); };
+  const stop = .3 + Math.random() * .3;
+  at(0, 0);
+  run(0, stop, 1100, () => setTimeout(() => run(stop, 1, 900, () => {
+    const t0 = performance.now(), f = now => { const k = (now - t0) / 400; L.style.opacity = 1 - k; k < 1 ? requestAnimationFrame(f) : L.remove(); }; requestAnimationFrame(f);
+  }), 1800 + Math.random() * 2500));
+}
+setTimeout(lizardRun, 12000 + Math.random() * 10000);
 function buildBeach(){
   // original bay-side beach: calm bay, long timber pier, a row of striped bathing boxes, umbrella
   const W = 400, H = 262, HOR = 176, SH = 214;   // horizon, shoreline
@@ -3119,7 +3161,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.78', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.79', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
