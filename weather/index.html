@@ -956,6 +956,7 @@
   .appear .pv-kst{background:linear-gradient(180deg,#2E1670 0%,#8A2FA0 50%,#FF5FA0 62%,#C9B6FF 63%,#5A5470 88%);position:relative}
   .appear .pv-kst::after{content:'♥';position:absolute;left:44%;top:34%;color:#fff;font-size:13px;text-shadow:0 0 6px #FF6FB5}
   @media (orientation:landscape) and (max-height:520px){ .kst{height:100vh!important} }
+  .ptime{font-size:13px;font-weight:600;opacity:.85;margin-top:4px;letter-spacing:.2px}
 </style>
 </head>
 <body>
@@ -1385,6 +1386,7 @@ function render(d){
       <div class="temp">${r0(c.temperature_2m)}<sup>°</sup></div>
       <div class="cond">${LABELS[c.weather_code] || '—'}</div>
       <div class="hilo">H ${r0(dy.temperature_2m_max[0])}°  ·  L ${r0(dy.temperature_2m_min[0])}°  ·  Feels like ${r0(c.apparent_temperature)}°</div>
+      <div class="ptime" id="ptime">${placeTimeText(d)}</div>
       ${theme === 'retro' ? dashHTML(d) : ''}
       <div class="wear">${wearTips(d, start).map(t=>`<span>${t}</span>`).join('')}</div>
       ${tomorrowHTML(d)}
@@ -1526,9 +1528,9 @@ let wasLand = null;
 function drawLand(){
   const L = LANDSCAPE(); if (L !== wasLand){ const first = wasLand === null; wasLand = L; if (!first || L){ buildRiver(); } if (lastData) updateSky(); }
   if (!LANDSCAPE()) return;
-  const n = new Date(), h = n.getHours(), m = String(n.getMinutes()).padStart(2, '0');
+  const P = placeNow(lastData), h = P.getUTCHours(), m = String(P.getUTCMinutes()).padStart(2, '0');
   $('landT').innerHTML = `${h % 12 || 12}:${m}<small>${h < 12 ? 'am' : 'pm'}</small>`;
-  $('landD').textContent = n.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' });
+  $('landD').textContent = P.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
   if (lastData && lastData.current){
     const c = lastData.current;
     $('landW').innerHTML = `<b>${Math.round(c.temperature_2m)}°</b> · ${LABELS[c.weather_code] || ''}${current && current.name ? ` · ${esc(current.name)}` : ''}`;
@@ -1558,6 +1560,17 @@ function distText(p){ const d = distKm(p); return d == null ? '' : ` · ${fmtKm(
     }, () => {}, { maximumAge: 600000, timeout: 15000 });
   }catch(e){}
 })();
+// Local date and time at the place you're viewing (from the forecast's time zone)
+function placeNow(d){ return new Date(Date.now() + ((d && d.utc_offset_seconds) || 0) * 1000); }   // read with getUTC*
+function placeTimeText(d){
+  if (!d) return '';
+  const t = placeNow(d), h = t.getUTCHours(), m = String(t.getUTCMinutes()).padStart(2, '0');
+  const day = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][t.getUTCDay()], mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][t.getUTCMonth()];
+  const diffH = ((d.utc_offset_seconds || 0) + new Date().getTimezoneOffset() * 60) / 3600;
+  const diff = Math.abs(diffH) < .01 ? '' : ` · ${diffH > 0 ? '+' : '−'}${Math.abs(diffH) % 1 ? Math.abs(diffH).toFixed(1) : Math.abs(diffH)} hr${Math.abs(diffH) === 1 ? '' : 's'} from you`;
+  return `🕒 ${day} ${t.getUTCDate()} ${mon} · ${h % 12 || 12}:${m} ${h < 12 ? 'am' : 'pm'}${diff}`;
+}
+setInterval(() => { const el = $('ptime'); if (el && lastData) el.textContent = placeTimeText(lastData); }, 15000);
 function setThemeClass(){
   ['neon','murray','retro','beach','seoul','kstreet'].forEach(t => document.body.classList.toggle(t, theme === t));
 }
@@ -3542,7 +3555,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.96', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.97', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
