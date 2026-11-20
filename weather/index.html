@@ -880,8 +880,8 @@
     @keyframes gridrun{to{background-position:0 0,0 0,0 40px,0 0}}
     .land .lt{font-size:min(24vh,18vw);font-weight:200;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
     .land .lt small{font-size:.22em;font-weight:500;margin-left:.15em;letter-spacing:0;opacity:.85}
-    .land .ld{font-size:min(6vh,18px);font-weight:600;opacity:.9;margin-top:6px}
-    .land .lw{font-size:min(8vh,24px);font-weight:500;margin-top:10px;opacity:.95}
+    .land .ld{font-size:min(6vh,30px);font-weight:600;opacity:.9;margin-top:6px}
+    .land .lw{font-size:min(8vh,40px);font-weight:500;margin-top:10px;opacity:.95}
     .land .lw b{font-weight:700}
     body.retro .land .lt{font-family:'Orbitron',sans-serif;font-weight:700;color:#FFB000;text-shadow:0 0 18px rgba(255,176,0,.6)}
     body.neon .land .lt{font-family:'Anton',sans-serif;font-weight:400}
@@ -1072,6 +1072,7 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="suncalc.js"></script>
+<script>const WALL_CSS = "\n    html,body{overflow:hidden!important;height:100%}\n    .land{display:flex;position:fixed;inset:0;z-index:90;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;color:#fff;text-align:center;pointer-events:none;\n      padding:max(14px,env(safe-area-inset-top)) env(safe-area-inset-right) 0 env(safe-area-inset-left);text-shadow:0 2px 18px rgba(0,0,0,.35)}\n    .app,.ptr,#editDone{display:none!important}\n    .scene{position:fixed!important;top:0!important;height:100vh!important}\n    .river{height:100vh!important}\n    body:not(.neon):not(.murray):not(.beach):not(.retro) .lhills{display:block;position:absolute;left:0;right:0;bottom:0;height:42%}\n    .lhills svg{width:100%;height:100%;display:block}\n    body.retro .lgrid{display:block;position:absolute;left:0;right:0;bottom:0;height:44%}\n    .lgrid .mtn{position:absolute;left:0;right:0;bottom:62%;width:100%;height:38%;opacity:var(--mtn,1)}\n    .lgrid .floor{position:absolute;left:-50%;right:-50%;top:38%;height:170%;transform:perspective(220px) rotateX(58deg);transform-origin:50% 0;\n      background:linear-gradient(180deg,rgba(255,63,142,.0),rgba(255,63,142,.12)),\n        repeating-linear-gradient(90deg,rgba(255,63,142,.85) 0 2px,transparent 2px 60px),\n        repeating-linear-gradient(0deg,rgba(255,63,142,.85) 0 2px,transparent 2px 40px),#140A2E;\n      background-position:0 0,0 0,0 0,0 0;animation:gridrun 2.5s linear infinite}\n    @keyframes gridrun{to{background-position:0 0,0 0,0 40px,0 0}}\n    .land .lt{font-size:min(24vh,18vw);font-weight:200;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}\n    .land .lt small{font-size:.22em;font-weight:500;margin-left:.15em;letter-spacing:0;opacity:.85}\n    .land .ld{font-size:min(6vh,30px);font-weight:600;opacity:.9;margin-top:6px}\n    .land .lw{font-size:min(8vh,40px);font-weight:500;margin-top:10px;opacity:.95}\n    .land .lw b{font-weight:700}\n    body.retro .land .lt{font-family:'Orbitron',sans-serif;font-weight:700;color:#FFB000;text-shadow:0 0 18px rgba(255,176,0,.6)}\n    body.neon .land .lt{font-family:'Anton',sans-serif;font-weight:400}\n  ";</script>
 <script src="quotes.js"></script>
 <script src="fortunes.js"></script>
 <script src="fun.js"></script>
@@ -1388,6 +1389,7 @@ const NEON_SKY = [
   [ 1.16, ['#0D0221','#26083F','#541066']],
 ];
 let theme = store.get('wx_theme', null) || (store.get('wx_neon', false) ? 'neon' : 'classic');
+{ const t = new URLSearchParams(location.search).get('theme'); if (['classic','neon','murray','retro','beach'].includes(t)) theme = t; }
 let neon = theme === 'neon';
 /* ---------- Time Warp theme: clock-radio style segment display + time-jump flash ---------- */
 const SEG = { '0':'abcdef','1':'bc','2':'abged','3':'abgcd','4':'fgbc','5':'afgcd','6':'afgedc','7':'abc','8':'abcdefg','9':'abcdfg','-':'g',' ':'' };
@@ -1424,11 +1426,13 @@ function timeJump(){
   if (theme !== 'retro') return;
   const f = $('warp'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
 }
-const LANDSCAPE = () => matchMedia('(orientation:landscape) and (max-height:520px)').matches;
+const WALL = /[?&]wall\b/.test(location.search);
+if (WALL){ const st = document.createElement('style'); st.textContent = WALL_CSS; document.head.appendChild(st); }
+const LANDSCAPE = () => WALL || matchMedia('(orientation:landscape) and (max-height:520px)').matches;
 let wasLand = null;
 function drawLand(){
   const L = LANDSCAPE(); if (L !== wasLand){ const first = wasLand === null; wasLand = L; if (!first || L){ buildRiver(); } if (lastData) updateSky(); }
-  if (!matchMedia('(orientation:landscape) and (max-height:520px)').matches) return;
+  if (!LANDSCAPE()) return;
   const n = new Date(), h = n.getHours(), m = String(n.getMinutes()).padStart(2, '0');
   $('landT').innerHTML = `${h % 12 || 12}:${m}<small>${h < 12 ? 'am' : 'pm'}</small>`;
   $('landD').textContent = n.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -1493,8 +1497,8 @@ function buildRiver(){
   // original river red gum scene: seeded so it looks the same every time
   let seed = 7;
   const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  const LAND = matchMedia('(orientation:landscape) and (max-height:520px)').matches;
-  const W = RIVER_W = LAND ? 640 : 400, HOR = 198, WAT = 202, DX = (W - 400) / 2;
+  const LAND = /[?&]wall\b/.test(location.search) || matchMedia('(orientation:landscape) and (max-height:520px)').matches;
+  const W = RIVER_W = LAND ? Math.max(400, Math.round(262 * innerWidth / innerHeight)) : 400, HOR = 198, WAT = 202, DX = (W - 400) / 2;
   // distant tree line along the far bank, plus its reflection
   // soft rounded crowns of distant gums, in clumps with gaps
   let crowns = '';
@@ -3264,7 +3268,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.87', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.88', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
