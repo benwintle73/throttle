@@ -231,6 +231,44 @@
   .edit-done.show{transform:translateX(-50%) translateY(0)}
   body.neon .edit-done{border-radius:2px;background:#000;color:#fff;border:2px solid #fff;font-family:'Anton',sans-serif;font-weight:400;letter-spacing:1px;text-transform:uppercase}
   .refresh-wrap .refresh + .refresh{margin-left:8px}
+  /* ===== severe weather alerts ===== */
+  .alerts{margin-top:12px;border-radius:20px;background:rgba(214,52,52,.88);color:#fff;padding:12px 14px;cursor:pointer;box-shadow:0 8px 24px rgba(160,20,20,.25)}
+  .alerts.amber{background:rgba(222,128,20,.9);box-shadow:0 8px 24px rgba(160,90,10,.25)}
+  .alerts .a-head{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px}
+  .alerts .a-head span{flex:1}
+  .alerts .a-head small{font-weight:600;font-size:12px;opacity:.85}
+  .alerts ul{list-style:none;margin-top:8px;display:none}
+  .alerts.open ul{display:block}
+  .alerts li{font-size:14px;line-height:1.4;padding:6px 0;border-top:1px solid rgba(255,255,255,.2)}
+  .alerts li b{display:block}
+  .alerts .a-foot{display:none;margin-top:8px;font-size:12px;opacity:.9}
+  .alerts.open .a-foot{display:block}
+  .alerts .a-foot a{display:inline-block;margin-top:6px;background:#fff;color:#B42525;border-radius:999px;padding:7px 14px;font-weight:700;text-decoration:none;font-size:13px}
+  body.neon .alerts,body.neon .alerts .a-foot a{border-radius:2px}
+
+  /* ===== rain radar ===== */
+  #radarMap{flex:1;min-height:0;border-radius:18px;overflow:hidden;margin-top:8px;background:#dfe6ec}
+  .rp .tp-in{padding-bottom:calc(env(safe-area-inset-bottom) + 10px)}
+  .rp-ctl{display:flex;align-items:center;gap:12px;margin-top:12px}
+  .rp-ctl button{width:46px;height:46px;border-radius:50%;border:0;background:#fff;color:#222;font-size:18px;cursor:pointer;flex-shrink:0}
+  .rp-ctl input{flex:1;accent-color:#fff}
+  .rp-key{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--soft);margin-top:8px}
+  .rp-key i{flex:1;height:6px;border-radius:6px;background:linear-gradient(90deg,#88DDEE,#0099CC,#0077AA,#FFEE00,#FF8800,#FF0000)}
+  .rp-credit{font-size:11px;color:var(--soft);margin-top:6px}
+  .rp-credit a{color:#fff}
+  .radar-card{cursor:pointer}
+  .radar-card .row{display:flex;align-items:center;gap:14px}
+  .radar-card .pv{width:54px;height:54px;border-radius:14px;flex-shrink:0;background:radial-gradient(circle at 35% 40%,rgba(0,153,204,.85) 0 18%,transparent 30%),radial-gradient(circle at 65% 60%,rgba(255,238,0,.8) 0 10%,rgba(0,153,204,.6) 18%,transparent 32%),linear-gradient(135deg,#C9D8E2,#AFC4D2);position:relative}
+  .radar-card .pv::after{content:'';position:absolute;left:50%;top:50%;width:8px;height:8px;margin:-4px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px rgba(255,46,120,.8)}
+  .radar-card .mid{flex:1;min-width:0}
+  .radar-card .t1{font-size:18px;font-weight:600}
+  .radar-card .t2{font-size:13px;color:var(--soft);margin-top:3px}
+  .radar-card .go{padding:9px 16px;border-radius:999px;background:#fff;color:#333;font-weight:600;font-size:14px;flex-shrink:0}
+  body.neon .radar-card{background:linear-gradient(150deg,#1FC8D6,#2A3FA8)}
+  body.neon .radar-card .t1{font-family:'Anton',sans-serif;font-weight:400;font-size:22px;letter-spacing:.5px;text-transform:uppercase}
+  body.neon .radar-card .go,body.neon .rp-ctl button{border-radius:2px}
+  body.neon #radarMap{border-radius:3px}
+
   /* ===== to-do ===== */
   .tp{position:fixed;inset:0;z-index:30;background:rgba(12,10,30,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
     opacity:0;pointer-events:none;transition:opacity .25s;padding:calc(env(safe-area-inset-top) + 12px) 12px 0}
@@ -620,6 +658,21 @@
 </div>
 <div class="toast" id="toast"></div>
 <button class="edit-done" id="editDone" onclick="toggleLayoutEdit(false)">Done</button>
+<div class="tp rp" id="radarPage">
+  <div class="tp-in">
+    <div class="pz-head">
+      <h3>Rain radar<small id="rpTime">Loading…</small></h3>
+      <button class="icon-btn" id="rpClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div id="radarMap"></div>
+    <div class="rp-ctl">
+      <button id="rpPlay" aria-label="Play">▶</button>
+      <input type="range" id="rpSlider" min="0" max="0" value="0">
+    </div>
+    <div class="rp-key"><span>Light</span><i></i><span>Heavy</span></div>
+    <p class="rp-credit">Radar: <a href="https://www.rainviewer.com" target="_blank" rel="noopener">Weather data by RainViewer</a> · Map © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a></p>
+  </div>
+</div>
 <div class="tp" id="todoPage">
   <div class="tp-in">
     <div class="pz-head">
@@ -712,7 +765,7 @@ function uvLabel(u){ return u<3?'Low':u<6?'Moderate':u<8?'High':u<11?'Very high'
 async function getWeather(p){
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${p.lat}&longitude=${p.lon}`
    + `&current=temperature_2m,apparent_temperature,relative_humidity_2m,is_day,weather_code,wind_speed_10m,wind_gusts_10m,wind_direction_10m,precipitation`
-   + `&hourly=temperature_2m,weather_code,precipitation_probability,is_day`
+   + `&hourly=temperature_2m,weather_code,precipitation_probability,is_day,wind_gusts_10m`
    + `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,sunrise,sunset,uv_index_max`
    + `&minutely_15=precipitation&forecast_minutely_15=10`
    + `&timezone=auto&forecast_days=7`;
@@ -792,7 +845,7 @@ function render(d){
   const arrow = `<svg viewBox="0 0 24 24"><path d="M12 2l5 14-5-3-5 3z" fill="#fff"/></svg>`;
 
   const SECTIONS = {
-    thought: thoughtCard(), todo: todoCard(), puzzle: puzzleCard(), rain: nowcastCard(d),
+    thought: thoughtCard(), todo: todoCard(), puzzle: puzzleCard(), rain: nowcastCard(d), radar: radarCard(),
     hourly: `<section class="card hourly-card">
       <h2>${svgClock()} Next 24 hours</h2>
       <div class="hourly">${hours}</div>
@@ -846,6 +899,7 @@ function render(d){
       <div class="hilo">H ${r0(dy.temperature_2m_max[0])}°  ·  L ${r0(dy.temperature_2m_min[0])}°  ·  Feels like ${r0(c.apparent_temperature)}°</div>
       <div class="wear">${wearTips(d, start).map(t=>`<span>${t}</span>`).join('')}</div>
     </section>
+    ${alertsHTML(d, start)}
 
     ${cardsHTML}
 
@@ -1322,9 +1376,87 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'Escape') closePuzzle(); else if (/^[a-zA-Z]$/.test(e.key)) pzKey(e.key.toLowerCase());
 });
 
+/* ---------- severe weather alerts (worked out from the forecast; not official warnings) ---------- */
+let alertsOpen = false;
+const STATE_CODES = { 'victoria':'vic','new south wales':'nsw','queensland':'qld','south australia':'sa','western australia':'wa','tasmania':'tas','northern territory':'nt','australian capital territory':'act' };
+function stateCode(){ const t = (current.sub || '').toLowerCase(); for (const [n, c] of Object.entries(STATE_CODES)) if (t.includes(n)) return c; return null; }
+function weatherAlerts(d, start){
+  const h = d.hourly, dy = d.daily, out = [];
+  const next = (arr) => arr.slice(start, start + 24);
+  const codes = next(h.weather_code), gusts = next(h.wind_gusts_10m || []), times = next(h.time);
+  const firstStorm = codes.findIndex(c => c >= 95);
+  if (firstStorm >= 0) out.push({ lvl:2, icon:'⛈️', t:'Thunderstorms', s: firstStorm === 0 ? 'Storms about now. Watch for lightning, hail and heavy rain.' : `Storms likely from about ${fmtHour(times[firstStorm])}.` });
+  const rainToday = dy.precipitation_sum[0] || 0, rainTmrw = dy.precipitation_sum[1] || 0;
+  if (rainToday >= 25) out.push({ lvl: rainToday >= 50 ? 2 : 1, icon:'🌧️', t:`Heavy rain — ${Math.round(rainToday)} mm today`, s:'Possible flash flooding on roads and low-lying areas.' });
+  else if (rainTmrw >= 25) out.push({ lvl:1, icon:'🌧️', t:`Heavy rain tomorrow — ${Math.round(rainTmrw)} mm`, s:'Plan ahead for wet roads.' });
+  const maxGust = gusts.length ? Math.max(...gusts) : 0;
+  if (maxGust >= 80){ const gi = gusts.indexOf(maxGust); out.push({ lvl: maxGust >= 100 ? 2 : 1, icon:'💨', t:`Damaging winds — gusts to ${Math.round(maxGust)} km/h`, s:`Strongest around ${fmtHour(times[gi])}. Secure loose items.` }); }
+  const hi = Math.max(dy.temperature_2m_max[0] ?? -99, dy.temperature_2m_max[1] ?? -99);
+  if (hi >= 38) out.push({ lvl: hi >= 42 ? 2 : 1, icon:'🔥', t:`Extreme heat — up to ${Math.round(hi)}°`, s:'Stay hydrated, avoid the midday sun, check on others.' });
+  const lo = dy.temperature_2m_min[1];
+  if (lo != null && lo <= 1) out.push({ lvl:1, icon:'❄️', t:`Frost likely tonight — ${Math.round(lo)}°`, s:'Cover plants and allow extra time to clear the car.' });
+  return out;
+}
+function alertsHTML(d, start){
+  const a = weatherAlerts(d, start); if (!a.length) return '';
+  const red = a.some(x => x.lvl >= 2), sc = stateCode();
+  const official = sc ? `https://www.bom.gov.au/${sc === 'act' ? 'nsw' : sc}/warnings/` : 'https://www.bom.gov.au/weather-and-climate/warnings-and-alerts';
+  return `<section class="alerts ${red ? '' : 'amber'} ${alertsOpen ? 'open' : ''}" onclick="if(!event.target.closest('a')){alertsOpen=!alertsOpen;this.classList.toggle('open');this.querySelector('small').textContent=alertsOpen?'Hide':'Details'}">
+    <div class="a-head">${a[0].icon} <span>${esc(a[0].t)}${a.length > 1 ? ` + ${a.length - 1} more` : ''}</span><small>${alertsOpen ? 'Hide' : 'Details'}</small></div>
+    <ul>${a.map(x => `<li><b>${x.icon} ${esc(x.t)}</b>${esc(x.s)}</li>`).join('')}</ul>
+    <div class="a-foot">Worked out from the forecast. Not an official warning.<br><a href="${official}" target="_blank" rel="noopener">Official BoM warnings ↗</a></div>
+  </section>`;
+}
+
+/* ---------- rain radar (RainViewer, past 2 hours) ---------- */
+function radarCard(){
+  return `<section class="card radar-card" onclick="openRadar()">
+    <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6-6"/></svg> Rain radar</h2>
+    <div class="row"><div class="pv"></div><div class="mid"><div class="t1">See rain moving</div><div class="t2">Last 2 hours around ${esc(current.name || 'you')}</div></div><div class="go">Open</div></div>
+  </section>`;
+}
+let RMAP = null, rFrames = [], rLayers = [], rIdx = 0, rTimer = null, rHost = '';
+function loadOnce(tag, attrs){ return new Promise((ok, bad) => { if (document.querySelector(`[data-lib="${attrs['data-lib']}"]`)) return ok(); const el = document.createElement(tag); Object.assign(el, attrs); el.setAttribute('data-lib', attrs['data-lib']); el.onload = ok; el.onerror = bad; document.head.appendChild(el); }); }
+async function openRadar(){
+  $('radarPage').classList.add('open');
+  $('rpTime').textContent = 'Loading…';
+  try {
+    await loadOnce('link', { rel: 'stylesheet', href: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css', 'data-lib': 'lcss' });
+    if (!window.L) await loadOnce('script', { src: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js', 'data-lib': 'ljs' });
+    const res = await fetch('https://api.rainviewer.com/public/weather-maps.json');
+    const j = await res.json();
+    rHost = j.host; rFrames = (j.radar && j.radar.past) || [];
+    if (!rFrames.length) throw new Error('no frames');
+  } catch { $('rpTime').textContent = 'Radar unavailable right now'; return; }
+  if (!RMAP){
+    RMAP = L.map('radarMap', { zoomControl: false, attributionControl: false, maxZoom: 10, minZoom: 4 });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 10 }).addTo(RMAP);
+    $('rpPlay').onclick = () => rTimer ? stopRadar() : playRadar();
+    $('rpSlider').oninput = e => { stopRadar(); showFrame(+e.target.value); };
+  }
+  RMAP.setView([current.lat, current.lon], 7);
+  if (RMAP._here) RMAP.removeLayer(RMAP._here);
+  RMAP._here = L.circleMarker([current.lat, current.lon], { radius: 7, color: '#fff', weight: 3, fillColor: '#FF2E78', fillOpacity: 1 }).addTo(RMAP);
+  rLayers.forEach(l => RMAP.removeLayer(l));
+  rLayers = rFrames.map(f => L.tileLayer(`${rHost}${f.path}/256/{z}/{x}/{y}/2/1_1.png`, { opacity: 0, maxNativeZoom: 7, maxZoom: 10, zIndex: 5 }).addTo(RMAP));
+  $('rpSlider').max = rFrames.length - 1;
+  setTimeout(() => RMAP.invalidateSize(), 60);
+  showFrame(rFrames.length - 1); playRadar();
+}
+function showFrame(i){
+  rIdx = i; rLayers.forEach((l, k) => l.setOpacity(k === i ? .75 : 0));
+  $('rpSlider').value = i;
+  const t = new Date(rFrames[i].time * 1000), ago = Math.round((Date.now() - t) / 60000);
+  $('rpTime').textContent = `${t.toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' })} · ${ago < 5 ? 'latest' : ago + ' min ago'}`;
+}
+function playRadar(){ stopRadar(); $('rpPlay').textContent = '❚❚'; let i = 0; rTimer = setInterval(() => { showFrame(i); i = (i + 1) % rFrames.length; if (i === 0) { clearInterval(rTimer); setTimeout(() => { if ($('rpPlay').textContent === '❚❚') playRadar(); }, 1200); } }, 500); }
+function stopRadar(){ clearInterval(rTimer); rTimer = null; $('rpPlay').textContent = '▶'; }
+function closeRadar(){ stopRadar(); $('radarPage').classList.remove('open'); }
+$('rpClose').onclick = closeRadar;
+
 /* ---------- card layout (reorderable) ---------- */
-const CARD_KEYS = ['thought','todo','puzzle','rain','hourly','daily','details'];
-const CARD_NAMES = { thought:'Thought', todo:'To-do', puzzle:'Daily puzzle', rain:'Next 2 hours', hourly:'Next 24 hours', daily:'7-day forecast', details:'Wind, UV & more' };
+const CARD_KEYS = ['thought','todo','puzzle','rain','radar','hourly','daily','details'];
+const CARD_NAMES = { thought:'Thought', todo:'To-do', puzzle:'Daily puzzle', rain:'Next 2 hours', radar:'Rain radar', hourly:'Next 24 hours', daily:'7-day forecast', details:'Wind, UV & more' };
 let editLayout = false;
 function layoutOrder(){
   const o = (store.get('wx_order', []) || []).filter(k => CARD_KEYS.includes(k));
@@ -1964,7 +2096,7 @@ window.addEventListener('focus', refreshIfStale);
   const ptr = $('ptr'), TH = 80;
   let y0 = null, dy = 0;
   addEventListener('touchstart', e => {
-    if (scrollY <= 0 && !editLayout && !sheet.classList.contains('open') && !$('pz').classList.contains('open') && !$('acct').classList.contains('open') && !$('todoPage').classList.contains('open')) { y0 = e.touches[0].clientY; dy = 0; ptr.style.transition = 'none'; }
+    if (scrollY <= 0 && !editLayout && !sheet.classList.contains('open') && !$('pz').classList.contains('open') && !$('acct').classList.contains('open') && !$('todoPage').classList.contains('open') && !$('radarPage').classList.contains('open')) { y0 = e.touches[0].clientY; dy = 0; ptr.style.transition = 'none'; }
   }, {passive:true});
   addEventListener('touchmove', e => {
     if (y0 === null) return;
