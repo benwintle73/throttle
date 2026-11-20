@@ -814,7 +814,8 @@ function tidyCodes(d){
     const c = d.current, h = d.hourly, dy = d.daily, m = d.minutely_15;
     // hourly
     if (h && h.precipitation) h.weather_code = h.weather_code.map((code, i) =>
-      WET(code) && (h.precipitation[i] || 0) < 0.2 && (h.precipitation_probability[i] ?? 0) < 50 ? 3 : code);
+      WET(code) && (h.precipitation[i] || 0) < 0.2 && (h.precipitation_probability[i] ?? 0) < 50 ? 3
+      : code >= 95 && (h.precipitation[i] || 0) < 1 && (h.precipitation_probability[i] ?? 0) < 60 ? 80 : code);
     // daily
     if (dy) dy.weather_code = dy.weather_code.map((code, i) =>
       WET(code) && (dy.precipitation_sum[i] || 0) < 1 && (dy.precipitation_probability_max[i] ?? 0) < 50 ? 3 : code);
@@ -826,7 +827,9 @@ function tidyCodes(d){
         let i0 = 0; m.time.forEach((t, i) => { if (Date.parse(t) <= now) i0 = i; });
         soon = Math.max(0, ...m.precipitation.slice(i0, i0 + 2).map(v => v || 0));
       }
-      if ((c.precipitation || 0) < 0.1 && soon < 0.1) c.weather_code = 3;
+      const wet = Math.max(c.precipitation || 0, soon);
+      if (wet < 0.2) c.weather_code = 3;                       // not actually raining
+      else if (c.weather_code >= 95 && wet < 1) c.weather_code = 80; // light rain, not a storm
     }
   }catch(e){}
   return d;
@@ -2086,6 +2089,11 @@ function locateAndLoad(quiet = false, explicit = false){
   if (explicit) $('placeName').textContent = 'Locating…';
   navigator.geolocation.getCurrentPosition(async pos => {
     const { latitude: lat, longitude: lon } = pos.coords;
+    // Same town as a saved place? Use that place's forecast so the two never disagree.
+    const km = (a, b) => { const R = 6371, r = Math.PI/180, dLa = (b.lat-a.lat)*r, dLo = (b.lon-a.lon)*r;
+      return 2*R*Math.asin(Math.sqrt(Math.sin(dLa/2)**2 + Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLo/2)**2)); };
+    const near = saved.map(p => [p, km({lat, lon}, p)]).sort((a, b) => a[1] - b[1])[0];
+    if (near && near[1] <= 8){ load({ ...near[0], here: true }, quiet); return; }
     const n = await placeName(lat, lon);
     load({ ...n, lat, lon, here: true }, quiet);
   }, () => {
