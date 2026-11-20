@@ -57,7 +57,7 @@
   .cloud::before,.cloud::after{content:'';position:absolute;border-radius:50%;background:inherit}
   .cloud::before{width:48%;height:180%;left:16%;bottom:20%}
   .cloud::after{width:36%;height:140%;left:50%;bottom:25%}
-  @keyframes drift{from{transform:translateX(-140px)}to{transform:translateX(calc(100vw + 140px))}}
+  @keyframes drift{from{transform:translateX(calc(-100% - 90px))}to{transform:translateX(calc(100vw + 90px))}}
   .deck{position:absolute;left:0;right:0;top:0;height:75%;opacity:0;transition:opacity 3s,background 3s;pointer-events:none}
   .deck.on{opacity:1}
   .deck.fog{height:100%}
@@ -1847,12 +1847,15 @@ function skyAt(p){
   }
 }
 
+let cloudKind = null;
 function buildClouds(k){
+  if (k === cloudKind && $('clouds').children.length) return;   // same sky: keep the clouds drifting where they are
+  cloudKind = k;
   const n = {clear:0, partly:3, cloudy:8, fog:4, rain:8, snow:6, storm:9}[k] ?? 2;
   const big = ['cloudy','rain','storm','snow'].includes(k);
   let html = '';
   for (let i=0;i<n;i++){
-    const w = (big ? 170 : 110) + (i*47)%(big ? 130 : 90), top = 20 + (i*67)%(big ? 230 : 200), dur = 80 + i*21, delay = -(i*31 % dur);
+    const w = (big ? 170 : 110) + (i*47)%(big ? 130 : 90), top = 20 + (i*67)%(big ? 230 : 200), dur = 80 + i*21, delay = -(((Date.now() / 1000) + i * 31) % dur).toFixed(1);
     html += `<div class="cloud" style="width:${w}px;height:${big ? 46 : 34}px;top:${top}px;animation-duration:${dur}s;animation-delay:${delay}s"></div>`;
   }
   html += `<div class="deck ${big || k==='fog' ? 'on' : ''} ${k==='fog' ? 'fog' : ''}"></div><div class="flash ${k==='storm' ? 'on' : ''}"></div>`;
@@ -3418,7 +3421,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.93', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.94', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
