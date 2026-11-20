@@ -385,7 +385,7 @@
   .pz-head{display:flex;align-items:center;gap:10px;padding:2px 6px;flex-shrink:0}
   .pz-head h3{flex:1;font-size:20px;font-weight:700}
   .pz-head small{display:block;font-size:12px;color:var(--soft);font-weight:500}
-  .pz-grid{flex:1 1 auto;min-height:0;display:grid;grid-template-rows:repeat(6,minmax(0,1fr));gap:6px;padding:10px 0;justify-content:center}
+  .pz-grid{flex:1 0 auto;min-height:0;display:grid;grid-template-rows:repeat(6,minmax(34px,1fr));gap:6px;padding:10px 0;justify-content:center}
   .pz-row{display:flex;gap:6px;min-height:0;height:100%;justify-content:center}
   .pz-row.shake{animation:shake .45s}
   @keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
@@ -901,6 +901,11 @@
   .clim .cb.now .mn{opacity:1;color:#FFD38A}
   .clim .cl-note{font-size:12px;opacity:.6;margin-top:10px}
   .favs,.results{max-height:calc(100dvh - 140px - env(safe-area-inset-top) - env(safe-area-inset-bottom));overflow-y:auto!important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  /* short screens (e.g. Safari with its toolbars): keep tiles square with letters inside, and let the puzzle scroll */
+  .pz .tp-in{overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .tile{container-type:size;min-height:34px}
+  .tile{font-size:min(clamp(18px,5.4vw,28px),58cqh)}
+  @media (max-height:700px){ .pz .pz-help{display:none} }
 </style>
 </head>
 <body>
@@ -3317,7 +3322,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.89', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.90', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
