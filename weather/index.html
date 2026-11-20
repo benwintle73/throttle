@@ -492,7 +492,7 @@
   .nick .rowi{display:flex;gap:8px}
   .nick .rowi input{flex:1}
   .nick .rowi button{border:0;border-radius:12px;padding:0 16px;background:#222;color:#fff;font:600 14px 'Outfit',sans-serif;cursor:pointer}
-  .toast{position:fixed;left:50%;top:22%;transform:translateX(-50%);background:#fff;color:#222;padding:10px 16px;border-radius:12px;font-weight:600;font-size:14px;z-index:40;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast{position:fixed;left:50%;top:22%;transform:translateX(-50%);background:#fff;color:#222;padding:10px 16px;border-radius:12px;font-weight:600;font-size:14px;z-index:95;opacity:0;transition:opacity .2s;pointer-events:none}
   .toast.show{opacity:1}
   body.neon .pz-card{background:linear-gradient(150deg,#14C8B4,#0F6FB8)}
   body.neon .pz-card .t1{font-family:'Anton',sans-serif;font-weight:400;font-size:22px;letter-spacing:.5px;text-transform:uppercase}
@@ -3122,14 +3122,14 @@ document.querySelector('.top .place').addEventListener('click', () => openPlaces
 // swipe left/right across the big temperature to flip between favourites
 (() => {
   let x0 = null, y0 = null;
-  document.addEventListener('touchstart', e => { const h = e.target.closest('#hero'); if (!h || editLayout){ x0 = null; return; } x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+  document.addEventListener('touchstart', e => { const h = e.target.closest('#hero') || (LANDSCAPE() ? document.body : null); if (!h || editLayout){ x0 = null; return; } x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
   document.addEventListener('touchend', e => {
     if (x0 === null) return;
     const t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0; x0 = null;
     if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.5 || !saved.length) return;
     let i = saved.findIndex(p => same(p, current));
     i = i < 0 ? 0 : (i + (dx < 0 ? 1 : -1) + saved.length) % saved.length;
-    load(saved[i]); toast(saved[i].name);
+    load(saved[i]); toast(saved[i].name); if (LANDSCAPE()) setTimeout(drawLand, 1200);
   }, { passive: true });
 })();
 $('closeSearch').onclick = closeSheet;
@@ -3220,7 +3220,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.84', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.85', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
