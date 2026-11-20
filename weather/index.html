@@ -213,6 +213,37 @@
   body.neon .acct-card .btn-p{border-radius:2px;background:#000;font-family:'Anton',sans-serif;font-weight:400;letter-spacing:1px;text-transform:uppercase;font-size:18px}
   body.neon .acct-card input,body.neon .acct-card .btn-s,body.neon .acct-tabs,body.neon .acct-tabs button{border-radius:2px}
 
+  /* ===== to-do ===== */
+  .todo .top-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
+  .todo .ask{font-size:17px;font-weight:600}
+  .todo .prog{font-size:13px;color:var(--soft);font-weight:600}
+  .todo .bar{height:6px;border-radius:6px;background:rgba(0,0,0,.15);overflow:hidden;margin-bottom:12px}
+  .todo .bar i{display:block;height:100%;background:linear-gradient(90deg,#2EE6A8,#14C8B4);border-radius:6px;transition:width .3s}
+  .todo .items{display:flex;flex-direction:column;gap:6px}
+  .todo .it{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.12);border-radius:12px;padding:10px 10px 10px 12px}
+  .todo .ck{width:24px;height:24px;border-radius:7px;border:2px solid rgba(255,255,255,.75);flex-shrink:0;display:grid;place-items:center;cursor:pointer;background:none;padding:0}
+  .todo .ck svg{width:14px;height:14px;opacity:0}
+  .todo .it.done .ck{background:#14C8B4;border-color:#14C8B4}
+  .todo .it.done .ck svg{opacity:1}
+  .todo .tx{flex:1;min-width:0;font-size:15px;font-weight:500;word-break:break-word}
+  .todo .it.done .tx{text-decoration:line-through;opacity:.6}
+  .todo .tx small{display:inline-block;font-size:11px;color:#fff;background:rgba(255,140,40,.85);border-radius:6px;padding:1px 7px;font-weight:700;margin-top:4px;text-decoration:none}
+  .todo .del{border:0;background:none;color:#fff;opacity:.55;font-size:17px;cursor:pointer;padding:2px 4px;flex-shrink:0}
+  .todo form{display:flex;gap:8px;margin-top:10px}
+  .todo form input{flex:1;min-width:0;height:44px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.92);color:#222;padding:0 12px;font:500 15px 'Outfit',sans-serif}
+  .todo form button{height:44px;border:0;border-radius:12px;background:#fff;color:#333;font:700 14px 'Outfit',sans-serif;padding:0 16px;cursor:pointer;flex-shrink:0}
+  .todo .empty{font-size:14px;color:var(--soft)}
+  .todo .hist-btn{margin-top:10px;border:0;background:none;color:#fff;font:600 13px 'Outfit',sans-serif;opacity:.8;cursor:pointer;padding:4px 0}
+  .todo .hist{margin-top:6px;display:flex;flex-direction:column;gap:8px}
+  .todo .tday{background:rgba(0,0,0,.14);border-radius:12px;padding:10px 12px}
+  .todo .tday b{font-size:13px;display:flex;justify-content:space-between}
+  .todo .tday b span{color:var(--soft);font-weight:600}
+  .todo .tday ul{list-style:none;margin-top:6px;font-size:13px;line-height:1.6}
+  .todo .tday li::before{content:'✓ ';color:#2EE6A8;font-weight:800}
+  body.neon .todo{background:linear-gradient(150deg,#7B3FF0,#E0368F)}
+  body.neon .todo .ask{font-family:'Anton',sans-serif;font-weight:400;font-size:22px;text-transform:uppercase;letter-spacing:.5px}
+  body.neon .todo .it,body.neon .todo .ck,body.neon .todo form input,body.neon .todo form button,body.neon .todo .tday{border-radius:2px}
+
   /* ===== reminders ===== */
   .rem .ask{font-size:17px;font-weight:600;margin-bottom:10px}
   .rem .sugs{display:flex;flex-direction:column;gap:8px}
@@ -555,7 +586,7 @@
 const DEFAULT_PLACE = { name:'Maryborough', sub:'Victoria, Australia', lat:-37.0457, lon:143.7393 };
 
 /* ---------- storage (safe) ---------- */
-const SYNC_KEYS = ['wx_saved','wx_last','wx_neon','wx_pz_stats'];
+const SYNC_KEYS = ['wx_saved','wx_last','wx_neon','wx_pz_stats','wx_todo'];
 const store = {
   get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch{ return d; } },
   set(k, v, quiet){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} if (!quiet && SYNC_KEYS.includes(k) && window.syncSoon) window.syncSoon(); }
@@ -714,9 +745,9 @@ function render(d){
 
     ${thoughtCard()}
 
-    ${puzzleCard()}
+    ${todoCard()}
 
-    ${remindersCard(d)}
+    ${puzzleCard()}
 
     ${nowcastCard(d)}
 
@@ -1204,7 +1235,79 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'Escape') closePuzzle(); else if (/^[a-zA-Z]$/.test(e.key)) pzKey(e.key.toLowerCase());
 });
 
-/* ---------- reminders (push notifications) ---------- */
+/* ---------- daily to-do list ---------- */
+// Items live in wx_todo (synced with the account). At the start of each new day, ticked items are archived under
+// the day they were ticked; unticked ones roll over into today.
+const TODO_KEEP_DAYS = 60;
+let todoHist = false;
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+function todoGet(){ return store.get('wx_todo', { items: [], archive: {}, day: localDay() }); }
+function todoSave(t){ store.set('wx_todo', t); }
+function todoRoll(){
+  const t = todoGet(), today = localDay();
+  if (t.day === today) return t;
+  t.archive = t.archive || {};
+  const keep = [];
+  for (const it of t.items){
+    if (it.deleted){ if (today - (it.u_day || today) < 30) keep.push(it); continue; }   // keep tombstones a while for sync
+    if (it.done){ const k = String(it.doneDay ?? t.day); (t.archive[k] = t.archive[k] || []).push(it.text); continue; }
+    keep.push(it);                                            // not done: carries over
+  }
+  t.items = keep; t.day = today;
+  Object.keys(t.archive).forEach(k => { if (today - +k > TODO_KEEP_DAYS) delete t.archive[k]; });
+  todoSave(t);
+  return t;
+}
+function mergeTodo(r, l){
+  if (!r) return l; if (!l) return r;
+  const byId = {};
+  [...(r.items||[]), ...(l.items||[])].forEach(it => { const o = byId[it.id]; if (!o || (it.u||0) > (o.u||0)) byId[it.id] = it; });
+  const archive = { ...(r.archive||{}) };
+  Object.entries(l.archive||{}).forEach(([k, v]) => { if (!archive[k] || v.length > archive[k].length) archive[k] = v; });
+  return { items: Object.values(byId).sort((a,b) => (a.c||0) - (b.c||0)), archive, day: Math.min(r.day ?? l.day, l.day ?? r.day) };
+}
+const dayLabel = n => { const d = new Date(2000, 0, 1 + n); return d.toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short' }); };
+function todoCard(){
+  const t = todoRoll(), today = localDay();
+  const items = t.items.filter(i => !i.deleted);
+  const done = items.filter(i => i.done).length;
+  const tick = `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>`;
+  const list = items.map(i => {
+    const age = today - (i.day ?? today);
+    const tag = age > 0 ? `<small>${age === 1 ? 'From yesterday' : `From ${age} days ago`}</small>` : '';
+    return `<div class="it ${i.done?'done':''}"><button class="ck" aria-label="${i.done?'Untick':'Tick'}" onclick="todoToggle('${i.id}')">${tick}</button><div class="tx">${esc(i.text)}${tag}</div><button class="del" aria-label="Delete" onclick="todoDel('${i.id}')">✕</button></div>`;
+  }).join('');
+  const days = Object.keys(t.archive || {}).map(Number).sort((a,b) => b - a).slice(0, 14);
+  const hist = todoHist ? `<div class="hist">${days.length ? days.map(k => `<div class="tday"><b>${dayLabel(k)}<span>${t.archive[k].length} done</span></b><ul>${t.archive[k].map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('') : '<div class="empty">Finished days will show up here.</div>'}</div>` : '';
+  return `<section class="card todo">
+    <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> To-do today</h2>
+    <div class="top-row"><div class="ask">${items.length ? (done === items.length ? 'All done — nice work! 🎉' : 'What’s on today?') : 'What do you want to get done today?'}</div>${items.length ? `<div class="prog">${done} of ${items.length}</div>` : ''}</div>
+    ${items.length ? `<div class="bar"><i style="width:${Math.round(done/items.length*100)}%"></i></div><div class="items">${list}</div>` : ''}
+    <form onsubmit="todoAdd(event)"><input id="todoIn" type="text" placeholder="Add a task…" maxlength="120" autocomplete="off" enterkeyhint="done"><button type="submit">Add</button></form>
+    <button class="hist-btn" onclick="todoHist=!todoHist; render(lastData)">${todoHist ? 'Hide past days ▲' : 'Past days ▼'}</button>
+    ${hist}
+  </section>`;
+}
+function todoAdd(e){
+  e.preventDefault();
+  const v = $('todoIn').value.trim(); if (!v) return;
+  const t = todoRoll(), now = Date.now();
+  t.items.push({ id: uid(), text: v, done: false, day: localDay(), c: now, u: now });
+  todoSave(t); render(lastData);
+  setTimeout(() => { const i = $('todoIn'); if (i) i.focus(); }, 30);   // keep typing the next one
+}
+function todoToggle(id){
+  const t = todoRoll(), it = t.items.find(i => i.id === id); if (!it) return;
+  it.done = !it.done; it.doneDay = it.done ? localDay() : null; it.u = Date.now();
+  todoSave(t); render(lastData);
+}
+function todoDel(id){
+  const t = todoRoll(), it = t.items.find(i => i.id === id); if (!it) return;
+  it.deleted = true; it.u = Date.now(); it.u_day = localDay();
+  todoSave(t); render(lastData);
+}
+
+/* ---------- reminders (push notifications) — not shown on the home screen for now ---------- */
 const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
 let remList = [], remState = 'unknown';         // unknown | off | on | blocked | unsupported | needs-install
@@ -1472,6 +1575,7 @@ function mergeData(remote, local){
   // stats: keep whichever has played more (ties: better streak)
   const rs = remote.wx_pz_stats, ls = local.wx_pz_stats;
   out.wx_pz_stats = !rs ? ls : !ls ? rs : (ls.played > rs.played || (ls.played === rs.played && ls.streak > rs.streak)) ? ls : rs;
+  out.wx_todo = mergeTodo(remote.wx_todo, local.wx_todo);
   Object.keys(out).forEach(k => out[k] === undefined && delete out[k]);
   return out;
 }
@@ -1503,7 +1607,6 @@ window.syncSoon = () => { if (!user) return; clearTimeout(syncTimer); syncTimer 
 function setUser(u){
   const was = user && user.id;
   user = u || null;
-  if (user && user.id !== was) initReminders();
   if (!user) remList = [];
   if ((user && user.id) !== was && lastData) render(lastData);
   $('acctDot').classList.toggle('on', !!user);
