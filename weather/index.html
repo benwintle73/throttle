@@ -638,6 +638,16 @@
   .fun .yr{font-weight:800;margin-right:4px}
   body.neon .fun .tile2,body.neon .fun .fortune{border-radius:3px}
   body.neon .fun .tile2{background:rgba(0,0,0,.35)}
+  .mq .q{font-size:17px;font-weight:600;line-height:1.35;margin:2px 0 10px}
+  .mq .ch{display:flex;flex-direction:column;gap:6px}
+  .mq .ch button{border:0;border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.16);color:#fff;font:600 14px 'Outfit',sans-serif;text-align:left;cursor:pointer;transition:background .2s}
+  .mq .ch button.right{background:#14C8B4}
+  .mq .ch button.wrong{background:#E5484D}
+  .mq .ch button:disabled{cursor:default}
+  .mq .ch button:disabled:not(.right):not(.wrong){opacity:.45}
+  .mq .mqres{margin-top:8px;font-size:14px;font-weight:600}
+  .mq .skip{margin-top:8px;border:0;background:none;color:var(--soft);font:600 13px 'Outfit',sans-serif;text-decoration:underline;padding:0;cursor:pointer}
+  body.neon .mq .ch button{border-radius:2px}
   /* 8-ball */
   .eb .tp-in{align-items:center;justify-content:center;padding:20px;gap:18px;text-align:center}
   .eb .pz-head{position:absolute;top:calc(env(safe-area-inset-top) + 10px);left:0;right:0;max-width:480px;margin:0 auto;padding:0 14px}
@@ -830,6 +840,7 @@
 <script src="quotes.js"></script>
 <script src="fortunes.js"></script>
 <script src="fun.js"></script>
+<script src="movies.js"></script>
 <script src="puzzle-words.js"></script>
 <script>
 const DEFAULT_PLACE = { name:'Maryborough', sub:'Victoria, Australia', lat:-37.0457, lon:143.7393 };
@@ -1360,6 +1371,41 @@ function crackCookie(el){
     const c = $('funCard'); if (c) c.outerHTML = funCard();
   }, 700);
 }
+// Movie quote of the day: random per person per day, 3 choices, one guess (or just reveal)
+function movieToday(){
+  const Q = window.MOVIE_QUOTES || []; if (!Q.length) return null;
+  const day = localDay(), cur = store.get('wx_movie', null);
+  if (cur && cur.day === day && Q[cur.i]) return cur;
+  const recent = (cur && cur.recent) || [];
+  let pool = Q.map((q, i) => i).filter(i => !recent.includes(i)); if (!pool.length) pool = Q.map((q, i) => i);
+  const i = pool[Math.floor(Math.random() * pool.length)], ans = Q[i];
+  const titles = [...new Set(Q.filter(x => x.m !== ans.m && (!ans.f || x.f !== ans.f)).map(x => x.m))];
+  const dec = []; while (dec.length < 2 && titles.length) dec.push(titles.splice(Math.floor(Math.random() * titles.length), 1)[0]);
+  const choices = [ans.m, ...dec].sort(() => Math.random() - .5);
+  const m = { day, i, choices, picked: null, recent: [...recent, i].slice(-120), score: (cur && cur.score) || 0, played: (cur && cur.played) || 0 };
+  store.set('wx_movie', m); return m;
+}
+function movieHTML(){
+  const m = movieToday(); if (!m) return '';
+  const Q = window.MOVIE_QUOTES[m.i], done = m.picked !== null;
+  const btns = m.choices.map((c, k) => {
+    const cls = done ? (c === Q.m ? 'right' : (m.picked === k ? 'wrong' : '')) : '';
+    return `<button class="${cls}" ${done ? 'disabled' : ''} onclick="pickMovie(${k})">${esc(c)}</button>`;
+  }).join('');
+  let res = '';
+  if (done){
+    const right = m.picked >= 0 && m.choices[m.picked] === Q.m;
+    res = `<div class="mqres">${m.picked === -1 ? `🎬 ${esc(Q.m)} (${Q.y})` : right ? `🎬 Nailed it! ${esc(Q.m)} (${Q.y})` : `Not quite — it’s from ${esc(Q.m)} (${Q.y})`}${m.played ? ` · ${m.score} of ${m.played} right` : ''}</div>`;
+  }
+  return `<div class="row2 mq"><div class="lbl">Movie quote · guess the film</div><div class="q">“${esc(Q.q)}”</div><div class="ch">${btns}</div>${res}${done ? '' : `<button class="skip" onclick="pickMovie(-1)">Just tell me</button>`}</div>`;
+}
+function pickMovie(k){
+  const m = store.get('wx_movie', null); if (!m || m.picked !== null) return;
+  m.picked = k;
+  if (k >= 0){ m.played = (m.played || 0) + 1; if (m.choices[k] === window.MOVIE_QUOTES[m.i].m) m.score = (m.score || 0) + 1; }
+  store.set('wx_movie', m);
+  const el = $('funCard'); if (el) el.outerHTML = funCard();
+}
 function funFact(){ const F = window.FUN_FACTS || []; return F.length ? F[(localDay() * 7) % F.length] : ''; }
 const OTD_DARK = /\b(kill|killed|killing|bomb|murder|massacre|war|wars|attack|terror|shot|shooting|assassin|execut|genocide|died|death|dead|serial|crash|disaster|earthquake|tsunami|famine|hijack|riot|invad|invasion|battle|siege|slave|rape|abuse|suicide|hostage|explos|sank|sinking|holocaust|nazi|coup|arrest|prison|plague|epidemic|pandemic|victim|injur)/i;
 let otdLoading = false;
@@ -1396,6 +1442,7 @@ function funCard(){
     <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.6 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg> Just for fun</h2>
     <div class="tiles">${ck ? cookie + ball.replace('class="tile2"','class="tile2 wide"') : cookie + ball}</div>
     ${hasOtd ? `<div class="row2"><div class="lbl">On this day</div><div class="txt"><span class="yr">${otd.year}</span>${otd.url ? `<a href="${esc(otd.url)}" target="_blank" rel="noopener">${esc(otd.text)}</a>` : esc(otd.text)}</div></div>` : ''}
+    ${movieHTML()}
     <div class="row2"><div class="lbl">Fun fact</div><div class="txt">${esc(funFact())}</div></div>
   </section>`;
 }
