@@ -153,9 +153,10 @@
   .rain-sum div{font-size:12px;color:var(--soft);text-transform:uppercase;letter-spacing:1px;font-weight:600}
   .rain-sum b{display:block;font-size:24px;color:#fff;letter-spacing:0;text-transform:none;font-weight:600;margin-top:2px}
   .rain-sum b small{font-size:13px;font-weight:500;margin-left:2px}
-  .rchart{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;align-items:end;height:150px;padding-top:4px;
-    background:repeating-linear-gradient(180deg,transparent 0 36px,rgba(255,255,255,.14) 36px 37px)}
-  .rcol{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+  .rchart{position:relative;display:grid;grid-template-columns:repeat(8,1fr);gap:6px;align-items:end;height:118px;margin-top:18px}
+  .rchart .band{position:absolute;left:0;right:0;height:0;border-top:1px dashed rgba(255,255,255,.28);pointer-events:none}
+  .rchart .band span{position:absolute;right:0;bottom:2px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--soft)}
+  .rcol{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;position:relative;z-index:1}
   .rcol em{font-style:normal;font-size:12px;font-weight:700;margin-bottom:4px;white-space:nowrap}
   .rcol i{width:100%;border-radius:7px 7px 3px 3px;background:rgba(255,255,255,.2);min-height:4px}
   .rcol i.l{background:linear-gradient(180deg,#B6EEFF,#6CC8F7)}
@@ -404,7 +405,7 @@
   body.neon .rcol i.l{background:#fff}
   body.neon .rcol i.m{background:#FFE14D}
   body.neon .rcol i.h{background:#FF2E9A}
-  body.neon .rchart{background:repeating-linear-gradient(180deg,transparent 0 36px,rgba(0,0,0,.18) 36px 37px)}
+  body.neon .rchart .band{border-top-color:rgba(0,0,0,.35)}
   body.neon .rain-sum b,body.neon .rcol em{font-family:'Anton',sans-serif;font-weight:400;letter-spacing:.5px}
 
   /* ===== Neon Coast mode: painted panel-grid collage ===== */
@@ -1602,9 +1603,10 @@ function nowcastCard(d){
   // intensity per 15 min: light < 0.5 mm, moderate < 2 mm, heavy >= 2 mm
   const lvl = v => v < WET ? '' : v < 0.5 ? 'l' : v < 2 ? 'm' : 'h';
   const total = P.reduce((a,v)=>a+v,0), peak = Math.max(...P);
-  const scale = Math.max(0.5, Math.ceil(peak*4)/4);                // chart top: fits drizzle, at least 0.5 mm
+  const TOP = 5;                                                   // fixed scale: 5 mm in 15 min = top of chart
+  const hgt = v => Math.sqrt(Math.min(v, TOP) / TOP) * 100;        // square-root scale: drizzle visible, heavy rain not huge
   const fmt = v => v >= 10 ? v.toFixed(0) : v.toFixed(1);
-  const cols = P.map(v => `<div class="rcol">${v >= WET ? `<em>${fmt(v)}</em>` : ''}<i class="${lvl(v)}" style="height:${v >= WET ? Math.max(6, v/scale*82) : 3}%"></i></div>`).join('');
+  const cols = P.map(v => `<div class="rcol">${v >= WET ? `<em>${fmt(v)}</em>` : ''}<i class="${lvl(v)}" style="height:${v >= WET ? Math.max(6, hgt(v)) : 3}%"></i></div>`).join('');
   const times = T.map((t,i) => `<span>${i===0 ? 'Now' : fmtClock(t)}</span>`).join('');
   const peakName = peak < 0.5 ? 'Light' : peak < 2 ? 'Moderate' : 'Heavy';
   return `<section class="card nowcast">
@@ -1615,7 +1617,7 @@ function nowcastCard(d){
       <div>Heaviest<b>${fmt(peak)}<small>mm / 15 min</small></b></div>
       <div>Intensity<b>${peakName}</b></div>
     </div>
-    <div class="rchart">${cols}</div>
+    <div class="rchart">${cols}<b class="band" style="bottom:${hgt(2)}%"></b><b class="band" style="bottom:${hgt(0.5)}%"></b></div>
     <div class="rtimes">${times}</div>
     <div class="rkey"><span style="--k:#8FDCFB">Light</span><span style="--k:#3F95EC">Moderate</span><span style="--k:#4A3FD8">Heavy</span><span style="opacity:.8">mm per 15 min</span></div>
   </section>`;
