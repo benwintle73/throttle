@@ -1317,24 +1317,22 @@ window.addEventListener('resize', updateSky);
 /* ---------- thought of the day ---------- */
 // One per day, changes at local midnight. Shuffled order with no repeats until the whole list is used.
 function thoughtOfTheDay(){
-  // Morning thought until midday, afternoon/evening thought after. Each pool gets its own
-  // shuffle per calendar year, so with 366+ in each pool nothing repeats within a year.
+  // One thought a day, picked at random for each person, from thoughts that suit any time of day.
+  // Remembers recent picks so the same one doesn't come back for months.
   const all = window.THOUGHTS || []; if (!all.length) return null;
-  const now = new Date(), y = now.getFullYear(), pm = now.getHours() >= 12;
-  const list = all.filter(t => t.w === (pm ? 'pm' : 'am'));
-  const pool = list.length ? list : all;
-  const doy = Math.round((new Date(y, now.getMonth(), now.getDate()) - new Date(y, 0, 1)) / 864e5);
-  const n = pool.length;
-  let seed = (y * 2654435761 + (pm ? 7919 : 97)) >>> 0;
-  const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
-  const order = [...Array(n).keys()];
-  for (let i = n-1; i > 0; i--){ const j = Math.floor(rnd()*(i+1)); [order[i],order[j]] = [order[j],order[i]]; }
-  return pool[order[doy % n]];
+  const TIMED = /\b(morning|evening|tonight|afternoon|bedtime|sunrise|sunset|night|lunch|breakfast|dinner)\b|before bed|end of the day|day ends/i;
+  const pool = all.map((t, i) => i).filter(i => !TIMED.test(all[i].x));
+  const day = localDay(), cur = store.get('wx_thought', null);
+  if (cur && cur.day === day && all[cur.i]) return all[cur.i];
+  const recent = (cur && cur.recent) || [];
+  const fresh = pool.filter(i => !recent.includes(i)), from = fresh.length ? fresh : pool;
+  const pick = from[Math.floor(Math.random() * from.length)];
+  store.set('wx_thought', { day, i: pick, recent: [...recent, pick].slice(-300) });
+  return all[pick];
 }
 function thoughtCard(){
   const t = thoughtOfTheDay(); if (!t) return '';
-  const h = new Date().getHours();
-  const when = h < 12 ? 'Morning thought' : h < 17 ? 'Afternoon thought' : 'Evening thought';
+  const when = 'Thought for today';
   const q = t.t === 'q' ? `“${t.x}”` : t.x;
   const by = t.t === 'q' ? `<div class="by">— ${t.by}</div>` : '';
   return `<section class="card totd">
