@@ -2037,7 +2037,7 @@ function drawPuzzle(revealRow = -1){
   // hint button: up to 3 per game, one per line, 75 points each
   const used = (st.hints || []).length, rowNow = st.guesses.length, usedHere = (st.hintRows || []).includes(rowNow);
   $('pzHint').innerHTML = st.done || st.legacy ? '' :
-    `<button id="hintBtn" ${used >= 3 || usedHere || rowNow < 3 ? 'disabled' : ''}>💡 ${rowNow < 3 ? 'Hints unlock after 3 guesses' : used >= 3 ? 'No hints left' : usedHere ? 'One hint per line' : `Hint · ${3 - used} left${daily ? ' · −75 pts' : ''}`}</button>`;
+    `<button id="hintBtn" ${used >= 3 || usedHere || rowNow < 3 ? 'disabled' : ''}>💡 ${rowNow < 3 ? 'Hints unlock after 3 guesses' : used >= 3 ? 'No hints left' : usedHere ? 'One hint per line' : `Hint · ${3 - used} left${daily ? ' · −25 pts' : ''}`}</button>`;
   if (!st.done && !st.legacy && rowNow >= 1) $('pzHint').insertAdjacentHTML('beforeend', `<button id="giveUpBtn" class="gu">Give up</button>`);
   const gu = $('giveUpBtn'); if (gu) gu.onclick = pzGiveUp;
   const hb = $('hintBtn'); if (hb) hb.onclick = pzHint;
@@ -2174,7 +2174,7 @@ function drawBoard(){
     <div class="lb-tabs"><button class="${boardTab==='week'?'on':''}" data-t="week">This week</button><button class="${boardTab==='today'?'on':''}" data-t="today">Today</button><button class="${boardTab==='all'?'on':''}" data-t="all">All time</button></div>
     ${rows || `<div class="lb-empty">No scores yet — be the first.</div>`}
     ${meBox}
-    <div class="lb-rules"><b>Scoring</b> — solved in 1 guess: 600 · 2: 500 · 3: 400 · 4: 300 · 5: 200 · 6: 100. Speed bonus up to +100, dropping 1 point every 6 seconds from your first guess to your last. Hints unlock after 3 guesses; each costs 75 (up to 3, one per line). Not solved or gave up: 0. The week runs Monday to Sunday and resets each Monday; All time keeps adding up. Every guess is checked and timed on the server.<br>Playing as <b>${esc(d.nickname || '—')}</b> — change your name in your account.</div>
+    <div class="lb-rules"><b>Scoring</b> — solved in 1 guess: 600 · 2: 500 · 3: 400 · 4: 300 · 5: 200 · 6: 100. Speed bonus up to +100, dropping 1 point every 6 seconds from your first guess to your last. Hints unlock after 3 guesses; each costs 25 (up to 3, one per line). Not solved or gave up: 0. The week runs Monday to Sunday and resets each Monday; All time keeps adding up. Every guess is checked and timed on the server.<br>Playing as <b>${esc(d.nickname || '—')}</b> — change your name in your account.</div>
     <div class="pz-actions" style="margin-top:12px"><button class="ghost" onclick="$('pz').classList.remove('board')">Back to puzzle</button></div>`;
   lb.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { boardTab = b.dataset.t; drawBoard(); });
   lb.querySelectorAll('[data-lg]').forEach(b => b.onclick = () => pickLeague(b.dataset.lg || null));
@@ -2201,7 +2201,7 @@ const HOW_HTML = `
   <ul>
     <li>Tap <b>💡 Hint</b> to light up a letter that’s in the word on the keyboard — it doesn’t say where it goes.</li>
     <li>Hints unlock after your 3rd guess, one per line, up to 3 per game.</li>
-    <li>Each hint costs <b>75 points</b>.</li>
+    <li>Each hint costs <b>25 points</b>.</li>
   </ul>
   <h4>Giving up</h4>
   <p>Stuck? <b>Give up</b> shows the word straight away. You score 0 for the day and your streak resets.</p>
@@ -2214,10 +2214,10 @@ const HOW_HTML = `
     <tr><td>5 guesses</td><td>200</td></tr>
     <tr><td>6 guesses</td><td>100</td></tr>
     <tr><td>Speed bonus</td><td>up to +100</td></tr>
-    <tr><td>Each hint used</td><td>−75</td></tr>
+    <tr><td>Each hint used</td><td>−25</td></tr>
     <tr><td>Not solved / gave up</td><td>0</td></tr>
   </table>
-  <p>The speed bonus starts at 100 and drops 1 point every 6 seconds, timed from your first guess (or first hint) to your last. A solved game always scores at least 25.</p>
+  <p>The speed bonus starts at 100 and drops 1 point every 6 seconds, timed from your first guess to your last. Hints only unlock from your 4th guess, so even the toughest solve with all 3 hints still scores at least 25.</p>
   <h4>Leaderboards</h4>
   <ul>
     <li><b>This week</b> — your points added up Monday to Sunday; it resets every Monday.</li>
@@ -2994,7 +2994,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.73', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.74', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
