@@ -203,12 +203,13 @@
   .sw-row .sw::after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
   .sw-row input:checked + .sw{background:#2EC27E}
   .sw-row input:checked + .sw::after{transform:translateX(20px)}
-  .appear{margin-top:18px;padding-top:16px;border-top:1px solid #eee}
+  .appear{margin-top:14px;padding-top:12px;border-top:1px solid #eee}
+  .appear:first-of-type{margin-top:4px;padding-top:0;border-top:0}
   .appear h4{font-size:12px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
   .appear .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .appear button{border:2px solid #e2dfeb;border-radius:14px;padding:0;overflow:hidden;background:#fff;cursor:pointer;text-align:left;font:600 14px 'Outfit',sans-serif;color:#333}
   .appear button.on{border-color:#6A5AE0;box-shadow:0 0 0 3px rgba(106,90,224,.18)}
-  .appear button i{display:block;height:54px}
+  .appear button i{display:block;height:40px}
   .appear button span{display:flex;align-items:center;justify-content:space-between;padding:8px 10px}
   .appear button span b{width:18px;height:18px;border-radius:50%;border:2px solid #ccc}
   .appear button.on span b{border:5px solid #6A5AE0}
@@ -452,7 +453,13 @@
   body.neon .lb-row,body.neon .lb-tabs,body.neon .lb-tabs button,body.neon .lb-me,body.neon .lb-rules,body.neon .pz-actions button{border-radius:2px}
   body.neon .lb-row .rk,body.neon .lb-row .sc,body.neon .lb-me b{font-family:'Anton',sans-serif;font-weight:400;letter-spacing:.5px}
   body.neon .lb-row.me{background:rgba(255,46,154,.35);outline-color:#FF2E9A}
-  .nick{margin-top:14px}
+  .nick{margin-top:2px}
+  .acct-sec{margin-top:14px;padding-top:12px;border-top:1px solid #eee}
+  .acct-sec h4{font-size:12px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+  .acct-card .who{display:flex;align-items:center;gap:10px}
+  .acct-card .who > div{flex:1;min-width:0}
+  .acct-card .who .syncl{flex:none;border:0;background:#fff;color:#6A5AE0;border-radius:10px;padding:8px 12px;font:600 14px 'Outfit',sans-serif;cursor:pointer}
+  .acct-card .btn-s.small{height:42px;margin-top:12px}
   .nick .rowi{display:flex;gap:8px}
   .nick .rowi input{flex:1}
   .nick .rowi button{border:0;border-radius:12px;padding:0 16px;background:#222;color:#fff;font:600 14px 'Outfit',sans-serif;cursor:pointer}
@@ -572,6 +579,8 @@
     transform:translateY(-16px);transition:transform .25s;
   }
   .sheet.open .panel{transform:none}
+  #acct{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  #acct .panel{padding-bottom:calc(env(safe-area-inset-bottom) + 24px)}
   .search{display:flex;gap:10px}
   .search input{
     flex:1;height:48px;border-radius:16px;border:1px solid var(--line);
@@ -2173,14 +2182,13 @@ function drawAcct(){
   if (!sb){ b.innerHTML = `<h3>Account <button class="x" onclick="closeAcct()">${X_SVG}</button></h3><p class="sub">Accounts need an internet connection. Try again when you’re online.</p>`; return; }
   if (user){
     const when = lastSync ? new Date(lastSync).toLocaleString('en-AU',{hour:'numeric',minute:'2-digit',day:'numeric',month:'short'}) : 'not yet';
-    b.innerHTML = `<h3>Your account <button class="x" onclick="closeAcct()">${X_SVG}</button></h3>
-      <p class="sub">Your saved places, Neon Coast setting and puzzle progress sync to every phone you sign in on.</p>
-      <div class="who"><small>Signed in as</small><b>${esc(user.email)}</b><small>Last synced ${when}</small></div>
+    b.innerHTML = `<h3>Settings <button class="x" onclick="closeAcct()">${X_SVG}</button></h3>
+      ${appearanceHTML()}
+      <div class="acct-sec"><h4>Account</h4>
+      <div class="who"><div><small>Signed in as</small><b>${esc(user.email)}</b><small>Synced ${when}</small></div><button class="syncl" id="syncBtn">Sync</button></div>
       ${msg}
       <div class="nick"><label for="nk">Leaderboard name</label><div class="rowi"><input id="nk" maxlength="16" placeholder="Your name on the puzzle leaderboard"><button id="nkSave" type="button">Save</button></div></div>
-      <button class="btn-p" id="syncBtn">Sync now</button>
-      <button class="btn-s" id="outBtn">Sign out</button>
-      ${appearanceHTML()}`;
+      <button class="btn-s small" id="outBtn">Sign out</button></div>`;
     bindAppearance();
     sb.rpc('weather_ensure_player').then(({ data }) => { const i = $('nk'); if (i && !i.value && data) i.value = data; });
     $('nkSave').onclick = async () => { acctErr = acctMsg = '';
