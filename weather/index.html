@@ -926,6 +926,36 @@
   .appear .pv-seoul::after{content:'';position:absolute;right:12%;top:18%;width:3px;height:40%;background:#EDEFF5;box-shadow:-1px 6px 0 2px #EDEFF5}
   @media (orientation:landscape) and (max-height:520px){ .kscene{height:100vh!important} }
   .updpill{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:99;border:0;border-radius:999px;padding:11px 18px;background:#fff;color:#222;font:700 14px 'Outfit',sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.3);cursor:pointer;animation:popIn .3s ease}
+  /* ===== K-Street theme ===== */
+  .kstreet-only{display:none}
+  body.kstreet .kstreet-only{display:block}
+  body.kstreet .bg{background:linear-gradient(180deg,var(--g1) 0%,var(--g2) 28%,var(--g3) 46%,var(--earth,#B8A8D8) 74%,var(--earth2,#7E6AA8) 100%)}
+  .kst{position:absolute;left:0;right:0;bottom:0;height:262px;pointer-events:none}
+  .kst svg{position:absolute;inset:0;width:100%;height:100%}
+  .kst .win{opacity:calc(var(--o) * var(--winop,.4))}
+  .kst .sign text{filter:drop-shadow(0 0 2px var(--sc))}
+  body.kst-night .kst .sign text{animation:neonflick 6s infinite;filter:drop-shadow(0 0 3px var(--sc)) drop-shadow(0 0 6px var(--sc))}
+  @keyframes neonflick{0%,92%,100%{opacity:1}93%{opacity:.3}94%{opacity:1}96%{opacity:.5}97%{opacity:1}}
+  .kst .heart{transform-box:fill-box;transform-origin:50% 60%;animation:beat 1.2s ease-in-out infinite}
+  @keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.25)}30%{transform:scale(1)}45%{transform:scale(1.15)}}
+  .kst .bulb{animation:twink 1.5s ease-in-out infinite alternate}
+  @keyframes twink{to{opacity:.35}}
+  .kst .dancer{transform-box:fill-box;transform-origin:50% 100%;animation:dance .6s ease-in-out infinite alternate}
+  @keyframes dance{0%{transform:translateY(0) rotate(-4deg)}100%{transform:translateY(-3px) rotate(4deg)}}
+  .kst .arm{transform-box:fill-box;transform-origin:50% 100%;animation:armup .6s ease-in-out infinite alternate}
+  .kst .a1{animation-direction:alternate-reverse}
+  @keyframes armup{to{transform:scaleY(-1)}}
+  .kst .fan{animation:wave 1.2s ease-in-out infinite alternate}
+  @keyframes wave{from{transform:rotate(-14deg)}to{transform:rotate(14deg)}}
+  body.kst-night .kst .stick{filter:drop-shadow(0 0 4px currentColor) brightness(1.3)}
+  body.kstreet .hero{padding-bottom:150px}
+  body.kstreet .place h1{font-family:'Jua',sans-serif;font-weight:400;font-size:28px}
+  body.kstreet .card{background:rgba(245,230,255,.15);border-color:rgba(220,190,255,.4)}
+  body.kstreet .card h2{color:#F3C6FF}
+  body.kstreet .tmrw{background:rgba(70,40,120,.32)}
+  .appear .pv-kst{background:linear-gradient(180deg,#2E1670 0%,#8A2FA0 50%,#FF5FA0 62%,#C9B6FF 63%,#5A5470 88%);position:relative}
+  .appear .pv-kst::after{content:'♥';position:absolute;left:44%;top:34%;color:#fff;font-size:13px;text-shadow:0 0 6px #FF6FB5}
+  @media (orientation:landscape) and (max-height:520px){ .kst{height:100vh!important} }
 </style>
 </head>
 <body>
@@ -952,6 +982,7 @@
   <div class="river murray-only" id="river"></div>
   <div class="bscene beach-only" id="beach"></div>
   <div class="kscene seoul-only" id="kscene"></div>
+  <div class="kst kstreet-only" id="kst"></div>
   <div class="petals seoul-only" id="petals"></div>
   <div class="precip" id="precip"></div>
 </div>
@@ -1417,6 +1448,17 @@ const BEACH_SKY = [
   [ 1.06, ['#1C2160','#7A3B78','#E0607A']],
   [ 1.16, ['#081430','#10244A','#1B3A5E']],
 ];
+const KST_SKY = [
+  [-0.16, ['#140A33','#2B1258','#4A1E78']],
+  [-0.06, ['#3A1E78','#8A4FB8','#FF8FC4']],
+  [ 0.02, ['#7A6BE0','#FFA8D2','#FFE0B8']],
+  [ 0.14, ['#8EC5FF','#C9B8FF','#FFD6EC']],
+  [ 0.50, ['#7FB8FF','#B9C8FF','#FFE0F2']],
+  [ 0.86, ['#8E9CFF','#E0A8F0','#FFD0C0']],
+  [ 0.98, ['#5A3FC0','#FF6FB0','#FFB27A']],
+  [ 1.06, ['#2E1670','#8A2FA0','#FF5FA0']],
+  [ 1.16, ['#140A33','#2B1258','#4A1E78']],
+];
 const SEOUL_SKY = [
   [-0.16, ['#0E0B2A','#1C1745','#2E2560']],
   [-0.06, ['#2A2160','#6A4C9C','#E79BB8']],
@@ -1440,7 +1482,7 @@ const NEON_SKY = [
   [ 1.16, ['#0D0221','#26083F','#541066']],
 ];
 let theme = store.get('wx_theme', null) || (store.get('wx_neon', false) ? 'neon' : 'classic');
-{ const t = new URLSearchParams(location.search).get('theme'); if (['classic','neon','murray','retro','beach','seoul'].includes(t)) theme = t; }
+{ const t = new URLSearchParams(location.search).get('theme'); if (['classic','neon','murray','retro','beach','seoul','kstreet'].includes(t)) theme = t; }
 let neon = theme === 'neon';
 /* ---------- Time Warp theme: clock-radio style segment display + time-jump flash ---------- */
 const SEG = { '0':'abcdef','1':'bc','2':'abged','3':'abgcd','4':'fgbc','5':'afgcd','6':'afgedc','7':'abc','8':'abcdefg','9':'abcdfg','-':'g',' ':'' };
@@ -1517,7 +1559,7 @@ function distText(p){ const d = distKm(p); return d == null ? '' : ` · ${fmtKm(
   }catch(e){}
 })();
 function setThemeClass(){
-  ['neon','murray','retro','beach','seoul'].forEach(t => document.body.classList.toggle(t, theme === t));
+  ['neon','murray','retro','beach','seoul','kstreet'].forEach(t => document.body.classList.toggle(t, theme === t));
 }
 function applyMode(){
   neon = theme === 'neon';
@@ -1779,6 +1821,63 @@ function buildSeoul(){
   $('petals').innerHTML = pet;
 }
 buildSeoul();
+// K-Street theme: a lively street with pastel shopfronts and neon signs, a busking dance crew on a little stage,
+// fans waving light sticks, a giant screen and string lights (original artwork, generic signs)
+function buildKStreet(){
+  const W = 400, H = 262, G = 236; let seed = 41; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const shops = [
+    { w: 58, h: 118, c: '#F7B6D2', sign: '노래방', sc: '#FF4FA3' },
+    { w: 50, h: 92,  c: '#B8D8FF', sign: '카페',   sc: '#3FA9FF' },
+    { w: 66, h: 140, c: '#C9B6FF', sign: '',       sc: '' },          // billboard building
+    { w: 52, h: 98,  c: '#FFD9A8', sign: '떡볶이', sc: '#FF7A3D' },
+    { w: 56, h: 124, c: '#B6F0D8', sign: '치킨',   sc: '#21C38B' },
+    { w: 60, h: 104, c: '#FFC2C2', sign: '분식',   sc: '#FF5A6E' },
+    { w: 64, h: 132, c: '#D6C2FF', sign: '코인',   sc: '#9B6BFF' },
+  ];
+  let x = -6, b = '', bill = null;
+  shops.forEach((sh, i) => {
+    const y = G - sh.h;
+    b += `<rect x="${x}" y="${y}" width="${sh.w}" height="${sh.h}" fill="${sh.c}" class="bld"/>`;
+    for (let wy = y + 10; wy < G - 34; wy += 14) for (let wx = x + 6; wx < x + sh.w - 8; wx += 12)
+      b += `<rect x="${wx}" y="${wy}" width="7" height="8" rx="1" class="win" fill="#FFF3C4" style="--o:${(r()*.8+.2).toFixed(2)}"/>`;
+    b += `<rect x="${x + 4}" y="${G - 26}" width="${sh.w - 8}" height="26" fill="#2B2340" opacity=".55"/><rect x="${x + 4}" y="${G - 30}" width="${sh.w - 8}" height="5" fill="${sh.c}" style="filter:brightness(.8)"/>`;
+    if (sh.sign) b += `<g class="sign" style="--sc:${sh.sc};animation-delay:${(-r()*6).toFixed(1)}s"><rect x="${x + 6}" y="${y + 8}" width="${sh.w - 12}" height="15" rx="3" fill="#1B1430"/>
+      <text x="${x + sh.w / 2}" y="${y + 19.5}" text-anchor="middle" font-family="Jua, sans-serif" font-size="11" fill="${sh.sc}">${sh.sign}</text></g>`;
+    if (!sh.sign) bill = { x: x + 5, y: y + 8, w: sh.w - 10 };
+    x += sh.w;
+  });
+  // giant screen
+  const bb = `<g><rect x="${bill.x - 2}" y="${bill.y - 2}" width="${bill.w + 4}" height="44" rx="3" fill="#1B1430"/>
+    <rect x="${bill.x}" y="${bill.y}" width="${bill.w}" height="40" fill="url(#kscr)" class="screen"/>
+    <path class="heart" d="M${bill.x + bill.w/2} ${bill.y + 31} l-9 -9 a5 5 0 0 1 9 -6 a5 5 0 0 1 9 6z" fill="#fff" opacity=".9"/></g>`;
+  // string lights
+  let lights = '';
+  for (let i = 0; i < 40; i++){ const t = i / 39, lx = t * W, ly = 128 + Math.sin(t * Math.PI * 3) * 10 + 8;
+    lights += `<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="1.6" fill="hsl(${(i * 37) % 360} 95% 72%)" class="bulb" style="animation-delay:${(-(i % 5) * .3).toFixed(1)}s"/>`; }
+  // dance crew
+  const outfits = ['#FF5FA2', '#5FC8FF', '#FFD24A', '#A77BFF'];
+  let crew = '';
+  [168, 188, 212, 232].forEach((cx, i) => crew += `<g class="dancer" style="animation-delay:${(-i * .12).toFixed(2)}s">
+      <circle cx="${cx}" cy="${G - 26}" r="3.4" fill="#2B1F2A"/>
+      <path d="M${cx - 4} ${G - 21} h8 l1.5 9 h-11z" fill="${outfits[i]}"/>
+      <path class="arm a${i % 2}" d="M${cx - 4} ${G - 20} l-5 -4 M${cx + 4} ${G - 20} l5 -4" stroke="${outfits[i]}" stroke-width="2" stroke-linecap="round"/>
+      <path d="M${cx - 2.5} ${G - 12} l-1.5 8 M${cx + 2.5} ${G - 12} l1.5 8" stroke="#2B1F2A" stroke-width="2" stroke-linecap="round"/></g>`);
+  // fans with light sticks
+  let fans = '';
+  for (let i = 0; i < 16; i++){ const fx = 8 + i * 25 + (r() - .5) * 8, fy = H - 6 - r() * 6, col = ['#FF6FB5', '#7FD0FF', '#C69BFF', '#FFE16A'][i % 4];
+    fans += `<g class="fan" style="animation-delay:${(-r() * 1.2).toFixed(2)}s;transform-origin:${fx}px ${fy}px">
+      <path d="M${fx} ${fy} l3 -12" stroke="#EDEDF5" stroke-width="1.4"/><circle cx="${fx + 3.4}" cy="${fy - 13.5}" r="3" fill="${col}" class="stick"/></g>
+      <circle cx="${fx - 4}" cy="${fy + 4}" r="6" fill="var(--crowd)"/><path d="M${fx - 12} ${H} q8 -10 16 0z" fill="var(--crowd)"/>`; }
+  $('kst').innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice">
+    <defs><linearGradient id="kscr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF6FB5"><animate attributeName="stop-color" values="#FF6FB5;#7FD0FF;#C69BFF;#FFE16A;#FF6FB5" dur="8s" repeatCount="indefinite"/></stop>
+      <stop offset="1" stop-color="#7FD0FF"><animate attributeName="stop-color" values="#7FD0FF;#C69BFF;#FFE16A;#FF6FB5;#7FD0FF" dur="8s" repeatCount="indefinite"/></stop></linearGradient></defs>
+    <g opacity="var(--kdim,1)">${b}</g>${bb}
+    <g opacity="var(--klit,.5)">${lights}</g>
+    <rect x="0" y="${G}" width="${W}" height="${H - G}" fill="var(--street,#5A5470)"/>
+    <rect x="140" y="${G - 4}" width="120" height="6" rx="1.5" fill="#2B2340"/><rect x="140" y="${G - 4}" width="120" height="1.5" fill="#FF5FA2"/>
+    ${crew}${fans}</svg>`;
+}
+buildKStreet();
 function buildBeach(){
   // original bay-side beach: calm bay, long timber pier, a row of striped bathing boxes, umbrella
   const W = 400, H = 262, HOR = 176, SH = 214;   // horizon, shoreline
@@ -1839,7 +1938,7 @@ function mute(hex, amt){ // desaturate + dim for overcast skies
 }
 function mixSet(a, b, t){ return a.map((c, i) => mix(c, b[i], t)); }
 function skyAt(p){
-  const K = neon ? NEON_SKY : theme === 'murray' ? MURRAY_SKY : theme === 'retro' ? RETRO_SKY : theme === 'beach' ? BEACH_SKY : theme === 'seoul' ? SEOUL_SKY : SKY;
+  const K = neon ? NEON_SKY : theme === 'murray' ? MURRAY_SKY : theme === 'retro' ? RETRO_SKY : theme === 'beach' ? BEACH_SKY : theme === 'seoul' ? SEOUL_SKY : theme === 'kstreet' ? KST_SKY : SKY;
   if (p <= K[0][0] || p >= K[K.length-1][0]) return K[0][1];
   for (let i=0;i<K.length-1;i++){
     const [p0,c0] = K[i], [p1,c1] = K[i+1];
@@ -1956,7 +2055,7 @@ function updateSky(){
     scene.style.height = H + 'px';
     W = scene.clientWidth;
   }
-  const murray = theme === 'murray', base = murray ? H - 64 : theme === 'beach' ? H - 86 : theme === 'seoul' ? H - 70 : H;   // in Murray mode the sun sets behind the far bank
+  const murray = theme === 'murray', base = murray ? H - 64 : theme === 'beach' ? H - 86 : theme === 'seoul' ? H - 70 : theme === 'kstreet' ? H - 120 : H;   // in Murray mode the sun sets behind the far bank
   const place = (el, t) => {
     el.style.left = (W*(0.07 + t*0.86)) + 'px';
     el.style.top  = (base - Math.sin(Math.PI*t)*(base - (neon ? 95 : Math.max(165, H * 0.42)))) + 'px';   // peak sits below the header, visible
@@ -1990,6 +2089,16 @@ function updateSky(){
   hg.style.background = `radial-gradient(ellipse at ${p < .5 ? '15%' : '85%'} 50%, ${neon ? '#FF2E9A' : '#FF8A50'}, transparent 70%)`;
   hg.style.opacity = neon ? Math.max(.35, twilight) * (1 - cloud*.5) : twilight * (1 - cloud) * 0.85;
   const wl = document.getElementById('winLights'); if (wl) wl.style.opacity = .25 + night*.75;
+  if (theme === 'kstreet'){
+    const set = (k, v) => r.setProperty(k, v);
+    set('--street', mix(mute('#6E6488', cloud * .3), '#140F24', night * .8));
+    set('--crowd', mix('#3A2E52', '#0B0716', night * .8));
+    set('--kdim', (1 - night * .45).toFixed(2));
+    set('--klit', (.35 + Math.max(night, twilight) * .65).toFixed(2));
+    set('--winop', (.25 + night * .75).toFixed(2));
+    set('--earth', mix(mute('#B8A8D8', cloud * .3), '#120A26', night * .85)); set('--earth2', mix('#7E6AA8', '#0A0618', night * .9));
+    document.body.classList.toggle('kst-night', night > .45);
+  }
   if (theme === 'seoul'){
     const set = (k, v) => r.setProperty(k, v), dark = Math.max(night * .9, twilight * .4);
     set('--k1', mix(mix(cols[2], '#7FB0D8', .5), '#0C1030', night * .8));
@@ -3421,7 +3530,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.94', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.95', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
@@ -3434,6 +3543,7 @@ function appearanceHTML(){
     <button type="button" data-theme="retro" class="${theme==='retro'?'on':''}"><i class="pv-retro"></i><span>⚡ Time Warp<b></b></span></button>
     <button type="button" data-theme="beach" class="${theme==='beach'?'on':''}"><i class="pv-beach"></i><span>🏖️ Beach<b></b></span></button>
     <button type="button" data-theme="seoul" class="${theme==='seoul'?'on':''}"><i class="pv-seoul"></i><span>🌸 Seoul<b></b></span></button>
+    <button type="button" data-theme="kstreet" class="${theme==='kstreet'?'on':''}"><i class="pv-kst"></i><span>💜 K-Street<b></b></span></button>
   </div></div>`;
 }
 function bindAppearance(){
