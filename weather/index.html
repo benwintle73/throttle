@@ -890,6 +890,17 @@
   .card{position:relative;isolation:isolate}
   .card::before{content:'';position:absolute;inset:0;border-radius:inherit;background:rgba(14,18,30,var(--shade,0));z-index:-1;pointer-events:none;transition:background 1.5s}
   .card,.hero{text-shadow:0 1px 3px rgba(0,0,0,calc(var(--shade,0) * 1.4))}
+  .clim .cl-sum{font-size:15px;line-height:1.4;margin:2px 0 12px}
+  .clim .cl-bars{display:grid;grid-template-columns:repeat(12,1fr);gap:3px;align-items:end}
+  .clim .cb{border:0;background:none;color:inherit;padding:0;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;font:inherit;-webkit-tap-highlight-color:transparent}
+  .clim .rng{position:relative;width:9px;height:70px;border-radius:5px;background:rgba(255,255,255,.1)}
+  .clim .rng i{position:absolute;left:0;right:0;border-radius:5px;background:linear-gradient(0deg,#5BC0EB,#FFB347)}
+  .clim .cb.on .rng{outline:2px solid #fff;outline-offset:2px}
+  .clim .hv{font-size:10px;font-weight:600;opacity:.85}
+  .clim .mn{font-size:11px;font-weight:700;opacity:.7}
+  .clim .cb.now .mn{opacity:1;color:#FFD38A}
+  .clim .cl-note{font-size:12px;opacity:.6;margin-top:10px}
+  .favs,.results{max-height:calc(100dvh - 140px - env(safe-area-inset-top) - env(safe-area-inset-bottom));overflow-y:auto!important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 </style>
 </head>
 <body>
@@ -1192,7 +1203,7 @@ function tidyCodes(d){
 let lastFetch = 0, busy = false;
 const REFRESH_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg>`;
 let queued = null;
-async function load(p, quiet=false){
+async function load(p, quiet=false){ climPick = null;
   if (busy){ queued = [p, quiet]; return; } busy = true;
   if (!quiet) timeJump();
   current = p; store.set('wx_last', p);
@@ -1261,7 +1272,7 @@ function render(d){
   const arrow = `<svg viewBox="0 0 24 24"><path d="M12 2l5 14-5-3-5 3z" fill="#fff"/></svg>`;
 
   const SECTIONS = {
-    thought: thoughtCard(), todo: todoCard(), puzzle: puzzleCard(), fun: funCard(), rain: nowcastCard(d), radar: radarCard(),
+    thought: thoughtCard(), todo: todoCard(), puzzle: puzzleCard(), fun: funCard(), rain: nowcastCard(d), radar: radarCard(), climate: climateCard(d),
     hourly: `<section class="card hourly-card">
       <h2>${svgClock()} Next 24 hours</h2>
       <div class="hourly">${hours}</div>
@@ -2605,6 +2616,44 @@ function alertsHTML(d, start){
 }
 
 /* ---------- rain radar (RainViewer, past 2 hours) ---------- */
+/* ---------- typical weather by month (10-year averages from past observations) ---------- */
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+let climPick = null, climLoading = '';
+function climKey(p){ return `wx_clim_${(+p.lat).toFixed(2)}_${(+p.lon).toFixed(2)}`; }
+async function loadClimate(p){
+  const k = climKey(p); if (climLoading === k) return; climLoading = k;
+  try{
+    const y = new Date().getFullYear() - 1;
+    const r = await fetch(`https://archive-api.open-meteo.com/v1/archive?latitude=${p.lat}&longitude=${p.lon}&start_date=${y-9}-01-01&end_date=${y}-12-31&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`);
+    if (!r.ok) throw 0;
+    const j = await r.json(), d = j.daily, M = Array.from({length:12}, () => ({hi:0, lo:0, n:0, rain:0, wet:0}));
+    d.time.forEach((t, i) => { const m = +t.slice(5,7) - 1, hi = d.temperature_2m_max[i], lo = d.temperature_2m_min[i], pr = d.precipitation_sum[i];
+      if (hi == null || lo == null) return; M[m].hi += hi; M[m].lo += lo; M[m].n++; M[m].rain += pr || 0; if ((pr || 0) >= 1) M[m].wet++; });
+    const out = M.map(m => ({ hi: +(m.hi / m.n).toFixed(1), lo: +(m.lo / m.n).toFixed(1), rain: Math.round(m.rain / 10), wet: Math.round(m.wet / 10) }));
+    localStorage.setItem(k, JSON.stringify({ t: Date.now(), m: out }));
+    if (current && climKey(current) === k){ const el = $('climCard'); if (el && lastData) el.outerHTML = climateCard(lastData); }
+  }catch(e){}
+  climLoading = '';
+}
+function climateCard(d){
+  const p = current; if (!p || p.lat == null) return '';
+  let c = null; try{ c = JSON.parse(localStorage.getItem(climKey(p)) || 'null'); }catch(e){}
+  if (!c || Date.now() - c.t > 30 * 864e5) setTimeout(() => loadClimate(p), 0);
+  const head = `<h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M14 14.8V4a2 2 0 0 0-4 0v10.8a4 4 0 1 0 4 0z"/></svg> Typical weather</h2>`;
+  if (!c) return `<section class="card clim" id="climCard">${head}<div class="cl-note">Working out the averages…</div></section>`;
+  const m = c.m, now = new Date().getMonth(), sel = climPick == null ? now : climPick, S = m[sel];
+  const lo = Math.min(...m.map(x => x.lo)), hi = Math.max(...m.map(x => x.hi)), span = Math.max(1, hi - lo);
+  const bars = m.map((x, i) => `<button class="cb ${i === sel ? 'on' : ''} ${i === now ? 'now' : ''}" onclick="climPick=${i};document.getElementById('climCard').outerHTML=climateCard(lastData)">
+      <span class="rng"><i style="bottom:${((x.lo - lo) / span * 100).toFixed(1)}%;height:${((x.hi - x.lo) / span * 100).toFixed(1)}%"></i></span>
+      <span class="hv">${Math.round(x.hi)}°</span><span class="mn">${MON[i][0]}</span></button>`).join('');
+  let vs = '';
+  if (sel === now && d && d.daily){ const diff = Math.round(d.daily.temperature_2m_max[0] - S.hi);
+    vs = Math.abs(diff) < 2 ? ' · today is about normal' : ` · today is ${Math.abs(diff)}° ${diff > 0 ? 'warmer' : 'cooler'} than usual`; }
+  return `<section class="card clim" id="climCard">${head}
+    <div class="cl-sum"><b>${['January','February','March','April','May','June','July','August','September','October','November','December'][sel]}</b> usually <b>${Math.round(S.hi)}°</b> / ${Math.round(S.lo)}° · ${S.rain} mm rain over ~${S.wet} days${vs}</div>
+    <div class="cl-bars">${bars}</div>
+    <div class="cl-note">Average of the last 10 years · tap a month</div></section>`;
+}
 function radarCard(){
   return `<section class="card radar-card" onclick="openRadar()">
     <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6-6"/></svg> Rain radar</h2>
@@ -2651,8 +2700,8 @@ function closeRadar(){ stopRadar(); $('radarPage').classList.remove('open'); }
 $('rpClose').onclick = closeRadar;
 
 /* ---------- card layout (reorderable) ---------- */
-const CARD_KEYS = ['thought','todo','puzzle','fun','rain','radar','hourly','daily','details'];
-const CARD_NAMES = { thought:'Thought', todo:'To-do', puzzle:'Daily puzzle', fun:'Just for fun', rain:'Next 2 hours', radar:'Rain radar', hourly:'Next 24 hours', daily:'7-day forecast', details:'Wind, UV & more' };
+const CARD_KEYS = ['thought','todo','puzzle','fun','rain','radar','hourly','daily','climate','details'];
+const CARD_NAMES = { thought:'Thought', todo:'To-do', puzzle:'Daily puzzle', fun:'Just for fun', rain:'Next 2 hours', radar:'Rain radar', hourly:'Next 24 hours', daily:'7-day forecast', climate:'Typical weather', details:'Wind, UV & more' };
 let editLayout = false;
 function layoutOrder(){
   const o = (store.get('wx_order', []) || []).filter(k => CARD_KEYS.includes(k));
@@ -3268,7 +3317,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.88', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.89', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
