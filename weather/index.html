@@ -23,6 +23,9 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
+  html,body{overflow-x:hidden;overflow-x:clip;max-width:100%}
+  .app{overflow-x:clip}
+  input,select,textarea{max-width:100%}
   body{
     font-family:'Outfit',system-ui,-apple-system,sans-serif;
     color:var(--text);
@@ -221,7 +224,9 @@
   .rem .sug.done .plus{background:#2EC27E;color:#fff}
   .rem .custom{display:flex;gap:8px;margin-top:8px}
   .rem .custom input{min-width:0;height:42px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.9);color:#222;padding:0 10px;font:500 15px 'Outfit',sans-serif}
-  .rem .custom input[type=time]{width:128px;flex-shrink:0}
+  .rem .custom{min-width:0}
+  .rem .custom input[type=time]{width:118px;flex-shrink:0;-webkit-appearance:none;appearance:none;display:flex;align-items:center}
+  .rem .custom input[type=time]::-webkit-date-and-time-value{text-align:left}
   .rem .custom input[type=text]{flex:1}
   .rem .custom button{height:42px;border:0;border-radius:12px;background:#fff;color:#333;font:700 14px 'Outfit',sans-serif;padding:0 14px;cursor:pointer;flex-shrink:0}
   .rem .list{margin-top:12px;display:flex;flex-direction:column;gap:6px}
