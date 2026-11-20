@@ -1029,7 +1029,9 @@ function updateSky(){
       sun.style.background = `radial-gradient(circle at 50% 50%, #FFFDF2 0%, ${core} 55%, ${glow} 100%)`;
       sun.style.boxShadow = `0 0 40px 12px ${glow}cc, 0 0 120px 50px ${glow}55, 0 0 240px 120px ${glow}22`;
     }
-    sun.style.opacity = Math.max(0, 1 - cloud * 1.2);   // gone under overcast / rain / storm
+    // behind cloud the sun stays visible as a soft, diffused glow
+    sun.style.opacity = cloud >= .7 ? (k === 'storm' ? .5 : .7) : Math.max(.6, 1 - cloud * 1.2);
+    if (!neon) sun.style.filter = cloud >= .5 ? `blur(${Math.round(cloud * 9)}px)` : '';
   } else sun.style.opacity = 0;
 
   // horizon glow around sunrise/sunset
