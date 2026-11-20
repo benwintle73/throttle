@@ -790,7 +790,7 @@
         <g clip-path="url(#cWin)">
           <g id="bTri">
             <polygon points="150,214 94,118 206,118" fill="url(#gTri)" stroke="#5f7bff" stroke-width="1.5" stroke-linejoin="round"/>
-            <text id="bTxt" x="150" text-anchor="middle" font-family="Outfit, sans-serif" font-weight="700" font-size="11" fill="#e6ecff" letter-spacing=".3"></text>
+            <text id="bTxt" x="150" text-anchor="middle" font-family="Outfit, sans-serif" font-weight="700" font-size="10.5" fill="#e6ecff" letter-spacing=".4"></text>
           </g>
           <circle id="bMurk" cx="150" cy="150" r="70" fill="#050a24" opacity=".9"/>
           <circle class="bub" cx="128" cy="182" r="2.2" fill="#9fb3ff"/><circle class="bub" cx="170" cy="190" r="1.6" fill="#9fb3ff" style="animation-delay:.3s"/><circle class="bub" cx="150" cy="196" r="1.3" fill="#9fb3ff" style="animation-delay:.6s"/>
@@ -1468,10 +1468,11 @@ function addShake(){
   });
 }
 function ballText(a){
-  const words = a.toUpperCase().split(' '), lines = []; let cur = '';
-  words.forEach(w => { if ((cur + ' ' + w).trim().length > 10 && cur){ lines.push(cur); cur = w; } else cur = (cur + ' ' + w).trim(); });
+  // Lines taper like the triangle (10 / 8 / 6 letters) and the block sits around the triangle's middle.
+  const LIM = [10, 8, 6], words = a.toUpperCase().split(' '), lines = []; let cur = '';
+  words.forEach(w => { const lim = LIM[Math.min(lines.length, 2)]; if (cur && (cur + ' ' + w).length > lim){ lines.push(cur); cur = w; } else cur = (cur + ' ' + w).trim(); });
   if (cur) lines.push(cur);
-  const t = $('bTxt'), lh = 13, y0 = 142 - (lines.length - 1) * lh / 2;
+  const t = $('bTxt'), lh = 13, y0 = 153 - (lines.length - 1) * 6.5;
   t.innerHTML = lines.map((l, i) => `<tspan x="150" y="${y0 + i * lh}">${esc(l)}</tspan>`).join('');
 }
 function askBall(){
