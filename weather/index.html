@@ -985,7 +985,7 @@ function updateSky(){
   }
   const place = (el, t) => {
     el.style.left = (W*(0.07 + t*0.86)) + 'px';
-    el.style.top  = (H - Math.sin(Math.PI*t)*(H - (neon ? 60 : 86))) + 'px';
+    el.style.top  = (H - Math.sin(Math.PI*t)*(H - (neon ? 95 : Math.max(165, H * 0.42)))) + 'px';   // peak sits below the header, visible
   };
 
   // sun: deep orange at the horizon, pale gold overhead
