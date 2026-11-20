@@ -782,6 +782,22 @@
   .top .place h1{grid-column:1/-1;grid-row:1}
   .top .place p{grid-column:1;grid-row:2;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .top > .icon-btn{grid-row:2}
+  /* favourites bar removed: tap the town name to switch places */
+  .chips{display:none!important}
+  .top .place h1{cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .top .place h1::after{content:'';display:inline-block;width:.42em;height:.42em;margin-left:.3em;vertical-align:.18em;border-right:2.5px solid currentColor;border-bottom:2.5px solid currentColor;transform:rotate(45deg);opacity:.75}
+  .favs{margin-top:12px;background:rgba(255,255,255,.96);border-radius:20px;overflow:hidden;color:#222}
+  .favs:empty{display:none}
+  .favs h5{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#888;padding:12px 16px 4px}
+  .fav{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer}
+  .fav + .fav{border-top:1px solid #eee}
+  .fav svg{width:18px;height:18px;flex-shrink:0;color:#8a6cff}
+  .fav div{flex:1;min-width:0}
+  .fav b{font-weight:600;display:block}
+  .fav small{display:block;color:#777;font-size:13px}
+  .fav.on b::after{content:' ✓';color:#14B8A6}
+  .fav .rm{flex:none;border:0;background:#f1f1f4;color:#888;width:30px;height:30px;border-radius:50%;font-size:15px;line-height:1;cursor:pointer}
+  .fav .tmp{color:#555;font-weight:600;font-size:15px}
 </style>
 </head>
 <body>
@@ -851,6 +867,7 @@
       </button>
     </form>
     <div class="results" id="results"></div>
+    <div class="favs" id="favs"></div>
   </div>
 </div>
 
@@ -2737,15 +2754,46 @@ function locateAndLoad(quiet = false, explicit = false){
 }
 $('locBtn').onclick = () => locateAndLoad(false, true);
 
-/* ---------- search ---------- */
+/* ---------- search + favourites (tap the town name) ---------- */
 const sheet = $('sheet');
-$('searchBtn').onclick = () => { sheet.classList.add('open'); setTimeout(()=>$('q').focus(),50); };
+const PIN_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>`;
+const LOC_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>`;
+function drawFavs(){
+  const f = $('favs');
+  if ($('q').value.trim().length >= 2){ f.innerHTML = ''; return; }
+  const here = `<div class="fav ${current.here ? 'on' : ''}" data-act="here">${LOC_SVG}<div><b>My location</b><small>Use where you are now</small></div></div>`;
+  const list = saved.map((p, i) => `<div class="fav ${!current.here && same(p, current) ? 'on' : ''}" data-i="${i}">${PIN_SVG}<div><b>${esc(p.name)}</b><small>${esc(p.sub || '')}</small></div><button class="rm" data-rm="${i}" aria-label="Remove ${esc(p.name)}">✕</button></div>`).join('');
+  f.innerHTML = here + (saved.length ? `<h5>Favourites</h5>${list}` : `<h5>Favourites</h5><div class="fav" style="cursor:default"><div><small>Tap ☆ on any place to add it here</small></div></div>`);
+}
+$('favs').onclick = e => {
+  const rm = e.target.closest('[data-rm]');
+  if (rm){ e.stopPropagation(); saved.splice(+rm.dataset.rm, 1); store.set('wx_saved', saved); renderChips(); renderSave(); drawFavs(); return; }
+  const row = e.target.closest('.fav[data-i], .fav[data-act]'); if (!row) return;
+  closeSheet();
+  if (row.dataset.act === 'here') locateAndLoad(false, true); else load(saved[+row.dataset.i]);
+};
+function openPlaces(focus){ drawFavs(); sheet.classList.add('open'); if (focus) setTimeout(()=>$('q').focus(),50); }
+$('searchBtn').onclick = () => openPlaces(true);
+document.querySelector('.top .place').addEventListener('click', () => openPlaces(false));
+// swipe left/right across the big temperature to flip between favourites
+(() => {
+  let x0 = null, y0 = null;
+  document.addEventListener('touchstart', e => { const h = e.target.closest('#hero'); if (!h || editLayout){ x0 = null; return; } x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+  document.addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0; x0 = null;
+    if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.5 || !saved.length) return;
+    let i = saved.findIndex(p => same(p, current));
+    i = i < 0 ? 0 : (i + (dx < 0 ? 1 : -1) + saved.length) % saved.length;
+    load(saved[i]); toast(saved[i].name);
+  }, { passive: true });
+})();
 $('closeSearch').onclick = closeSheet;
 sheet.onclick = e => { if(e.target === sheet) closeSheet(); };
 function closeSheet(){ sheet.classList.remove('open'); $('q').value=''; $('results').innerHTML=''; }
 
 let timer, lastResults = [];
-$('q').oninput = () => { clearTimeout(timer); timer = setTimeout(search, 250); };
+$('q').oninput = () => { drawFavs(); clearTimeout(timer); timer = setTimeout(search, 250); };
 $('searchForm').onsubmit = e => { e.preventDefault(); if(lastResults[0]) pick(0); else search(); };
 async function search(){
   const q = $('q').value.trim();
