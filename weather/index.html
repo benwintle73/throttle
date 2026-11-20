@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Pacifico&family=Orbitron:wght@500;700;900&family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Jua&family=Pacifico&family=Orbitron:wght@500;700;900&family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --g1:#FFD166; --g2:#FF8A5B; --g3:#FF5E7E;
@@ -908,6 +908,23 @@
   @media (max-height:700px){ .pz .pz-help{display:none} }
   .river,.bscene,.lhills,.lgrid,.skyline,.sea,.palm{transition:opacity .6s}
   body:not(.skyready) .river,body:not(.skyready) .bscene,body:not(.skyready) .lhills,body:not(.skyready) .lgrid,body:not(.skyready) .skyline,body:not(.skyready) .sea,body:not(.skyready) .palm{opacity:0}
+  /* ===== Seoul theme ===== */
+  .seoul-only{display:none}
+  body.seoul .seoul-only{display:block}
+  body.seoul .bg{background:linear-gradient(180deg,var(--g1) 0%,var(--g2) 28%,var(--g3) 46%,var(--earth,#C9B8C9) 74%,var(--earth2,#8E7A92) 100%)}
+  .kscene{position:absolute;left:0;right:0;bottom:0;height:262px;pointer-events:none}
+  .kscene svg{position:absolute;inset:0;width:100%;height:100%}
+  .petals{position:absolute;inset:0;pointer-events:none;overflow:hidden;transition:opacity 2s}
+  .petals i{position:absolute;top:-12px;width:7px;height:5px;border-radius:70% 0 70% 0;background:#F8BFD4;opacity:.85;animation:petal linear infinite}
+  @keyframes petal{0%{transform:translate(0,0) rotate(0)}25%{transform:translate(18px,25vh) rotate(120deg)}50%{transform:translate(-6px,50vh) rotate(220deg)}75%{transform:translate(22px,75vh) rotate(320deg)}100%{transform:translate(4px,105vh) rotate(420deg)}}
+  body.seoul .hero{padding-bottom:110px}
+  body.seoul .place h1{font-family:'Jua',sans-serif;font-weight:400;font-size:28px;letter-spacing:.3px}
+  body.seoul .card{background:rgba(255,236,246,.15);border-color:rgba(255,214,232,.38)}
+  body.seoul .card h2{color:#FFD3E6}
+  body.seoul .tmrw{background:rgba(60,40,90,.3)}
+  .appear .pv-seoul{background:linear-gradient(180deg,#7FB2F0 0%,#F7DDE8 55%,#8A93B8 56%,#4E7FAE 75%,#3A3F4A 76%);position:relative}
+  .appear .pv-seoul::after{content:'';position:absolute;right:12%;top:18%;width:3px;height:40%;background:#EDEFF5;box-shadow:-1px 6px 0 2px #EDEFF5}
+  @media (orientation:landscape) and (max-height:520px){ .kscene{height:100vh!important} }
 </style>
 </head>
 <body>
@@ -933,6 +950,8 @@
   <div class="lgrid" id="lgrid"><svg class="mtn" viewBox="0 0 800 120" preserveAspectRatio="none"><path d="M0 120 L60 70 L110 95 L190 30 L260 88 L330 52 L400 100 L470 46 L540 84 L620 22 L700 80 L760 58 L800 76 L800 120Z" fill="#2A1450"/><path d="M0 120 L60 70 L110 95 L190 30 L260 88 L330 52 L400 100 L470 46 L540 84 L620 22 L700 80 L760 58 L800 76" fill="none" stroke="#FF3F8E" stroke-width="2"/></svg><div class="floor"></div></div>
   <div class="river murray-only" id="river"></div>
   <div class="bscene beach-only" id="beach"></div>
+  <div class="kscene seoul-only" id="kscene"></div>
+  <div class="petals seoul-only" id="petals"></div>
   <div class="precip" id="precip"></div>
 </div>
 <svg width="0" height="0" style="position:absolute">
@@ -1396,6 +1415,17 @@ const BEACH_SKY = [
   [ 1.06, ['#1C2160','#7A3B78','#E0607A']],
   [ 1.16, ['#081430','#10244A','#1B3A5E']],
 ];
+const SEOUL_SKY = [
+  [-0.16, ['#0E0B2A','#1C1745','#2E2560']],
+  [-0.06, ['#2A2160','#6A4C9C','#E79BB8']],
+  [ 0.02, ['#5A63B8','#F0A9C4','#FFD6C2']],
+  [ 0.14, ['#7FB2F0','#B9D3F7','#F7DDE8']],
+  [ 0.50, ['#6AA8F2','#A9CDF7','#EEE3F4']],
+  [ 0.86, ['#7A9BE0','#C8B4E6','#FFD3C9']],
+  [ 0.98, ['#4B3E9E','#E57FAE','#FFB28A']],
+  [ 1.06, ['#241E63','#7A3F8E','#E0709E']],
+  [ 1.16, ['#0E0B2A','#1C1745','#2E2560']],
+];
 const NEON_SKY = [
   [-0.16, ['#0D0221','#26083F','#541066']],
   [-0.06, ['#1B0638','#6E1B72','#FF3E8A']],
@@ -1408,7 +1438,7 @@ const NEON_SKY = [
   [ 1.16, ['#0D0221','#26083F','#541066']],
 ];
 let theme = store.get('wx_theme', null) || (store.get('wx_neon', false) ? 'neon' : 'classic');
-{ const t = new URLSearchParams(location.search).get('theme'); if (['classic','neon','murray','retro','beach'].includes(t)) theme = t; }
+{ const t = new URLSearchParams(location.search).get('theme'); if (['classic','neon','murray','retro','beach','seoul'].includes(t)) theme = t; }
 let neon = theme === 'neon';
 /* ---------- Time Warp theme: clock-radio style segment display + time-jump flash ---------- */
 const SEG = { '0':'abcdef','1':'bc','2':'abged','3':'abgcd','4':'fgbc','5':'afgcd','6':'afgedc','7':'abc','8':'abcdefg','9':'abcdfg','-':'g',' ':'' };
@@ -1485,7 +1515,7 @@ function distText(p){ const d = distKm(p); return d == null ? '' : ` · ${fmtKm(
   }catch(e){}
 })();
 function setThemeClass(){
-  ['neon','murray','retro','beach'].forEach(t => document.body.classList.toggle(t, theme === t));
+  ['neon','murray','retro','beach','seoul'].forEach(t => document.body.classList.toggle(t, theme === t));
 }
 function applyMode(){
   neon = theme === 'neon';
@@ -1703,6 +1733,50 @@ function lizardRun(){
   }), 1800 + Math.random() * 2500));
 }
 setTimeout(lizardRun, 12000 + Math.random() * 10000);
+// Seoul theme: Namsan-style tower on its hill, city skyline over the river with a lit bridge,
+// a hanok roof with lanterns in the foreground and a cherry blossom tree dropping petals (original artwork)
+function buildSeoul(){
+  const W = 400, H = 262; let seed = 23; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  let city = '', wins = '';
+  for (let x = -4; x < W; ){
+    const w = 10 + r() * 16, h = 18 + r() * 46 * (x > 230 && x < 330 ? .55 : 1), y = 204 - h;
+    city += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}"/>`;
+    for (let wy = y + 4; wy < 200; wy += 6) for (let wx = x + 2.5; wx < x + w - 3; wx += 4.5) if (r() < .45) wins += `<rect x="${wx.toFixed(1)}" y="${wy.toFixed(1)}" width="1.8" height="2.4"/>`;
+    x += w + 1 + r() * 3;
+  }
+  let bulbs = '';
+  for (let x = 6; x < W; x += 9) bulbs += `<circle cx="${x}" cy="196.5" r="1.1" fill="hsl(${(x * 3) % 360} 90% 70%)"/>`;
+  let blossom = '';
+  for (let i = 0; i < 26; i++){ const bx = 300 + (r() - .3) * 110, by = 150 + r() * 62; blossom += `<circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="${(9 + r() * 12).toFixed(1)}"/>`; }
+  let lanterns = '';
+  [42, 78, 114, 150].forEach((x, i) => lanterns += `<path d="M${x} 214 v6" stroke="#2A1B14" stroke-width=".8"/><ellipse class="lan" cx="${x}" cy="225" rx="5.2" ry="6.4" fill="${['#E5484D','#F2A93B','#E5484D','#4B8BE0'][i]}"/><rect x="${x - 2.2}" y="217.6" width="4.4" height="1.6" fill="#2A1B14"/><rect x="${x - 2.2}" y="230.8" width="4.4" height="1.6" fill="#2A1B14"/>`);
+  $('kscene').innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice">
+    <defs><linearGradient id="han" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--k1)"/><stop offset="1" style="stop-color:var(--k2)"/></linearGradient></defs>
+    <path d="M200 206 C240 170 280 150 320 146 C355 143 385 160 410 176 L410 206Z" fill="var(--khill)"/>
+    <g fill="var(--ktower)"><rect x="318.6" y="96" width="2.8" height="52"/><path d="M313 112 h14 l-2 -9 h-10z"/><rect x="314.5" y="102" width="11" height="3"/><rect x="319.4" y="72" width="1.2" height="24"/><path d="M316 148 l4 -10 l4 10z"/></g>
+    <circle cx="320" cy="72" r="1.4" fill="#FF5A6E" opacity="var(--klights)"/>
+    <g fill="var(--kcity)">${city}</g><g fill="#FFE7A8" opacity="var(--klights)">${wins}</g>
+    <rect x="0" y="204" width="${W}" height="30" fill="url(#han)"/>
+    <g fill="none" stroke="var(--kbridge)" stroke-width="1.4">${Array.from({length: 9}, (_, i) => `<path d="M${i*46 - 6} 204 Q${i*46 + 17} 196 ${i*46 + 40} 204"/>`).join('')}</g>
+    <rect x="0" y="195" width="${W}" height="2.4" fill="var(--kbridge)"/>
+    <g opacity="var(--klights)">${bulbs}</g>
+    <g opacity="calc(var(--klights) * .5)"><rect x="0" y="206" width="${W}" height="1.2" fill="#FFB3D1"/><rect x="0" y="210" width="${W}" height=".8" fill="#9EC9FF"/></g>
+    <!-- hanok roof -->
+    <path d="M-10 262 L-10 232 L196 232 L196 262Z" fill="var(--kwall)"/>
+    <rect x="-10" y="229" width="206" height="4" fill="#2C7A5B"/><rect x="-10" y="232.5" width="206" height="1.6" fill="#C9473A"/>
+    <path d="M-14 214 Q20 222 92 219 Q160 222 200 206 Q206 214 196 222 Q150 232 92 230 Q30 232 -14 226Z" fill="var(--kroof)"/>
+    <path d="M-14 214 Q20 222 92 219 Q160 222 200 206" fill="none" stroke="var(--kroof2)" stroke-width="2.2"/>
+    ${Array.from({length: 26}, (_, i) => `<path d="M${-8 + i*8} ${219 + Math.sin(i/4)} v10" stroke="var(--kroof2)" stroke-width=".8" opacity=".55"/>`).join('')}
+    <g>${lanterns}</g>
+    <!-- cherry blossom -->
+    <path d="M338 262 C334 240 330 224 318 210 M332 236 C346 222 360 214 372 206 M326 222 C312 210 300 204 290 196" stroke="var(--kbark)" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <g fill="var(--kpink)" opacity=".95">${blossom}</g>
+  </svg>`;
+  let pet = '';
+  for (let i = 0; i < 14; i++) pet += `<i style="left:${(r()*100).toFixed(1)}%;animation-delay:${(-r()*14).toFixed(1)}s;animation-duration:${(9 + r()*7).toFixed(1)}s"></i>`;
+  $('petals').innerHTML = pet;
+}
+buildSeoul();
 function buildBeach(){
   // original bay-side beach: calm bay, long timber pier, a row of striped bathing boxes, umbrella
   const W = 400, H = 262, HOR = 176, SH = 214;   // horizon, shoreline
@@ -1763,7 +1837,7 @@ function mute(hex, amt){ // desaturate + dim for overcast skies
 }
 function mixSet(a, b, t){ return a.map((c, i) => mix(c, b[i], t)); }
 function skyAt(p){
-  const K = neon ? NEON_SKY : theme === 'murray' ? MURRAY_SKY : theme === 'retro' ? RETRO_SKY : theme === 'beach' ? BEACH_SKY : SKY;
+  const K = neon ? NEON_SKY : theme === 'murray' ? MURRAY_SKY : theme === 'retro' ? RETRO_SKY : theme === 'beach' ? BEACH_SKY : theme === 'seoul' ? SEOUL_SKY : SKY;
   if (p <= K[0][0] || p >= K[K.length-1][0]) return K[0][1];
   for (let i=0;i<K.length-1;i++){
     const [p0,c0] = K[i], [p1,c1] = K[i+1];
@@ -1877,7 +1951,7 @@ function updateSky(){
     scene.style.height = H + 'px';
     W = scene.clientWidth;
   }
-  const murray = theme === 'murray', base = murray ? H - 64 : theme === 'beach' ? H - 86 : H;   // in Murray mode the sun sets behind the far bank
+  const murray = theme === 'murray', base = murray ? H - 64 : theme === 'beach' ? H - 86 : theme === 'seoul' ? H - 70 : H;   // in Murray mode the sun sets behind the far bank
   const place = (el, t) => {
     el.style.left = (W*(0.07 + t*0.86)) + 'px';
     el.style.top  = (base - Math.sin(Math.PI*t)*(base - (neon ? 95 : Math.max(165, H * 0.42)))) + 'px';   // peak sits below the header, visible
@@ -1911,6 +1985,22 @@ function updateSky(){
   hg.style.background = `radial-gradient(ellipse at ${p < .5 ? '15%' : '85%'} 50%, ${neon ? '#FF2E9A' : '#FF8A50'}, transparent 70%)`;
   hg.style.opacity = neon ? Math.max(.35, twilight) * (1 - cloud*.5) : twilight * (1 - cloud) * 0.85;
   const wl = document.getElementById('winLights'); if (wl) wl.style.opacity = .25 + night*.75;
+  if (theme === 'seoul'){
+    const set = (k, v) => r.setProperty(k, v), dark = Math.max(night * .9, twilight * .4);
+    set('--k1', mix(mix(cols[2], '#7FB0D8', .5), '#0C1030', night * .8));
+    set('--k2', mix('#4E7FAE', '#070A1E', night * .85));
+    set('--khill', mix(mix(cols[2], '#6E8F7A', .55), '#120F2A', night * .85));
+    set('--ktower', mix('#EDEFF5', '#2A2550', night * .7));
+    set('--kcity', mix(mix(cols[1], '#8A93B8', .55), '#141133', night * .85));
+    set('--kbridge', mix('#D9DDE8', '#3A3466', night * .7));
+    set('--klights', Math.min(1, night * 1.2 + twilight * .4).toFixed(2));
+    set('--kwall', mix(mute('#E9DCC4', cloud * .4), '#1A1526', dark));
+    set('--kroof', mix('#3A3F4A', '#0D0B16', dark)); set('--kroof2', mix('#5A606C', '#15121F', dark));
+    set('--kbark', mix('#5A3A33', '#120D14', dark)); set('--kpink', mix(mute('#F7B8CF', cloud * .35), '#3A2240', night * .8));
+    set('--earth', mix(mute('#C9B8C9', cloud * .4), '#120F22', night * .85)); set('--earth2', mix('#8E7A92', '#0A0816', night * .9));
+    $('petals').style.opacity = (k === 'rain' || k === 'storm' || night > .6) ? 0 : 1;
+    document.querySelectorAll('#kscene .lan').forEach(l => l.style.filter = night > .4 ? 'drop-shadow(0 0 4px #FFB24A)' : '');
+  }
   if (theme === 'beach'){
     const set = (k, v) => r.setProperty(k, v), dark = Math.max(night * .9, twilight * .35);
     set('--b1', mix(mix(cols[2], '#36C2C9', .55), '#0B1A33', night * .85));
@@ -3326,7 +3416,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.91', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.92', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
@@ -3338,6 +3428,7 @@ function appearanceHTML(){
     <button type="button" data-theme="murray" class="${theme==='murray'?'on':''}"><i class="pv-murray"></i><span>🌳 Murray<b></b></span></button>
     <button type="button" data-theme="retro" class="${theme==='retro'?'on':''}"><i class="pv-retro"></i><span>⚡ Time Warp<b></b></span></button>
     <button type="button" data-theme="beach" class="${theme==='beach'?'on':''}"><i class="pv-beach"></i><span>🏖️ Beach<b></b></span></button>
+    <button type="button" data-theme="seoul" class="${theme==='seoul'?'on':''}"><i class="pv-seoul"></i><span>🌸 Seoul<b></b></span></button>
   </div></div>`;
 }
 function bindAppearance(){
