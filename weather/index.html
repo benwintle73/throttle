@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Orbitron:wght@500;700;900&family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --g1:#FFD166; --g2:#FF8A5B; --g3:#FF5E7E;
@@ -706,7 +706,52 @@
   body.murray .tmrw{background:rgba(52,44,28,.35)}
   .appear .pv-murray{background:linear-gradient(180deg,#4A4F86 0%,#D9798A 38%,#F7A262 58%,#6E7A58 60%,#4E5B3F 100%);position:relative}
   .appear .pv-murray::after{content:'';position:absolute;left:6%;bottom:30%;width:30%;height:55%;border-radius:50% 50% 40% 40%;background:#2B3122;box-shadow:120px 8px 0 -6px #2B3122}
-  .appear .opts{grid-template-columns:repeat(3,1fr)}
+  .appear .opts{grid-template-columns:1fr 1fr}
+
+  /* ===== Time Warp mode: original 80s retro-tech look ===== */
+  body.retro::before{content:'';position:fixed;inset:0;z-index:50;pointer-events:none;
+    background:repeating-linear-gradient(180deg,rgba(0,0,0,0) 0 2px,rgba(0,0,0,.07) 2px 3px);mix-blend-mode:multiply}
+  body.retro::after{content:'';position:fixed;inset:-50%;z-index:50;pointer-events:none;opacity:.07;animation:grain 1s steps(4) infinite;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
+  @keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-3%)}75%{transform:translate(-2%,-1%)}}
+  body.retro .place h1{font-family:'Orbitron',sans-serif;font-weight:900;font-size:18px;letter-spacing:.5px;text-transform:uppercase;font-style:normal}
+  body.retro .place p{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  body.retro .temp{font-family:'Orbitron',sans-serif;font-weight:900;font-size:96px;letter-spacing:-2px;transform:skewX(-8deg);
+    background:linear-gradient(180deg,#FFFFFF 0%,#CFE8FF 30%,#5E7FB8 48%,#1C2350 50%,#F5C26B 54%,#FFE7B0 75%,#FFFFFF 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 3px 0 rgba(0,0,0,.45)) drop-shadow(0 0 18px rgba(255,170,60,.35))}
+  body.retro .temp sup{color:transparent}
+  body.retro .cond{font-family:'Orbitron',sans-serif;font-weight:700;font-size:16px;letter-spacing:3px;text-transform:uppercase;color:#FFD38A}
+  body.retro .hilo{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:1px}
+  .dash{display:flex;gap:10px;justify-content:center;margin:14px auto 4px;max-width:340px}
+  .dash .seg{position:relative;flex:1;background:linear-gradient(180deg,#0b0b0e,#18181d);border:2px solid #3a3a44;border-radius:10px;padding:16px 10px 8px;
+    box-shadow:inset 0 2px 10px rgba(0,0,0,.8),0 4px 14px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;gap:6px;text-shadow:none}
+  .dash .seg:first-child{flex:1.6}
+  .dash .seg small{position:absolute;top:4px;left:0;right:0;font:700 8px 'Orbitron',sans-serif;letter-spacing:2px;text-transform:uppercase;color:#8B8F9C}
+  .dash .seg b{font:700 10px 'Orbitron',sans-serif;color:#FFB000;align-self:flex-end;margin-bottom:4px}
+  .dash svg{filter:drop-shadow(0 0 4px currentColor);overflow:visible}
+  .dash .seg:first-child svg{color:#FFB000}.dash .seg:last-child svg{color:#39FF7A}
+  body.retro .card{background:rgba(10,14,34,.42);border:1px solid rgba(255,176,0,.35);box-shadow:0 0 0 1px rgba(0,0,0,.25) inset}
+  body.retro .card h2{font-family:'Orbitron',sans-serif;font-weight:700;font-size:10px;letter-spacing:2.5px;color:#FFB000}
+  body.retro .chip{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;background:rgba(10,14,34,.45);border-color:rgba(255,176,0,.45)}
+  body.retro .chip.active{background:#FFB000;color:#14121a}
+  body.retro .icon-btn{background:rgba(10,14,34,.45);border-color:rgba(255,176,0,.45)}
+  body.retro .tmrw{background:rgba(10,14,34,.5);border:1px solid rgba(255,176,0,.3)}
+  body.retro .stat .v,body.retro .hour .v,body.retro .day .hi{font-family:'Orbitron',sans-serif;font-weight:700}
+  body.retro .totd .q{font-weight:600}
+  /* striped 80s sun */
+  body.retro .sun{-webkit-mask-image:linear-gradient(180deg,#000 0 52%,transparent 52% 57%,#000 57% 66%,transparent 66% 70%,#000 70% 78%,transparent 78% 81%,#000 81% 88%,transparent 88% 90%,#000 90%);
+    mask-image:linear-gradient(180deg,#000 0 52%,transparent 52% 57%,#000 57% 66%,transparent 66% 70%,#000 70% 78%,transparent 78% 81%,#000 81% 88%,transparent 88% 90%,#000 90%)}
+  /* stronger lightning */
+  body.retro .flash{background:#DDEBFF}
+  body.retro .flash.on{animation:flashR 9s infinite}
+  @keyframes flashR{0%,90%,100%{opacity:0}91%{opacity:.55}92%{opacity:.05}93%{opacity:.4}94.5%{opacity:0}}
+  /* time-jump flash when you switch places */
+  .warp{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:0;
+    background:linear-gradient(180deg,transparent 0 40%,rgba(255,255,255,.9) 49% 51%,transparent 60%),radial-gradient(circle at 50% 50%,#fff 0%,rgba(150,210,255,.6) 30%,transparent 70%)}
+  .warp.go{animation:warp .7s ease-out}
+  @keyframes warp{0%{opacity:0;transform:scaleY(.02)}15%{opacity:1;transform:scaleY(.05)}40%{opacity:.95;transform:scaleY(1)}100%{opacity:0;transform:scaleY(1.2)}}
+  .appear .pv-retro{background:linear-gradient(180deg,#141339 0%,#C8452F 55%,#FF9B2E 70%,#0b0b0e 70%);position:relative}
+  .appear .pv-retro::after{content:'12:00';position:absolute;left:0;right:0;bottom:2px;text-align:center;font:700 11px 'Orbitron',monospace;color:#FFB000;text-shadow:0 0 4px #FFB000}
 </style>
 </head>
 <body>
@@ -801,6 +846,7 @@
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<div class="warp" id="warp"></div>
 <button class="edit-done" id="editDone" onclick="toggleLayoutEdit(false)">Done</button>
 <div class="tp eb" id="ebPage">
   <div class="tp-in">
@@ -996,6 +1042,7 @@ const REFRESH_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" 
 let queued = null;
 async function load(p, quiet=false){
   if (busy){ queued = [p, quiet]; return; } busy = true;
+  if (!quiet) timeJump();
   current = p; store.set('wx_last', p);
   if (!quiet) $('app').classList.add('loading');
   $('placeName').textContent = p.name;
@@ -1115,6 +1162,7 @@ function render(d){
       <div class="temp">${r0(c.temperature_2m)}<sup>°</sup></div>
       <div class="cond">${LABELS[c.weather_code] || '—'}</div>
       <div class="hilo">H ${r0(dy.temperature_2m_max[0])}°  ·  L ${r0(dy.temperature_2m_min[0])}°  ·  Feels like ${r0(c.apparent_temperature)}°</div>
+      ${theme === 'retro' ? dashHTML(d) : ''}
       <div class="wear">${wearTips(d, start).map(t=>`<span>${t}</span>`).join('')}</div>
       ${tomorrowHTML(d)}
     </section>
@@ -1155,6 +1203,17 @@ const MURRAY_SKY = [
   [ 1.06, ['#262A55','#6A4A73','#B5677A']],
   [ 1.16, ['#0B1022','#151B33','#232742']],
 ];
+const RETRO_SKY = [
+  [-0.16, ['#060A1F','#0E1A3A','#123B55']],
+  [-0.06, ['#141A44','#3B2A6B','#C2513F']],
+  [ 0.02, ['#25306E','#D2653C','#FFB347']],
+  [ 0.14, ['#1F78A8','#57B4C9','#FFD07A']],
+  [ 0.50, ['#1A6FB0','#3FA9CF','#9ED8DC']],
+  [ 0.86, ['#245C9C','#6E8FB8','#FFB55E']],
+  [ 0.98, ['#2A1F5C','#C8452F','#FF9B2E']],
+  [ 1.06, ['#141339','#4A1F4F','#A8352F']],
+  [ 1.16, ['#060A1F','#0E1A3A','#123B55']],
+];
 const NEON_SKY = [
   [-0.16, ['#0D0221','#26083F','#541066']],
   [-0.06, ['#1B0638','#6E1B72','#FF3E8A']],
@@ -1168,10 +1227,47 @@ const NEON_SKY = [
 ];
 let theme = store.get('wx_theme', null) || (store.get('wx_neon', false) ? 'neon' : 'classic');
 let neon = theme === 'neon';
+/* ---------- Time Warp theme: clock-radio style segment display + time-jump flash ---------- */
+const SEG = { '0':'abcdef','1':'bc','2':'abged','3':'abgcd','4':'fgbc','5':'afgcd','6':'afgedc','7':'abc','8':'abcdefg','9':'abcdfg','-':'g',' ':'' };
+function segSVG(str, color, h = 40){
+  // each digit is a 22x40 cell; segments are slanted slightly like an old LED display
+  const P = { a:'4,2 18,2 15,5 7,5', b:'19,3 20,18 17,17 16,6', c:'20,22 21,37 18,34 17,23', d:'6,35 17,35 20,38 3,38',
+              e:'2,22 5,23 4,34 1,37', f:'1,3 4,6 5,17 2,18', g:'4,19 17,19 18,20 17,21 4,21 3,20' };
+  let x = 0, out = '';
+  for (const ch of String(str)){
+    if (ch === ':'){ out += `<circle cx="${x+4}" cy="13" r="2" fill="${color}"/><circle cx="${x+3.5}" cy="28" r="2" fill="${color}"/>`; x += 9; continue; }
+    if (ch === '°'){ out += `<circle cx="${x+5}" cy="6" r="3.2" fill="none" stroke="${color}" stroke-width="2.2"/>`; x += 12; continue; }
+    const on = SEG[ch] ?? '';
+    for (const k of 'abcdefg') out += `<polygon points="${P[k]}" transform="translate(${x} 0) skewX(-6)" fill="${color}" opacity="${on.includes(k) ? 1 : .09}"/>`;
+    x += 24;
+  }
+  return `<svg viewBox="0 0 ${x} 40" style="height:${h}px;width:${x * h / 40}px">${out}</svg>`;
+}
+function dashTime(d){
+  const t = new Date(Date.now() + (d.utc_offset_seconds || 0) * 1000), h = t.getUTCHours(), m = t.getUTCMinutes();
+  return { hm: `${String(h % 12 || 12).padStart(2,' ')}:${String(m).padStart(2,'0')}`, pm: h >= 12 };
+}
+function dashHTML(d){
+  const tm = dashTime(d), temp = Math.round(d.current.temperature_2m);
+  return `<div class="dash" id="dash">
+    <div class="seg"><small>Local time</small><div id="dashT">${segSVG(tm.hm, '#FFB000')}</div><b id="dashAP">${tm.pm ? 'PM' : 'AM'}</b></div>
+    <div class="seg"><small>Temp</small>${segSVG((temp < 0 ? '-' : '') + Math.abs(temp) + '°', '#39FF7A')}</div>
+  </div>`;
+}
+setInterval(() => {
+  if (theme !== 'retro' || !lastData || !$('dashT')) return;
+  const tm = dashTime(lastData); $('dashT').innerHTML = segSVG(tm.hm, '#FFB000'); $('dashAP').textContent = tm.pm ? 'PM' : 'AM';
+}, 15000);
+function timeJump(){
+  if (theme !== 'retro') return;
+  const f = $('warp'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
+}
+function setThemeClass(){
+  ['neon','murray','retro'].forEach(t => document.body.classList.toggle(t, theme === t));
+}
 function applyMode(){
   neon = theme === 'neon';
-  document.body.classList.toggle('neon', neon);
-  document.body.classList.toggle('murray', theme === 'murray');
+  setThemeClass();
   renderChips();
   updateSky();
 }
@@ -1265,7 +1361,7 @@ function mute(hex, amt){ // desaturate + dim for overcast skies
 }
 function mixSet(a, b, t){ return a.map((c, i) => mix(c, b[i], t)); }
 function skyAt(p){
-  const K = neon ? NEON_SKY : theme === 'murray' ? MURRAY_SKY : SKY;
+  const K = neon ? NEON_SKY : theme === 'murray' ? MURRAY_SKY : theme === 'retro' ? RETRO_SKY : SKY;
   if (p <= K[0][0] || p >= K[K.length-1][0]) return K[0][1];
   for (let i=0;i<K.length-1;i++){
     const [p0,c0] = K[i], [p1,c1] = K[i+1];
@@ -2593,7 +2689,7 @@ function localData(){ const d = {}; SYNC_KEYS.forEach(k => { const v = store.get
 function applyData(d){
   SYNC_KEYS.forEach(k => { if (d[k] !== undefined) store.set(k, d[k], true); });
   saved = store.get('wx_saved', saved); theme = store.get('wx_theme', null) || (store.get('wx_neon', neon) ? 'neon' : 'classic'); neon = theme === 'neon';
-  document.body.classList.toggle('neon', neon); document.body.classList.toggle('murray', theme === 'murray');
+  setThemeClass();
   if (lastData) render(lastData); else renderChips();
   if ($('todoPage').classList.contains('open')) drawTodo();
 }
@@ -2633,6 +2729,7 @@ function appearanceHTML(){
     <button type="button" data-theme="classic" class="${theme==='classic'?'on':''}"><i class="pv-classic"></i><span>Classic<b></b></span></button>
     <button type="button" data-theme="neon" class="${theme==='neon'?'on':''}"><i class="pv-neon"></i><span>🌴 Neon<b></b></span></button>
     <button type="button" data-theme="murray" class="${theme==='murray'?'on':''}"><i class="pv-murray"></i><span>🌳 Murray<b></b></span></button>
+    <button type="button" data-theme="retro" class="${theme==='retro'?'on':''}"><i class="pv-retro"></i><span>⚡ Time Warp<b></b></span></button>
   </div></div>`;
 }
 function bindAppearance(){
@@ -2733,7 +2830,7 @@ if (sb){
 }
 
 /* ---------- go ---------- */
-document.body.classList.toggle('neon', neon); document.body.classList.toggle('murray', theme === 'murray');
+setThemeClass();
 load(current);
 if (useLoc) locateAndLoad(true);
 
