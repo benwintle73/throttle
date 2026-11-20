@@ -806,6 +806,7 @@
     background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.7) 92%,#fff 100%);
     filter:drop-shadow(0 0 4px rgba(200,225,255,.9));animation:shoot 1.1s ease-out forwards}
   @keyframes shoot{0%{opacity:0;transform:rotate(var(--a)) translateX(0) scaleX(.2)}15%{opacity:1}70%{opacity:1;transform:rotate(var(--a)) translateX(calc(var(--d) * .8)) scaleX(1)}100%{opacity:0;transform:rotate(var(--a)) translateX(var(--d)) scaleX(.6)}}
+  .ver{margin-top:16px;text-align:center;font-size:12px;color:#999}
 </style>
 </head>
 <body>
@@ -2920,6 +2921,8 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const APP_VERSION = '1.71', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
     <label class="sw-row"><span>Show weather where I am when the app opens<small>Uses your phone’s location. Turn off to open on your last viewed place.</small></span>
@@ -2953,7 +2956,7 @@ function drawAcct(){
       ${msg}
       <div class="nick"><label for="nk">Leaderboard name</label><div class="rowi"><input id="nk" maxlength="16" placeholder="Your name on the puzzle leaderboard"><button id="nkSave" type="button">Save</button></div></div>
       <button class="btn-s small" id="outBtn">Sign out</button></div>`;
-    bindAppearance();
+    bindAppearance(); addVersion();
     sb.rpc('weather_ensure_player').then(({ data }) => { const i = $('nk'); if (i && !i.value && data) i.value = data; });
     $('nkSave').onclick = async () => { acctErr = acctMsg = '';
       const { data, error } = await sb.rpc('weather_set_nickname', { p_nickname: $('nk').value });
@@ -2985,7 +2988,7 @@ function drawAcct(){
     </form>
     <button class="link" id="altLink">${forgot ? 'Back to sign in' : up ? '' : 'Forgot password?'}</button>
     ${appearanceHTML()}`;
-  bindAppearance();
+  bindAppearance(); addVersion();
   b.querySelectorAll('.acct-tabs button').forEach(t => t.onclick = () => { acctMode = t.dataset.m; acctErr = acctMsg = ''; drawAcct(); });
   const alt = $('altLink'); if (!alt.textContent) alt.remove(); else alt.onclick = () => { acctMode = forgot ? 'in' : 'forgot'; acctErr = acctMsg = ''; drawAcct(); };
   $('acctForm').onsubmit = async e => {
