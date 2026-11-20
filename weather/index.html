@@ -1591,7 +1591,8 @@ function buildRiver(){
   let seed = 7;
   const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   const LAND = /[?&]wall\b/.test(location.search) || matchMedia('(orientation:landscape) and (max-height:520px)').matches;
-  const W = RIVER_W = LAND ? Math.max(400, Math.round(262 * innerWidth / innerHeight)) : 400, HOR = 198, WAT = 202, DX = (W - 400) / 2;
+  const WIDE = LAND || innerWidth > 520;
+  const W = RIVER_W = WIDE ? sceneW() : 400, HOR = 198, WAT = 202, DX = (W - 400) / 2;
   // distant tree line along the far bank, plus its reflection
   // soft rounded crowns of distant gums, in clumps with gaps
   let crowns = '';
@@ -1667,8 +1668,8 @@ function buildRiver(){
       <g fill="#20160F"><rect x="226" y="242" width="16" height="5" rx="2"/><rect x="284" y="243" width="14" height="5" rx="2"/></g>
     </g>
     </g>
-    ${gum(LAND ? 70 : 34, 262, 1.15, .5)}
-    ${gum(LAND ? W - 60 : 378, 262, .85, -.6)}
+    ${gum(WIDE ? Math.max(34, DX - 20) : 34, 262, 1.15, .5)}
+    ${gum(WIDE ? Math.min(W - 30, W - DX + 40) : 378, 262, .85, -.6)}
     <g stroke="var(--gum)" stroke-width="1.2" fill="none" opacity=".8">${reeds}</g>
   </svg>
   <div class="ripple"></div><div class="rglint" id="rglint"></div>
@@ -1779,37 +1780,42 @@ function lizardRun(){
 setTimeout(lizardRun, 12000 + Math.random() * 10000);
 // Seoul theme: Namsan-style tower on its hill, city skyline over the river with a lit bridge,
 // a hanok roof with lanterns in the foreground and a cherry blossom tree dropping petals (original artwork)
+function sceneW(){
+  const land = /[?&]wall\b/.test(location.search) || matchMedia('(orientation:landscape) and (max-height:520px)').matches;
+  const h = land ? innerHeight : 262;
+  return Math.max(400, Math.round(262 * innerWidth / h));
+}
 function buildSeoul(){
-  const W = 400, H = 262; let seed = 23; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const W = sceneW(), H = 262, DX = (W - 400) / 2; let seed = 23; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   let city = '', wins = '';
-  for (let x = -4; x < W; ){
+  for (let x = -4 - DX; x < W - DX; ){
     const w = 10 + r() * 16, h = 18 + r() * 46 * (x > 230 && x < 330 ? .55 : 1), y = 204 - h;
     city += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}"/>`;
     for (let wy = y + 4; wy < 200; wy += 6) for (let wx = x + 2.5; wx < x + w - 3; wx += 4.5) if (r() < .45) wins += `<rect x="${wx.toFixed(1)}" y="${wy.toFixed(1)}" width="1.8" height="2.4"/>`;
     x += w + 1 + r() * 3;
   }
   let bulbs = '';
-  for (let x = 6; x < W; x += 9) bulbs += `<circle cx="${x}" cy="196.5" r="1.1" fill="hsl(${(x * 3) % 360} 90% 70%)"/>`;
+  for (let x = 6 - DX; x < W - DX; x += 9) bulbs += `<circle cx="${x}" cy="196.5" r="1.1" fill="hsl(${(x * 3) % 360} 90% 70%)"/>`;
   let blossom = '';
   for (let i = 0; i < 26; i++){ const bx = 300 + (r() - .3) * 110, by = 150 + r() * 62; blossom += `<circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="${(9 + r() * 12).toFixed(1)}"/>`; }
   let lanterns = '';
   [42, 78, 114, 150].forEach((x, i) => lanterns += `<path d="M${x} 214 v6" stroke="#2A1B14" stroke-width=".8"/><ellipse class="lan" cx="${x}" cy="225" rx="5.2" ry="6.4" fill="${['#E5484D','#F2A93B','#E5484D','#4B8BE0'][i]}"/><rect x="${x - 2.2}" y="217.6" width="4.4" height="1.6" fill="#2A1B14"/><rect x="${x - 2.2}" y="230.8" width="4.4" height="1.6" fill="#2A1B14"/>`);
-  $('kscene').innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice">
+  $('kscene').innerHTML = `<svg viewBox="${-DX} 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice">
     <defs><linearGradient id="han" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--k1)"/><stop offset="1" style="stop-color:var(--k2)"/></linearGradient></defs>
-    <path d="M200 206 C240 170 280 150 320 146 C355 143 385 160 410 176 L410 206Z" fill="var(--khill)"/>
+    <path d="M200 206 C240 170 280 150 320 146 C355 143 385 160 410 176 L${W-DX} 190 L${W-DX} 206Z" fill="var(--khill)"/>
     <g fill="var(--ktower)"><rect x="318.6" y="96" width="2.8" height="52"/><path d="M313 112 h14 l-2 -9 h-10z"/><rect x="314.5" y="102" width="11" height="3"/><rect x="319.4" y="72" width="1.2" height="24"/><path d="M316 148 l4 -10 l4 10z"/></g>
     <circle cx="320" cy="72" r="1.4" fill="#FF5A6E" opacity="var(--klights)"/>
     <g fill="var(--kcity)">${city}</g><g fill="#FFE7A8" opacity="var(--klights)">${wins}</g>
-    <rect x="0" y="204" width="${W}" height="30" fill="url(#han)"/>
-    <g fill="none" stroke="var(--kbridge)" stroke-width="1.4">${Array.from({length: 9}, (_, i) => `<path d="M${i*46 - 6} 204 Q${i*46 + 17} 196 ${i*46 + 40} 204"/>`).join('')}</g>
-    <rect x="0" y="195" width="${W}" height="2.4" fill="var(--kbridge)"/>
+    <rect x="${-DX}" y="204" width="${W}" height="30" fill="url(#han)"/><rect x="${-DX}" y="232" width="${W}" height="30" fill="var(--kwall)" opacity=".35"/>
+    <g fill="none" stroke="var(--kbridge)" stroke-width="1.4">${Array.from({length: Math.ceil(W/46) + 1}, (_, i) => `<path d="M${i*46 - 6 - DX} 204 Q${i*46 + 17} 196 ${i*46 + 40} 204"/>`).join('')}</g>
+    <rect x="${-DX}" y="195" width="${W}" height="2.4" fill="var(--kbridge)"/>
     <g opacity="var(--klights)">${bulbs}</g>
-    <g opacity="calc(var(--klights) * .5)"><rect x="0" y="206" width="${W}" height="1.2" fill="#FFB3D1"/><rect x="0" y="210" width="${W}" height=".8" fill="#9EC9FF"/></g>
+    <g opacity="calc(var(--klights) * .5)"><rect x="${-DX}" y="206" width="${W}" height="1.2" fill="#FFB3D1"/><rect x="${-DX}" y="210" width="${W}" height=".8" fill="#9EC9FF"/></g>
     <!-- hanok roof -->
-    <path d="M-10 262 L-10 232 L196 232 L196 262Z" fill="var(--kwall)"/>
-    <rect x="-10" y="229" width="206" height="4" fill="#2C7A5B"/><rect x="-10" y="232.5" width="206" height="1.6" fill="#C9473A"/>
-    <path d="M-14 214 Q20 222 92 219 Q160 222 200 206 Q206 214 196 222 Q150 232 92 230 Q30 232 -14 226Z" fill="var(--kroof)"/>
-    <path d="M-14 214 Q20 222 92 219 Q160 222 200 206" fill="none" stroke="var(--kroof2)" stroke-width="2.2"/>
+    <path d="M${-DX-10} 262 L${-DX-10} 232 L196 232 L196 262Z" fill="var(--kwall)"/>
+    <rect x="${-DX-10}" y="229" width="${206+DX}" height="4" fill="#2C7A5B"/><rect x="${-DX-10}" y="232.5" width="${206+DX}" height="1.6" fill="#C9473A"/>
+    <path d="M${-DX-14} 214 L-14 214 Q20 222 92 219 Q160 222 200 206 Q206 214 196 222 Q150 232 92 230 Q30 232 -14 226 L${-DX-14} 226Z" fill="var(--kroof)"/>
+    <path d="M${-DX-14} 214 L-14 214 Q20 222 92 219 Q160 222 200 206" fill="none" stroke="var(--kroof2)" stroke-width="2.2"/>
     ${Array.from({length: 26}, (_, i) => `<path d="M${-8 + i*8} ${219 + Math.sin(i/4)} v10" stroke="var(--kroof2)" stroke-width=".8" opacity=".55"/>`).join('')}
     <g>${lanterns}</g>
     <!-- cherry blossom -->
@@ -1824,7 +1830,7 @@ buildSeoul();
 // K-Street theme: a lively street with pastel shopfronts and neon signs, a busking dance crew on a little stage,
 // fans waving light sticks, a giant screen and string lights (original artwork, generic signs)
 function buildKStreet(){
-  const W = 400, H = 262, G = 236; let seed = 41; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const W = sceneW(), H = 262, G = 236, DX = (W - 400) / 2; let seed = 41; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   const shops = [
     { w: 58, h: 118, c: '#F7B6D2', sign: '노래방', sc: '#FF4FA3' },
     { w: 50, h: 92,  c: '#B8D8FF', sign: '카페',   sc: '#3FA9FF' },
@@ -1835,7 +1841,10 @@ function buildKStreet(){
     { w: 64, h: 132, c: '#D6C2FF', sign: '코인',   sc: '#9B6BFF' },
   ];
   let x = -6, b = '', bill = null;
-  shops.forEach((sh, i) => {
+  // fill outward from the main block so wide windows get more shops on both sides
+  const row = [...shops]; let lx = -6; while (lx > -DX - 10){ const sh = shops[(row.length) % shops.length]; lx -= sh.w; row.unshift({ ...sh, sign: sh.sign || '노래방', sc: sh.sc || '#FF4FA3' }); }
+  x = lx; let rx = x + row.reduce((a, b) => a + b.w, 0); let k = 0; while (rx < W - DX + 10){ const sh = shops[k++ % shops.length]; row.push({ ...sh, sign: sh.sign || '카페', sc: sh.sc || '#3FA9FF' }); rx += sh.w; }
+  row.forEach((sh, i) => {
     const y = G - sh.h;
     b += `<rect x="${x}" y="${y}" width="${sh.w}" height="${sh.h}" fill="${sh.c}" class="bld"/>`;
     for (let wy = y + 10; wy < G - 34; wy += 14) for (let wx = x + 6; wx < x + sh.w - 8; wx += 12)
@@ -1852,7 +1861,7 @@ function buildKStreet(){
     <path class="heart" d="M${bill.x + bill.w/2} ${bill.y + 31} l-9 -9 a5 5 0 0 1 9 -6 a5 5 0 0 1 9 6z" fill="#fff" opacity=".9"/></g>`;
   // string lights
   let lights = '';
-  for (let i = 0; i < 40; i++){ const t = i / 39, lx = t * W, ly = 128 + Math.sin(t * Math.PI * 3) * 10 + 8;
+  for (let i = 0; i < 40; i++){ const t = i / 39, lx = t * W - DX, ly = 128 + Math.sin(t * Math.PI * 3) * 10 + 8;
     lights += `<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="1.6" fill="hsl(${(i * 37) % 360} 95% 72%)" class="bulb" style="animation-delay:${(-(i % 5) * .3).toFixed(1)}s"/>`; }
   // dance crew
   const outfits = ['#FF5FA2', '#5FC8FF', '#FFD24A', '#A77BFF'];
@@ -1864,23 +1873,26 @@ function buildKStreet(){
       <path d="M${cx - 2.5} ${G - 12} l-1.5 8 M${cx + 2.5} ${G - 12} l1.5 8" stroke="#2B1F2A" stroke-width="2" stroke-linecap="round"/></g>`);
   // fans with light sticks
   let fans = '';
-  for (let i = 0; i < 16; i++){ const fx = 8 + i * 25 + (r() - .5) * 8, fy = H - 6 - r() * 6, col = ['#FF6FB5', '#7FD0FF', '#C69BFF', '#FFE16A'][i % 4];
+  for (let i = 0; i < Math.ceil(W / 25); i++){ const fx = 8 + i * 25 - DX + (r() - .5) * 8, fy = H - 6 - r() * 6, col = ['#FF6FB5', '#7FD0FF', '#C69BFF', '#FFE16A'][i % 4];
     fans += `<g class="fan" style="animation-delay:${(-r() * 1.2).toFixed(2)}s;transform-origin:${fx}px ${fy}px">
       <path d="M${fx} ${fy} l3 -12" stroke="#EDEDF5" stroke-width="1.4"/><circle cx="${fx + 3.4}" cy="${fy - 13.5}" r="3" fill="${col}" class="stick"/></g>
       <circle cx="${fx - 4}" cy="${fy + 4}" r="6" fill="var(--crowd)"/><path d="M${fx - 12} ${H} q8 -10 16 0z" fill="var(--crowd)"/>`; }
-  $('kst').innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice">
+  $('kst').innerHTML = `<svg viewBox="${-DX} 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice">
     <defs><linearGradient id="kscr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF6FB5"><animate attributeName="stop-color" values="#FF6FB5;#7FD0FF;#C69BFF;#FFE16A;#FF6FB5" dur="8s" repeatCount="indefinite"/></stop>
       <stop offset="1" stop-color="#7FD0FF"><animate attributeName="stop-color" values="#7FD0FF;#C69BFF;#FFE16A;#FF6FB5;#7FD0FF" dur="8s" repeatCount="indefinite"/></stop></linearGradient></defs>
     <g opacity="var(--kdim,1)">${b}</g>${bb}
     <g opacity="var(--klit,.5)">${lights}</g>
-    <rect x="0" y="${G}" width="${W}" height="${H - G}" fill="var(--street,#5A5470)"/>
+    <rect x="${-DX}" y="${G}" width="${W}" height="${H - G}" fill="var(--street,#5A5470)"/>
     <rect x="140" y="${G - 4}" width="120" height="6" rx="1.5" fill="#2B2340"/><rect x="140" y="${G - 4}" width="120" height="1.5" fill="#FF5FA2"/>
     ${crew}${fans}</svg>`;
 }
 buildKStreet();
+let sceneWas = sceneW();
+let sceneT = 0;
+addEventListener("resize", () => { clearTimeout(sceneT); sceneT = setTimeout(() => { const w = sceneW(); if (Math.abs(w - sceneWas) < 20) return; sceneWas = w; buildRiver(); buildSeoul(); buildKStreet(); buildBeach(); if (lastData) updateSky(); }, 250); });
 function buildBeach(){
   // original bay-side beach: calm bay, long timber pier, a row of striped bathing boxes, umbrella
-  const W = 400, H = 262, HOR = 176, SH = 214;   // horizon, shoreline
+  const W = sceneW(), H = 262, HOR = 176, SH = 214, DX = (W - 400) / 2;   // horizon, shoreline
   let seed = 11; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   // pier: deck runs from the beach out towards the horizon, posts underneath
   let posts = '';
@@ -1903,16 +1915,16 @@ function buildBeach(){
       <rect x="${x + 9}" y="${base - 15}" width="8" height="15" fill="rgba(0,0,0,.25)"/></g>`;
   });
   // low headland far off across the bay
-  const hill = `<path d="M250 ${HOR} C285 ${HOR-12} 320 ${HOR-16} 352 ${HOR-12} C372 ${HOR-9} 390 ${HOR-6} 400 ${HOR-5} L400 ${HOR} Z" fill="var(--hill)"/>`;
-  $('beach').innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice">
+  const hill = `<path d="M250 ${HOR} C285 ${HOR-12} 320 ${HOR-16} 352 ${HOR-12} C372 ${HOR-9} 390 ${HOR-6} 400 ${HOR-5} L${W - DX} ${HOR - 5} L${W - DX} ${HOR} L400 ${HOR} Z" fill="var(--hill)"/>`;
+  $('beach').innerHTML = `<svg viewBox="${-DX} 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice">
     <defs>
       <linearGradient id="bay" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--b1)"/><stop offset="1" style="stop-color:var(--b2)"/></linearGradient>
       <linearGradient id="sand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--s1)"/><stop offset="1" style="stop-color:var(--s2)"/></linearGradient>
     </defs>
     ${hill}
-    <rect x="0" y="${HOR}" width="${W}" height="${SH - HOR + 6}" fill="url(#bay)"/>
+    <rect x="${-DX}" y="${HOR}" width="${W}" height="${SH - HOR + 6}" fill="url(#bay)"/>
     ${pier}
-    <path d="M0 ${SH + 4} C80 ${SH - 2} 160 ${SH + 6} 250 ${SH + 1} C320 ${SH - 3} 370 ${SH + 3} 400 ${SH} L400 ${H} L0 ${H}Z" fill="url(#sand)"/>
+    <path d="M${-DX} ${SH + 4} L0 ${SH + 4} C80 ${SH - 2} 160 ${SH + 6} 250 ${SH + 1} C320 ${SH - 3} 370 ${SH + 3} 400 ${SH} L${W - DX} ${SH} L${W - DX} ${H} L${-DX} ${H}Z" fill="url(#sand)"/>
     <path class="lap" d="M0 ${SH + 4} C80 ${SH - 2} 160 ${SH + 6} 250 ${SH + 1} C320 ${SH - 3} 370 ${SH + 3} 400 ${SH}" fill="none" stroke="#fff" stroke-width="2" opacity=".75"/>
     <g opacity="var(--boxes,1)">${boxes}</g>
     <g transform="translate(352 230)" opacity="var(--boxes,1)"><path d="M0 -40 L1.5 -40 L2 18 L0.5 18Z" fill="#EDE6D6"/>
@@ -3530,7 +3542,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.95', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.96', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
