@@ -703,7 +703,7 @@
       <input type="range" id="rpSlider" min="0" max="0" value="0">
     </div>
     <div class="rp-key"><span>Light</span><i></i><span>Heavy</span></div>
-    <p class="rp-credit">Radar: <a href="https://www.rainviewer.com" target="_blank" rel="noopener">Weather data by RainViewer</a> · Map © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a></p>
+    <p class="rp-credit">Radar: <a href="https://www.rainviewer.com" target="_blank" rel="noopener">Weather data by RainViewer</a> · Map © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</p>
   </div>
 </div>
 <div class="tp" id="todoPage">
@@ -1583,7 +1583,7 @@ async function openRadar(){
   } catch { $('rpTime').textContent = 'Radar unavailable right now'; return; }
   if (!RMAP){
     RMAP = L.map('radarMap', { zoomControl: false, attributionControl: false, maxZoom: 10, minZoom: 4 });
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 10 }).addTo(RMAP);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 10 }).addTo(RMAP);
     $('rpPlay').onclick = () => rTimer ? stopRadar() : playRadar();
     $('rpSlider').oninput = e => { stopRadar(); showFrame(+e.target.value); };
   }
