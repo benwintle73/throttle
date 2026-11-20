@@ -184,6 +184,19 @@
   .acct-card .who{background:#f6f4fb;border-radius:14px;padding:14px;font-size:15px}
   .acct-card .who b{display:block;font-size:16px;word-break:break-all}
   .acct-card .who small{color:#777;font-size:13px}
+  .appear{margin-top:18px;padding-top:16px;border-top:1px solid #eee}
+  .appear h4{font-size:12px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+  .appear .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .appear button{border:2px solid #e2dfeb;border-radius:14px;padding:0;overflow:hidden;background:#fff;cursor:pointer;text-align:left;font:600 14px 'Outfit',sans-serif;color:#333}
+  .appear button.on{border-color:#6A5AE0;box-shadow:0 0 0 3px rgba(106,90,224,.18)}
+  .appear button i{display:block;height:54px}
+  .appear button span{display:flex;align-items:center;justify-content:space-between;padding:8px 10px}
+  .appear button span b{width:18px;height:18px;border-radius:50%;border:2px solid #ccc}
+  .appear button.on span b{border:5px solid #6A5AE0}
+  .appear .pv-classic{background:linear-gradient(180deg,#4C9FEE,#8ACAF4 60%,#FFE1A4)}
+  .appear .pv-neon{background:linear-gradient(180deg,#5B0E91,#FF2E9A 60%,#FF9A3D);position:relative}
+  .appear .pv-neon::after{content:'';position:absolute;left:0;right:0;bottom:0;height:16px;background:linear-gradient(180deg,#2EE6D6,#0B6E8C)}
+  body.neon .appear button{border-radius:2px}
   body.neon .acct-card{border-radius:3px;border:3px solid #000;box-shadow:8px 8px 0 #FF2E9A}
   body.neon .acct-card .btn-p{border-radius:2px;background:#000;font-family:'Anton',sans-serif;font-weight:400;letter-spacing:1px;text-transform:uppercase;font-size:18px}
   body.neon .acct-card input,body.neon .acct-card .btn-s,body.neon .acct-tabs,body.neon .acct-tabs button{border-radius:2px}
@@ -417,7 +430,7 @@
     <button class="icon-btn" id="locBtn" aria-label="Use my location">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
     </button>
-    <button class="icon-btn" id="acctBtn" aria-label="Account">
+    <button class="icon-btn" id="acctBtn" aria-label="Account and settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
       <i class="acct-dot" id="acctDot"></i>
     </button>
@@ -1115,7 +1128,7 @@ function svgCal(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentC
 /* ---------- saved places ---------- */
 const same = (a,b) => Math.abs(a.lat-b.lat)<0.01 && Math.abs(a.lon-b.lon)<0.01;
 function renderChips(){
-  $('chips').innerHTML = `<button class="chip mode ${neon?'on':''}" id="modeBtn">🌴 Neon Coast</button>` + saved.map((p,i)=>`<button class="chip ${same(p,current)?'active':''}" data-i="${i}">${p.name}</button>`).join('');
+  $('chips').innerHTML = saved.map((p,i)=>`<button class="chip ${same(p,current)?'active':''}" data-i="${i}">${p.name}</button>`).join('');
 }
 function renderSave(){ $('saveBtn').classList.toggle('on', saved.some(p=>same(p,current))); }
 $('chips').onclick = e => {
@@ -1224,6 +1237,18 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function appearanceHTML(){
+  return `<div class="appear"><h4>Appearance</h4><div class="opts">
+    <button type="button" data-theme="classic" class="${neon?'':'on'}"><i class="pv-classic"></i><span>Classic<b></b></span></button>
+    <button type="button" data-theme="neon" class="${neon?'on':''}"><i class="pv-neon"></i><span>🌴 Neon Coast<b></b></span></button>
+  </div></div>`;
+}
+function bindAppearance(){
+  $('acctBody').querySelectorAll('[data-theme]').forEach(b => b.onclick = () => {
+    const want = b.dataset.theme === 'neon'; if (want === neon) return;
+    neon = want; store.set('wx_neon', neon); applyMode(); drawAcct();
+  });
+}
 function drawAcct(){
   const b = $('acctBody');
   const msg = (acctErr ? `<div class="err">${esc(acctErr)}</div>` : '') + (acctMsg ? `<div class="ok">${esc(acctMsg)}</div>` : '');
@@ -1235,7 +1260,9 @@ function drawAcct(){
       <div class="who"><small>Signed in as</small><b>${esc(user.email)}</b><small>Last synced ${when}</small></div>
       ${msg}
       <button class="btn-p" id="syncBtn">Sync now</button>
-      <button class="btn-s" id="outBtn">Sign out</button>`;
+      <button class="btn-s" id="outBtn">Sign out</button>
+      ${appearanceHTML()}`;
+    bindAppearance();
     $('syncBtn').onclick = async () => { acctErr = acctMsg = ''; try { await pull(); acctMsg = 'All synced.'; } catch(e){ acctErr = 'Couldn’t sync. Check your connection.'; } drawAcct(); };
     $('outBtn').onclick = async () => { await sb.auth.signOut(); acctMsg = 'Signed out. Your data stays on this phone.'; acctErr = ''; setUser(null); drawAcct(); };
     return;
@@ -1260,7 +1287,9 @@ function drawAcct(){
       ${msg}
       <button class="btn-p" type="submit">${forgot ? 'Send reset link' : up ? 'Create account' : 'Sign in'}</button>
     </form>
-    <button class="link" id="altLink">${forgot ? 'Back to sign in' : up ? '' : 'Forgot password?'}</button>`;
+    <button class="link" id="altLink">${forgot ? 'Back to sign in' : up ? '' : 'Forgot password?'}</button>
+    ${appearanceHTML()}`;
+  bindAppearance();
   b.querySelectorAll('.acct-tabs button').forEach(t => t.onclick = () => { acctMode = t.dataset.m; acctErr = acctMsg = ''; drawAcct(); });
   const alt = $('altLink'); if (!alt.textContent) alt.remove(); else alt.onclick = () => { acctMode = forgot ? 'in' : 'forgot'; acctErr = acctMsg = ''; drawAcct(); };
   $('acctForm').onsubmit = async e => {
