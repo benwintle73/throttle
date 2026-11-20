@@ -420,6 +420,8 @@
   .pz-hint button{border:0;border-radius:999px;padding:7px 14px;background:rgba(255,216,77,.22);color:#fff;font:700 13px 'Outfit',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px}
   .pz-hint button:disabled{opacity:.45;cursor:default}
   .pz-hint:empty{display:none}
+  .pz-hint{gap:8px}
+  .pz-hint button.gu{background:rgba(255,255,255,.14)}
   .pz-actions{display:flex;gap:8px;justify-content:center;margin-top:8px}
   .pz-actions button{border:0;border-radius:999px;padding:8px 16px;background:#fff;color:#333;font:700 13px 'Outfit',sans-serif;cursor:pointer}
   .pz-actions button.ghost{background:rgba(255,255,255,.18);color:#fff}
@@ -1370,7 +1372,26 @@ function drawPuzzle(revealRow = -1){
   const used = (st.hints || []).length, rowNow = st.guesses.length, usedHere = (st.hintRows || []).includes(rowNow);
   $('pzHint').innerHTML = st.done || st.legacy ? '' :
     `<button id="hintBtn" ${used >= 3 || usedHere || rowNow < 3 ? 'disabled' : ''}>💡 ${rowNow < 3 ? 'Hints unlock after 3 guesses' : used >= 3 ? 'No hints left' : usedHere ? 'One hint per line' : `Hint · ${3 - used} left${daily ? ' · −75 pts' : ''}`}</button>`;
+  if (!st.done && !st.legacy && rowNow >= 1) $('pzHint').insertAdjacentHTML('beforeend', `<button id="giveUpBtn" class="gu">Give up</button>`);
+  const gu = $('giveUpBtn'); if (gu) gu.onclick = pzGiveUp;
   const hb = $('hintBtn'); if (hb) hb.onclick = pzHint;
+}
+async function pzGiveUp(){
+  if (!PZ || pzBusy || PZ.st.done) return;
+  if (!confirm(PZ.mode === 'daily' ? 'Give up and see the word? You’ll score 0 today.' : 'Give up and see the word?')) return;
+  if (PZ.mode === 'daily'){
+    pzBusy = true;
+    const { data, error } = await sb.rpc('weather_give_up');
+    pzBusy = false;
+    if (error) return toast('Couldn’t reach the server — try again');
+    PZ.st = fromServer(data); store.set('wx_pz_srv', PZ.st, true);
+    finishStats(false, PZ.st.guesses.length); fetchRank();
+  } else {
+    const st = PZ.st; st.done = true; st.won = false; st.word = PZ.word;
+    finishStats(false, st.guesses.length);
+    store.set('wx_pz', { day: st.day, guesses: st.guesses, done: true, won: false, hints: st.hints, hintRows: st.hintRows }, true);
+  }
+  cur = ''; drawPuzzle();
 }
 async function pzHint(){
   if (!PZ || pzBusy || PZ.st.done) return;
@@ -1487,7 +1508,7 @@ function drawBoard(){
     <div class="lb-tabs"><button class="${boardTab==='week'?'on':''}" data-t="week">This week</button><button class="${boardTab==='today'?'on':''}" data-t="today">Today</button><button class="${boardTab==='all'?'on':''}" data-t="all">All time</button></div>
     ${rows || `<div class="lb-empty">No scores yet — be the first.</div>`}
     ${meBox}
-    <div class="lb-rules"><b>Scoring</b> — solved in 1 guess: 600 · 2: 500 · 3: 400 · 4: 300 · 5: 200 · 6: 100. Speed bonus up to +100, dropping 1 point every 6 seconds from your first guess to your last. Hints unlock after 3 guesses; each costs 75 (up to 3, one per line). Not solved: 0. The week runs Monday to Sunday and resets each Monday; All time keeps adding up. Every guess is checked and timed on the server.<br>Playing as <b>${esc(d.nickname || '—')}</b> — change your name in your account.</div>
+    <div class="lb-rules"><b>Scoring</b> — solved in 1 guess: 600 · 2: 500 · 3: 400 · 4: 300 · 5: 200 · 6: 100. Speed bonus up to +100, dropping 1 point every 6 seconds from your first guess to your last. Hints unlock after 3 guesses; each costs 75 (up to 3, one per line). Not solved or gave up: 0. The week runs Monday to Sunday and resets each Monday; All time keeps adding up. Every guess is checked and timed on the server.<br>Playing as <b>${esc(d.nickname || '—')}</b> — change your name in your account.</div>
     <div class="pz-actions" style="margin-top:12px"><button class="ghost" onclick="$('pz').classList.remove('board')">Back to puzzle</button></div>`;
   lb.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { boardTab = b.dataset.t; drawBoard(); });
   lb.querySelectorAll('[data-lg]').forEach(b => b.onclick = () => pickLeague(b.dataset.lg || null));
