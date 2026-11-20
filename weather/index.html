@@ -53,6 +53,12 @@
   .cloud::before{width:48%;height:180%;left:16%;bottom:20%}
   .cloud::after{width:36%;height:140%;left:50%;bottom:25%}
   @keyframes drift{from{transform:translateX(-140px)}to{transform:translateX(calc(100vw + 140px))}}
+  .deck{position:absolute;left:0;right:0;top:0;height:75%;opacity:0;transition:opacity 3s,background 3s;pointer-events:none}
+  .deck.on{opacity:1}
+  .deck.fog{height:100%}
+  .flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+  .flash.on{animation:flash 11s infinite}
+  @keyframes flash{0%,93%,100%{opacity:0}94%{opacity:.18}95%{opacity:0}96%{opacity:.1}97%{opacity:0}}
   .precip{position:absolute;inset:0;opacity:0;transition:opacity 3s}
   .precip.rain{background:repeating-linear-gradient(105deg,transparent 0 27px,rgba(255,255,255,.45) 27px 28px);background-size:80px 90px;animation:fall .9s linear infinite}
   .precip.snow{background-image:radial-gradient(circle,#fff 1.5px,transparent 2px),radial-gradient(circle,rgba(255,255,255,.8) 1px,transparent 1.5px);background-size:46px 46px,30px 30px;animation:snowfall 6s linear infinite}
@@ -890,7 +896,10 @@ function buildSkyline(){
     <g id="winLights" fill="#FFE27A">${win}</g></svg>`;
 }
 buildSkyline();
-const CLOUDINESS = {clear:0, partly:.12, cloudy:.42, fog:.5, rain:.5, snow:.3, storm:.62};
+const CLOUDINESS = {clear:0, partly:.18, cloudy:.78, fog:.72, rain:.8, snow:.6, storm:.88};
+// overcast palettes (top, middle, horizon) the sky blends towards: day / night, and storm
+const GREY_DAY   = ['#8E9AA8','#A7B0BA','#C2C8CE'], GREY_NIGHT = ['#1D2129','#262A33','#30343D'];
+const STORM_DAY  = ['#4F5866','#636B78','#7C838E'], STORM_NIGHT = ['#14161C','#1B1E25','#24272F'];
 
 const hex2rgb = h => [1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
 const rgb2hex = a => '#'+a.map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('');
@@ -900,6 +909,7 @@ function mute(hex, amt){ // desaturate + dim for overcast skies
   const [r,g,b] = hex2rgb(hex), l = (.3*r+.59*g+.11*b)*.88;
   return rgb2hex([r,g,b].map(v=>v+(l-v)*amt));
 }
+function mixSet(a, b, t){ return a.map((c, i) => mix(c, b[i], t)); }
 function skyAt(p){
   const K = neon ? NEON_SKY : SKY;
   if (p <= K[0][0] || p >= K[K.length-1][0]) return K[0][1];
@@ -910,12 +920,14 @@ function skyAt(p){
 }
 
 function buildClouds(k){
-  const n = {clear:0, partly:2, cloudy:4, fog:3, rain:4, snow:3, storm:4}[k] ?? 2;
+  const n = {clear:0, partly:3, cloudy:8, fog:4, rain:8, snow:6, storm:9}[k] ?? 2;
+  const big = ['cloudy','rain','storm','snow'].includes(k);
   let html = '';
   for (let i=0;i<n;i++){
-    const w = 110 + (i*47)%90, top = 40 + (i*67)%200, dur = 70 + i*23, delay = -(i*31 % dur);
-    html += `<div class="cloud" style="width:${w}px;top:${top}px;animation-duration:${dur}s;animation-delay:${delay}s"></div>`;
+    const w = (big ? 170 : 110) + (i*47)%(big ? 130 : 90), top = 20 + (i*67)%(big ? 230 : 200), dur = 80 + i*21, delay = -(i*31 % dur);
+    html += `<div class="cloud" style="width:${w}px;height:${big ? 46 : 34}px;top:${top}px;animation-duration:${dur}s;animation-delay:${delay}s"></div>`;
   }
+  html += `<div class="deck ${big || k==='fog' ? 'on' : ''} ${k==='fog' ? 'fog' : ''}"></div><div class="flash ${k==='storm' ? 'on' : ''}"></div>`;
   $('clouds').innerHTML = html;
   const pr = $('precip');
   pr.className = 'precip' + (k==='rain'||k==='storm' ? ' rain' : k==='snow' ? ' snow' : '');
@@ -968,7 +980,9 @@ function updateSky(){
   const elev = clamp(Math.sin(Math.PI*p));
 
   // sky gradient
-  const cols = skyAt(p).map(c => mute(c, neon ? cloud*.6 : cloud));
+  const cover = neon ? cloud * .6 : cloud;
+  const grey = k === 'storm' ? mixSet(STORM_DAY, STORM_NIGHT, night) : mixSet(GREY_DAY, GREY_NIGHT, night);
+  const cols = skyAt(p).map((c, j) => mix(mute(c, Math.min(1, cover * .6)), grey[j], cover * .85));
   const r = document.documentElement.style;
   r.setProperty('--g1', cols[0]); r.setProperty('--g2', cols[1]); r.setProperty('--g3', cols[2]);
   document.querySelector('meta[name=theme-color]').setAttribute('content', cols[0]);
@@ -1014,7 +1028,7 @@ function updateSky(){
       sun.style.background = `radial-gradient(circle at 50% 50%, #FFFDF2 0%, ${core} 55%, ${glow} 100%)`;
       sun.style.boxShadow = `0 0 40px 12px ${glow}cc, 0 0 120px 50px ${glow}55, 0 0 240px 120px ${glow}22`;
     }
-    sun.style.opacity = 1 - cloud*0.85;
+    sun.style.opacity = Math.max(0, 1 - cloud * 1.2);   // gone under overcast / rain / storm
   } else sun.style.opacity = 0;
 
   // horizon glow around sunrise/sunset
@@ -1042,18 +1056,21 @@ function updateSky(){
   if (ma && ma.up){
     // real position: from its actual rise to its actual set; faint in daylight like the real thing
     place(moon, Math.min(.97, Math.max(.03, ma.q)));
-    moon.style.opacity = (0.35 + 0.65 * night) * (1 - cloud * 0.7) * (mp.illum < 3 ? 0 : 1);
+    moon.style.opacity = (mp.illum < 3 || cloud >= .7) ? 0 : (night > .5 ? Math.max(0, 1 - cloud * 1.15) : (cloud > .2 ? 0 : 0.6 * (1 - cloud * 2)));
   } else if (!ma && q >= 0){ place(moon, q); moon.style.opacity = night * (1 - cloud*0.7); }
   else moon.style.opacity = 0;
-  $('stars').style.opacity = night * (1 - cloud*1.4);
+  $('stars').style.opacity = night * Math.max(0, 1 - cloud * 1.6);
 
   // clouds tint with the sky
-  const cloudCol = mix(mix('#FFFFFF', cols[1], .25), '#3A3F5C', night*.75);
-  const darker = (k==='rain'||k==='storm') ? .35 : 0;
+  const cloudCol = mix(mix('#FFFFFF', cols[1], .3), '#3A3F5C', night*.75);
+  const darker = k==='storm' ? .6 : k==='rain' ? .4 : k==='cloudy' ? .12 : 0;
   document.querySelectorAll('.cloud').forEach(c => {
-    c.style.background = mix(cloudCol, '#5A6178', darker);
-    c.style.opacity = k==='clear' ? 0 : k==='partly' ? .75 : .92;
+    c.style.background = mix(cloudCol, k==='storm' ? '#3E4452' : '#6A7284', darker);
+    c.style.opacity = k==='clear' ? 0 : k==='partly' ? .8 : .95;
   });
+  const deck = document.querySelector('.deck');
+  if (deck) deck.style.background = k==='fog' ? `linear-gradient(180deg, ${mix('#E8ECEF', cols[1], night*.8)}cc, ${mix('#E8ECEF', cols[2], night*.8)}55)`
+    : `linear-gradient(180deg, ${mix(cloudCol, k==='storm' ? '#3E4452' : '#7A8394', darker)}ee 0%, ${mix(cloudCol, '#7A8394', darker)}66 55%, transparent 100%)`;
   // normal mode: no falling rain/snow overlay (clouds and greyer sky show the weather); Neon Coast keeps it
   $('precip').style.opacity = (k==='rain'||k==='storm'||k==='snow') ? (neon ? .3 : .22) : 0;   // subtle in both looks
 }
@@ -1623,7 +1640,7 @@ function moonSVG(f, lat, dark = 1){
   // southern hemisphere sees the moon flipped (waxing lit on the left)
   const flip = lat < 0 ? 'scale(-1 1)' : '';
   return `<svg viewBox="-1.1 -1.1 2.2 2.2" width="100%" height="100%">
-    <defs><radialGradient id="mg" cx="-.3" cy="-.3" r="1.4" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFFCEB"/><stop offset="1" stop-color="#E9D79A"/></radialGradient></defs>
+    <defs><radialGradient id="mg" cx="-.3" cy="-.3" r="1.4" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${dark < .4 ? '#FFFFFF' : '#FFFCEB'}"/><stop offset="1" stop-color="${dark < .4 ? '#E4ECF4' : '#E9D79A'}"/></radialGradient></defs>
     <circle r="1" fill="rgba(20,24,60,${(.55*dark).toFixed(2)})"/>
     <g transform="${flip}"><path d="${moonPath(f)}" fill="url(#mg)"/></g>
     <circle cx=".28" cy="-.2" r=".14" fill="rgba(160,140,90,.25)"/><circle cx="-.3" cy=".32" r=".1" fill="rgba(160,140,90,.2)"/>
