@@ -858,6 +858,21 @@
   .lizard.run .l1{animation:lgA .14s steps(1) infinite}.lizard.run .l2{animation:lgB .14s steps(1) infinite}
   @keyframes lgA{50%{opacity:0}}@keyframes lgB{0%{opacity:0}50%{opacity:1}}
   .lizard:not(.run) .l2{opacity:0}
+  /* landscape on a phone: a simple bedside-clock view instead of the full app */
+  .land{display:none}
+  @media (orientation:landscape) and (max-height:520px){
+    html,body{overflow:hidden!important;height:100%}
+    .land{display:flex;position:fixed;inset:0;z-index:90;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#fff;text-align:center;
+      background:linear-gradient(180deg,var(--g1,#1b2a4a) 0%,var(--g2,#2d4370) 55%,var(--g3,#4a6aa0) 100%);
+      padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);text-shadow:0 2px 18px rgba(0,0,0,.25)}
+    .land .lt{font-size:min(30vh,22vw);font-weight:200;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+    .land .lt small{font-size:.22em;font-weight:500;margin-left:.15em;letter-spacing:0;opacity:.85}
+    .land .ld{font-size:min(6vh,18px);font-weight:600;opacity:.9;margin-top:6px}
+    .land .lw{font-size:min(8vh,24px);font-weight:500;margin-top:10px;opacity:.95}
+    .land .lw b{font-weight:700}
+    body.retro .land .lt{font-family:'Orbitron',sans-serif;font-weight:700;color:#FFB000;text-shadow:0 0 18px rgba(255,176,0,.6)}
+    body.neon .land .lt{font-family:'Anton',sans-serif;font-weight:400}
+  }
 </style>
 </head>
 <body>
@@ -957,6 +972,7 @@
 </div>
 <div class="toast" id="toast"></div>
 <div class="warp" id="warp"></div>
+<div class="land" id="land"><div class="lt" id="landT"></div><div class="ld" id="landD"></div><div class="lw" id="landW"></div></div>
 <div class="defpop" id="defPop"></div>
 <button class="edit-done" id="editDone" onclick="toggleLayoutEdit(false)">Done</button>
 <div class="tp eb" id="ebPage">
@@ -1384,6 +1400,19 @@ function timeJump(){
   if (theme !== 'retro') return;
   const f = $('warp'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
 }
+function drawLand(){
+  if (!matchMedia('(orientation:landscape) and (max-height:520px)').matches) return;
+  const n = new Date(), h = n.getHours(), m = String(n.getMinutes()).padStart(2, '0');
+  $('landT').innerHTML = `${h % 12 || 12}:${m}<small>${h < 12 ? 'am' : 'pm'}</small>`;
+  $('landD').textContent = n.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' });
+  if (lastData && lastData.current){
+    const c = lastData.current;
+    $('landW').innerHTML = `<b>${Math.round(c.temperature_2m)}°</b> · ${LABELS[c.weather_code] || ''}${current && current.name ? ` · ${esc(current.name)}` : ''}`;
+  }
+}
+setInterval(drawLand, 5000);
+addEventListener('resize', drawLand);
+addEventListener('orientationchange', () => setTimeout(drawLand, 200));
 function setThemeClass(){
   ['neon','murray','retro','beach'].forEach(t => document.body.classList.toggle(t, theme === t));
 }
@@ -3174,7 +3203,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.80', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.81', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
