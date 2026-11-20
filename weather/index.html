@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --g1:#FFD166; --g2:#FF8A5B; --g3:#FF5E7E;
@@ -671,6 +671,42 @@
   @keyframes bub{0%{opacity:0;transform:translateY(10px)}30%{opacity:.7}100%{opacity:0;transform:translateY(-34px)}}
   .eb input{width:min(86vw,360px);font:500 16px 'Outfit',sans-serif;padding:12px 14px;border-radius:12px;border:0;background:rgba(255,255,255,.92);color:#222;text-align:center}
   .eb .hint{font-size:13px;color:var(--soft)}
+
+  /* ===== Murray River mode: river red gum country ===== */
+  .murray-only{display:none}
+  body.murray .murray-only{display:block}
+  body.murray .bg{background:linear-gradient(180deg,var(--g1) 0%,var(--g2) 28%,var(--g3) 46%,var(--earth,#4F4934) 78%,var(--earth2,#2E2A1E) 100%)}
+  .river{position:absolute;left:0;right:0;bottom:0;height:260px;pointer-events:none}
+  .river svg{position:absolute;inset:0;width:100%;height:100%}
+  .river svg.steamer{inset:auto;bottom:30px;left:-90px;width:78px;height:34px}
+  .river .ripple{position:absolute;left:0;right:0;bottom:0;height:58px;background:repeating-linear-gradient(180deg,rgba(255,255,255,0) 0 6px,rgba(255,255,255,.09) 6px 7px);animation:swell 7s ease-in-out infinite alternate;mix-blend-mode:screen}
+  .river .rglint{position:absolute;bottom:0;height:58px;width:110px;margin-left:-55px;transition:left 3s linear,opacity 3s;
+    background:radial-gradient(ellipse 50% 100% at 50% 0%,var(--glint,#FFE9B0) 0%,transparent 70%);opacity:0;mix-blend-mode:screen}
+  .river .rglint::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0 5px,rgba(0,0,0,.35) 5px 7px)}
+  .steamer{position:absolute;bottom:30px;left:-90px;width:78px;height:34px;animation:steam 420s linear infinite;animation-delay:-120s}
+  @keyframes steam{0%{transform:translateX(0)}60%,100%{transform:translateX(calc(100vw + 180px))}}
+  .birds{position:absolute;top:110px;left:-60px;width:60px;height:24px;animation:fly 150s linear infinite;animation-delay:-40s;transition:opacity 3s}
+  .birds svg{width:100%;height:100%}
+  .birds path{animation:flap .7s ease-in-out infinite alternate;transform-origin:center}
+  .birds path:nth-child(2){animation-delay:-.3s}.birds path:nth-child(3){animation-delay:-.5s}.birds path:nth-child(4){animation-delay:-.15s}
+  @keyframes fly{0%{transform:translate(0,0)}22%{transform:translate(calc(50vw + 30px),-30px)}45%,100%{transform:translate(calc(100vw + 120px),10px)}}
+  @keyframes flap{to{transform:scaleY(.4)}}
+  body.murray .hero{padding-bottom:118px}
+  body.murray .place h1{font-family:'Fraunces',serif;font-weight:600;font-size:25px;letter-spacing:0}
+  body.murray .place p{font-style:italic;font-family:'Fraunces',serif}
+  body.murray .temp{font-family:'Fraunces',serif;font-weight:300;letter-spacing:-3px;font-size:108px}
+  body.murray .cond{font-family:'Fraunces',serif;font-style:italic;font-weight:400;font-size:23px}
+  body.murray .card{background:rgba(255,244,222,.15);border-color:rgba(255,232,196,.3)}
+  body.murray .card h2{color:rgba(255,236,206,.85)}
+  body.murray .totd .q,body.murray .fun .fortune p,body.murray .mq .q{font-family:'Fraunces',serif}
+  body.murray .totd .q{font-weight:400;font-size:20px}
+  body.murray .chip{background:rgba(255,240,214,.16);border-color:rgba(255,232,196,.35)}
+  body.murray .chip.active{background:#F4E6CC;color:#3D3322}
+  body.murray .icon-btn{background:rgba(255,240,214,.16);border-color:rgba(255,232,196,.35)}
+  body.murray .tmrw{background:rgba(52,44,28,.35)}
+  .appear .pv-murray{background:linear-gradient(180deg,#4A4F86 0%,#D9798A 38%,#F7A262 58%,#6E7A58 60%,#4E5B3F 100%);position:relative}
+  .appear .pv-murray::after{content:'';position:absolute;left:6%;bottom:30%;width:30%;height:55%;border-radius:50% 50% 40% 40%;background:#2B3122;box-shadow:120px 8px 0 -6px #2B3122}
+  .appear .opts{grid-template-columns:repeat(3,1fr)}
 </style>
 </head>
 <body>
@@ -686,6 +722,8 @@
   <div class="sea neon-only" id="sea"><div class="glint" id="glint"></div></div>
   <svg class="palm l neon-only" viewBox="0 0 150 200"><use href="#palmShape"/></svg>
   <svg class="palm r neon-only" viewBox="0 0 150 200"><use href="#palmShape"/></svg>
+  <div class="birds murray-only" id="birds"><svg viewBox="0 0 60 24" fill="none" stroke="var(--bird,#fff)" stroke-width="1.8" stroke-linecap="round"><path d="M2 10q4-5 8 0q4-5 8 0"/><path d="M22 4q3-4 6 0q3-4 6 0"/><path d="M30 16q4-5 8 0q4-5 8 0"/><path d="M46 8q3-4 6 0q3-4 6 0"/></svg></div>
+  <div class="river murray-only" id="river"></div>
   <div class="precip" id="precip"></div>
 </div>
 <svg width="0" height="0" style="position:absolute">
@@ -846,7 +884,7 @@
 const DEFAULT_PLACE = { name:'Maryborough', sub:'Victoria, Australia', lat:-37.0457, lon:143.7393 };
 
 /* ---------- storage (safe) ---------- */
-const SYNC_KEYS = ['wx_saved','wx_last','wx_neon','wx_pz_stats','wx_todo','wx_order'];
+const SYNC_KEYS = ['wx_saved','wx_last','wx_neon','wx_theme','wx_pz_stats','wx_todo','wx_order'];
 const store = {
   get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch{ return d; } },
   set(k, v, quiet){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} if (!quiet && SYNC_KEYS.includes(k) && window.syncSoon) window.syncSoon(); }
@@ -1106,6 +1144,17 @@ const SKY = [
   [ 1.06, ['#1E2161','#5A2E7E','#B4446F']],
   [ 1.16, ['#0A0F26','#151A40','#2A2763']],
 ];
+const MURRAY_SKY = [
+  [-0.16, ['#0B1022','#151B33','#232742']],
+  [-0.06, ['#1F2547','#4E4566','#B07A7E']],
+  [ 0.02, ['#53608F','#D79A86','#F6C48C']],
+  [ 0.14, ['#6FA6D6','#A9C9DC','#EEDDBE']],
+  [ 0.50, ['#5C9AD2','#94C0DE','#DCE3D2']],
+  [ 0.86, ['#5E8FC6','#B9BFC0','#F2CC8C']],
+  [ 0.98, ['#4A4F86','#D9798A','#F7A262']],
+  [ 1.06, ['#262A55','#6A4A73','#B5677A']],
+  [ 1.16, ['#0B1022','#151B33','#232742']],
+];
 const NEON_SKY = [
   [-0.16, ['#0D0221','#26083F','#541066']],
   [-0.06, ['#1B0638','#6E1B72','#FF3E8A']],
@@ -1117,9 +1166,12 @@ const NEON_SKY = [
   [ 1.06, ['#2A0845','#921F80','#FF4F81']],
   [ 1.16, ['#0D0221','#26083F','#541066']],
 ];
-let neon = store.get('wx_neon', false);
+let theme = store.get('wx_theme', null) || (store.get('wx_neon', false) ? 'neon' : 'classic');
+let neon = theme === 'neon';
 function applyMode(){
+  neon = theme === 'neon';
   document.body.classList.toggle('neon', neon);
+  document.body.classList.toggle('murray', theme === 'murray');
   renderChips();
   updateSky();
 }
@@ -1140,6 +1192,64 @@ function buildSkyline(){
     <g id="winLights" fill="#FFE27A">${win}</g></svg>`;
 }
 buildSkyline();
+function buildRiver(){
+  // original river red gum scene: seeded so it looks the same every time
+  let seed = 7;
+  const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const W = 400, HOR = 198, WAT = 202;
+  // distant tree line along the far bank, plus its reflection
+  // soft rounded crowns of distant gums, in clumps with gaps
+  let crowns = '';
+  for (let x = -6; x <= W + 6; x += 7 + r()*6){
+    const tall = (Math.sin(x/41) + 1) * 5 + (Math.sin(x/13 + 1) + 1) * 2;
+    if (r() < .12) continue;
+    const rr = 5 + r()*6 + tall*.35, cy = HOR - 3 - tall - r()*4;
+    crowns += `<ellipse cx="${x.toFixed(1)}" cy="${cy.toFixed(1)}" rx="${(rr*1.25).toFixed(1)}" ry="${rr.toFixed(1)}"/><rect x="${(x-.8).toFixed(1)}" y="${cy.toFixed(1)}" width="1.6" height="${(HOR-cy).toFixed(1)}"/>`;
+  }
+  const farG = (extra) => `<g fill="var(--far)" ${extra}>${crowns}<rect x="0" y="${HOR-4}" width="${W}" height="6"/></g>`;
+  // a river red gum: thick pale trunk, crooked limbs, clumpy canopy
+  const gum = (bx, by, s, lean) => {
+    let limbs = '', leaves = '';
+    const fx = bx + lean*30*s, fy = by - 70*s;
+    const trunk = `M${bx-16*s} ${by} C${bx-12*s} ${by-30*s} ${fx-10*s} ${fy+20*s} ${fx-7*s} ${fy} L${fx+7*s} ${fy} C${fx+10*s} ${fy+24*s} ${bx+14*s} ${by-28*s} ${bx+18*s} ${by}Z`;
+    const ends = [[-70,-60],[-25,-115],[30,-125],[78,-70],[5,-80]];
+    ends.forEach(([dx, dy], k) => {
+      const ex = fx + dx*s + (r()-.5)*20*s, ey = fy + dy*s + (r()-.5)*16*s;
+      const cx = fx + dx*s*.35 + (r()-.5)*24*s, cy = fy + dy*s*.6;
+      limbs += `<path d="M${fx} ${fy+4*s} Q${cx} ${cy} ${ex} ${ey}" stroke-width="${(k===4?5:8)*s}"/>`;
+      for (let j = 0; j < 7; j++){
+        const lx = ex + (r()-.5)*58*s, ly = ey + (r()-.6)*30*s, rx = (14 + r()*16)*s, ry = (9 + r()*9)*s;
+        leaves += `<ellipse cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}"/>`;
+      }
+    });
+    return `<g><g fill="var(--gum)" opacity=".92">${leaves}</g><path d="${trunk}" fill="var(--bark)"/><g stroke="var(--bark)" fill="none" stroke-linecap="round">${limbs}</g>
+      <path d="${trunk}" fill="url(#barkShade)" opacity=".5"/></g>`;
+  };
+  // small reeds at the near edge
+  let reeds = '';
+  for (let x = 0; x < W; x += 3) if (r() < .5) { const h = 6 + r()*12; reeds += `<path d="M${x} 262 q${(r()-.5)*4} ${-h/2} ${(r()-.5)*6} ${-h}"/>`; }
+  $('river').innerHTML = `<svg viewBox="0 0 ${W} 262" preserveAspectRatio="xMidYMax slice">
+    <defs>
+      <linearGradient id="water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--w1)"/><stop offset="1" style="stop-color:var(--w2)"/></linearGradient>
+      <linearGradient id="barkShade" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".35"/><stop offset=".45" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></linearGradient>
+    </defs>
+    <rect x="0" y="${WAT}" width="${W}" height="${262-WAT}" fill="url(#water)"/>
+    ${farG(`transform="translate(0 ${2*WAT}) scale(1 -1)" opacity=".3"`)}
+    ${farG('')}
+    <rect x="0" y="${HOR}" width="${W}" height="${WAT-HOR+1}" fill="var(--bank)"/>
+    ${gum(34, 262, 1.15, .5)}
+    ${gum(378, 262, .85, -.6)}
+    <g stroke="var(--gum)" stroke-width="1.2" fill="none" opacity=".8">${reeds}</g>
+  </svg>
+  <div class="ripple"></div><div class="rglint" id="rglint"></div>
+  <svg class="steamer" viewBox="0 0 78 34"><g fill="var(--boat)">
+    <path d="M4 26 L74 26 L68 32 L10 32Z"/><rect x="14" y="17" width="44" height="9"/><rect x="20" y="10" width="30" height="7"/>
+    <rect x="30" y="1" width="3.5" height="10"/><rect x="38" y="1" width="3.5" height="10"/>
+    <circle cx="64" cy="24" r="7" fill="none" stroke="var(--boat)" stroke-width="2"/></g>
+    <g fill="#FFD27A" opacity="var(--lights,0)"><rect x="18" y="19" width="3" height="3"/><rect x="25" y="19" width="3" height="3"/><rect x="32" y="19" width="3" height="3"/><rect x="39" y="19" width="3" height="3"/><rect x="46" y="19" width="3" height="3"/><rect x="24" y="12" width="3" height="3"/><rect x="32" y="12" width="3" height="3"/><rect x="40" y="12" width="3" height="3"/></g>
+    <path d="M10 26 L72 26" stroke="#B5432F" stroke-width="1.5"/></svg>`;
+}
+buildRiver();
 const CLOUDINESS = {clear:0, partly:.18, cloudy:.78, fog:.72, rain:.8, snow:.6, storm:.88};
 // overcast palettes (top, middle, horizon) the sky blends towards: day / night, and storm
 const GREY_DAY   = ['#8E9AA8','#A7B0BA','#C2C8CE'], GREY_NIGHT = ['#1D2129','#262A33','#30343D'];
@@ -1155,7 +1265,7 @@ function mute(hex, amt){ // desaturate + dim for overcast skies
 }
 function mixSet(a, b, t){ return a.map((c, i) => mix(c, b[i], t)); }
 function skyAt(p){
-  const K = neon ? NEON_SKY : SKY;
+  const K = neon ? NEON_SKY : theme === 'murray' ? MURRAY_SKY : SKY;
   if (p <= K[0][0] || p >= K[K.length-1][0]) return K[0][1];
   for (let i=0;i<K.length-1;i++){
     const [p0,c0] = K[i], [p1,c1] = K[i+1];
@@ -1250,9 +1360,10 @@ function updateSky(){
     scene.style.height = H + 'px';
     W = scene.clientWidth;
   }
+  const murray = theme === 'murray', base = murray ? H - 64 : H;   // in Murray mode the sun sets behind the far bank
   const place = (el, t) => {
     el.style.left = (W*(0.07 + t*0.86)) + 'px';
-    el.style.top  = (H - Math.sin(Math.PI*t)*(H - (neon ? 95 : Math.max(165, H * 0.42)))) + 'px';   // peak sits below the header, visible
+    el.style.top  = (base - Math.sin(Math.PI*t)*(base - (neon ? 95 : Math.max(165, H * 0.42)))) + 'px';   // peak sits below the header, visible
   };
 
   // sun: deep orange at the horizon, pale gold overhead
@@ -1283,6 +1394,28 @@ function updateSky(){
   hg.style.background = `radial-gradient(ellipse at ${p < .5 ? '15%' : '85%'} 50%, ${neon ? '#FF2E9A' : '#FF8A50'}, transparent 70%)`;
   hg.style.opacity = neon ? Math.max(.35, twilight) * (1 - cloud*.5) : twilight * (1 - cloud) * 0.85;
   const wl = document.getElementById('winLights'); if (wl) wl.style.opacity = .25 + night*.75;
+  if (murray){
+    const dark = Math.max(night * .92, twilight * .55);
+    const set = (k, v) => r.setProperty(k, v);
+    set('--far', mix(mix(cols[2], '#5B6B4F', .6), '#0B0E10', night * .88));
+    set('--bank', mix(mute('#C9A774', cloud * .5), '#16140F', night * .88));
+    set('--w1', mix(mix(cols[2], '#7C8B6A', .5), '#0A0F1C', night * .82));
+    set('--w2', mix('#4B5839', '#04060A', night * .9));
+    set('--gum', mix(mute('#4D5A3A', cloud * .4), '#0A0C09', dark));
+    set('--bark', mix(mute('#D8CCB6', cloud * .4), '#141613', dark));
+    set('--boat', mix('#F1EBDD', '#22201C', night * .85));
+    set('--lights', night.toFixed(2));
+    set('--bird', night > .5 ? 'rgba(0,0,0,0)' : twilight > .5 ? '#2A2622' : '#FFFFFF');
+    set('--earth', mix(mute('#5E5640', cloud * .5), '#0D0E0F', night * .85));
+    set('--earth2', mix('#3A3424', '#07080A', night * .9));
+    $('birds').style.opacity = (k === 'rain' || k === 'storm' || night > .5) ? 0 : 1;
+    const g = $('rglint'), src = (p > -0.05 && p < 1.05) ? p : (q >= 0 ? q : -1);
+    if (g && src >= 0){
+      g.style.left = (W*(0.07 + src*0.86)) + 'px';
+      g.style.setProperty('--glint', night > .5 ? '#FFF4C8' : mix('#FF8A50', '#FFF1B8', elev));
+      g.style.opacity = (1 - cloud) * (night > .5 ? .5 : .8);
+    } else if (g) g.style.opacity = 0;
+  }
   if (neon){
     const g = $('glint');
     const src = (p > -0.05 && p < 1.05) ? p : (q >= 0 ? q : -1);
@@ -2362,7 +2495,7 @@ function renderChips(){
 function renderSave(){ $('saveBtn').classList.toggle('on', saved.some(p=>same(p,current))); $('locBtn').classList.toggle('here', !!current.here); }
 $('chips').onclick = e => {
   const b = e.target.closest('.chip'); if(!b) return;
-  if (b.id === 'modeBtn'){ neon = !neon; store.set('wx_neon', neon); applyMode(); return; }
+  if (b.id === 'modeBtn'){ theme = theme === 'neon' ? 'classic' : 'neon'; store.set('wx_theme', theme); store.set('wx_neon', theme === 'neon'); applyMode(); return; }
   load(saved[+b.dataset.i]);
 };
 $('saveBtn').onclick = () => {
@@ -2441,6 +2574,7 @@ function mergeData(remote, local){
   out.wx_saved = [...r, ...l.filter(p => !r.some(q => same(p,q)))];
   out.wx_last  = remote.wx_last ?? local.wx_last;
   out.wx_neon  = remote.wx_neon ?? local.wx_neon;
+  out.wx_theme = remote.wx_theme ?? local.wx_theme ?? (out.wx_neon ? 'neon' : 'classic');
   out.wx_order = local.wx_order ?? remote.wx_order;
   // today's puzzle: keep the further-along game for the same day, else the newer day
   const rp = remote.wx_pz, lp = local.wx_pz;
@@ -2455,11 +2589,11 @@ function mergeData(remote, local){
   Object.keys(out).forEach(k => out[k] === undefined && delete out[k]);
   return out;
 }
-function localData(){ const d = {}; SYNC_KEYS.forEach(k => { const v = store.get(k, undefined); if (v !== undefined) d[k] = v; }); d.wx_saved = saved; d.wx_neon = neon; d.wx_last = current; return d; }
+function localData(){ const d = {}; SYNC_KEYS.forEach(k => { const v = store.get(k, undefined); if (v !== undefined) d[k] = v; }); d.wx_saved = saved; d.wx_neon = neon; d.wx_theme = theme; d.wx_last = current; return d; }
 function applyData(d){
   SYNC_KEYS.forEach(k => { if (d[k] !== undefined) store.set(k, d[k], true); });
-  saved = store.get('wx_saved', saved); neon = store.get('wx_neon', neon);
-  document.body.classList.toggle('neon', neon);
+  saved = store.get('wx_saved', saved); theme = store.get('wx_theme', null) || (store.get('wx_neon', neon) ? 'neon' : 'classic'); neon = theme === 'neon';
+  document.body.classList.toggle('neon', neon); document.body.classList.toggle('murray', theme === 'murray');
   if (lastData) render(lastData); else renderChips();
   if ($('todoPage').classList.contains('open')) drawTodo();
 }
@@ -2496,16 +2630,17 @@ function appearanceHTML(){
     <label class="sw-row"><span>Show weather where I am when the app opens<small>Uses your phone’s location. Turn off to open on your last viewed place.</small></span>
       <input type="checkbox" id="locToggle" ${useLoc ? 'checked' : ''}><i class="sw"></i></label></div>
   <div class="appear"><h4>Appearance</h4><div class="opts">
-    <button type="button" data-theme="classic" class="${neon?'':'on'}"><i class="pv-classic"></i><span>Classic<b></b></span></button>
-    <button type="button" data-theme="neon" class="${neon?'on':''}"><i class="pv-neon"></i><span>🌴 Neon Coast<b></b></span></button>
+    <button type="button" data-theme="classic" class="${theme==='classic'?'on':''}"><i class="pv-classic"></i><span>Classic<b></b></span></button>
+    <button type="button" data-theme="neon" class="${theme==='neon'?'on':''}"><i class="pv-neon"></i><span>🌴 Neon<b></b></span></button>
+    <button type="button" data-theme="murray" class="${theme==='murray'?'on':''}"><i class="pv-murray"></i><span>🌳 Murray<b></b></span></button>
   </div></div>`;
 }
 function bindAppearance(){
   const lt = $('locToggle');
   if (lt) lt.onchange = () => { useLoc = lt.checked; store.set('wx_useloc', useLoc, true); if (useLoc) locateAndLoad(false, true); };
   $('acctBody').querySelectorAll('[data-theme]').forEach(b => b.onclick = () => {
-    const want = b.dataset.theme === 'neon'; if (want === neon) return;
-    neon = want; store.set('wx_neon', neon); applyMode(); drawAcct();
+    const want = b.dataset.theme; if (want === theme) return;
+    theme = want; store.set('wx_theme', theme); store.set('wx_neon', theme === 'neon'); applyMode(); drawAcct();
   });
 }
 function drawAcct(){
@@ -2598,7 +2733,7 @@ if (sb){
 }
 
 /* ---------- go ---------- */
-document.body.classList.toggle('neon', neon);
+document.body.classList.toggle('neon', neon); document.body.classList.toggle('murray', theme === 'murray');
 load(current);
 if (useLoc) locateAndLoad(true);
 
