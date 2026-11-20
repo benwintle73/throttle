@@ -1464,13 +1464,23 @@ function drawTodo(){
       `<div class="it future"><span class="cal">📅</span><div class="tx">${esc(i.text)}</div><button class="del" aria-label="Delete" onclick="todoDel('${i.id}')">✕</button></div>`).join('')}</div>`).join('')}` : '';
   const days = Object.keys(t.archive || {}).map(Number).sort((a,b) => b - a).slice(0, 14);
   const hist = todoHist ? `<div class="hist">${days.length ? days.map(k => `<div class="tday"><b>${dayLabel(k)}<span>${t.archive[k].length} done</span></b><ul>${t.archive[k].map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('') : '<div class="empty">Finished days will show up here.</div>'}</div>` : '';
-  $('todoBody').innerHTML = `
-    <form onsubmit="todoAdd(event)"><input id="todoIn" type="text" placeholder="${todoWhen === today ? 'Add a task for today…' : 'Add a task for ' + whenLbl(todoWhen) + '…'}" maxlength="120" autocomplete="off" enterkeyhint="done"><button type="submit">Add</button></form>
-    <div class="when">
-      <button type="button" class="${todoWhen === today ? 'on' : ''}" onclick="setTodoWhen(${today})">Today</button>
-      <button type="button" class="${todoWhen === today + 1 ? 'on' : ''}" onclick="setTodoWhen(${today + 1})">Tomorrow</button>
-      <label class="${todoWhen > today + 1 ? 'on' : ''}">📅 ${todoWhen > today + 1 ? dayLabel(todoWhen) : 'Pick a date'}<input type="date" min="${isoDay(today + 1)}" onchange="if(this.value) setTodoWhen(dayFromIso(this.value))"></label>
-    </div>
+  if (!$('todoIn')){
+    $('todoBody').innerHTML = `
+      <form onsubmit="todoAdd(event)"><input id="todoIn" type="text" maxlength="120" autocomplete="off" enterkeyhint="done"><button type="submit">Add</button></form>
+      <div class="when">
+        <button type="button" id="whenToday">Today</button>
+        <button type="button" id="whenTmrw">Tomorrow</button>
+        <label id="whenPick"><span id="whenPickTxt">📅 Pick a date</span><input type="date" id="whenDate"></label>
+      </div>
+      <div id="todoList"></div>`;
+    $('whenToday').onclick = () => setTodoWhen(localDay());
+    $('whenTmrw').onclick  = () => setTodoWhen(localDay() + 1);
+    $('whenDate').min = isoDay(today + 1);
+    // only act once a date has actually been chosen; never rebuild the picker while it's open
+    $('whenDate').addEventListener('change', e => { if (e.target.value) setTodoWhen(dayFromIso(e.target.value)); });
+  }
+  paintWhen();
+  $('todoList').innerHTML = `
     <div class="top-row" style="margin-top:16px"><div class="ask">${items.length ? (done === items.length ? 'All done — nice work! 🎉' : 'Today') : 'Nothing on the list yet'}</div>${items.length ? `<div class="prog">${done} of ${items.length} done</div>` : ''}</div>
     ${items.length ? `<div class="bar"><i style="width:${Math.round(done/items.length*100)}%"></i></div><div class="items">${list}</div>` : `<div class="empty">Add the things you want to get done today. Anything you don’t tick off moves to tomorrow.</div>`}
     ${coming}
@@ -1480,8 +1490,16 @@ function drawTodo(){
 let todoWhen = localDay();
 const isoDay = n => { const d = new Date(2000, 0, 1 + n); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 const dayFromIso = v => { const [y,m,d] = v.split('-').map(Number); return localDay(new Date(y, m-1, d)); };
-function setTodoWhen(n){ todoWhen = n; drawTodo(); const i = $('todoIn'); if (i) i.focus(); }
-function openTodo(){ todoWhen = localDay(); drawTodo(); $('todoPage').classList.add('open'); }
+function paintWhen(){
+  const today = localDay(), lbl = n => n === today + 1 ? 'tomorrow' : dayLabel(n);
+  $('whenToday').classList.toggle('on', todoWhen === today);
+  $('whenTmrw').classList.toggle('on', todoWhen === today + 1);
+  $('whenPick').classList.toggle('on', todoWhen > today + 1);
+  $('whenPickTxt').textContent = todoWhen > today + 1 ? '📅 ' + dayLabel(todoWhen) : '📅 Pick a date';
+  $('todoIn').placeholder = todoWhen === today ? 'Add a task for today…' : `Add a task for ${lbl(todoWhen)}…`;
+}
+function setTodoWhen(n){ todoWhen = Math.max(n, localDay()); paintWhen(); }   // just updates the chips; typed text stays
+function openTodo(){ todoWhen = localDay(); $('todoBody').innerHTML = ''; drawTodo(); $('todoPage').classList.add('open'); }
 function closeTodo(){ $('todoPage').classList.remove('open'); if (lastData) render(lastData); }
 $('tpClose').onclick = closeTodo;
 function todoAdd(e){
@@ -1491,7 +1509,7 @@ function todoAdd(e){
   t.items.push({ id: uid(), text: v, done: false, day: Math.max(todoWhen, localDay()), c: now, u: now });
   todoSave(t); drawTodo();
   if (todoWhen > localDay()) toast(`Added for ${todoWhen === localDay() + 1 ? 'tomorrow' : dayLabel(todoWhen)}`);
-  setTimeout(() => { const i = $('todoIn'); if (i) i.focus(); }, 30);   // keep typing the next one
+  $('todoIn').value = '';
 }
 function todoToggle(id){
   const t = todoRoll(), it = t.items.find(i => i.id === id); if (!it) return;
