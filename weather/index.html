@@ -678,12 +678,10 @@
   body.murray .bg{background:linear-gradient(180deg,var(--g1) 0%,var(--g2) 28%,var(--g3) 46%,var(--earth,#4F4934) 78%,var(--earth2,#2E2A1E) 100%)}
   .river{position:absolute;left:0;right:0;bottom:0;height:260px;pointer-events:none}
   .river svg{position:absolute;inset:0;width:100%;height:100%}
-  .river svg.steamer{inset:auto;bottom:30px;left:-90px;width:78px;height:34px}
   .river .ripple{position:absolute;left:0;right:0;bottom:0;height:58px;background:repeating-linear-gradient(180deg,rgba(255,255,255,0) 0 6px,rgba(255,255,255,.09) 6px 7px);animation:swell 7s ease-in-out infinite alternate;mix-blend-mode:screen}
   .river .rglint{position:absolute;bottom:0;height:58px;width:110px;margin-left:-55px;transition:left 3s linear,opacity 3s;
     background:radial-gradient(ellipse 50% 100% at 50% 0%,var(--glint,#FFE9B0) 0%,transparent 70%);opacity:0;mix-blend-mode:screen}
   .river .rglint::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0 5px,rgba(0,0,0,.35) 5px 7px)}
-  .steamer{position:absolute;bottom:30px;left:-90px;width:78px;height:34px;animation:steam 420s linear infinite;animation-delay:-120s}
   @keyframes steam{0%{transform:translateX(0)}60%,100%{transform:translateX(calc(100vw + 180px))}}
   .birds{position:absolute;top:110px;left:-60px;width:60px;height:24px;animation:fly 150s linear infinite;animation-delay:-40s;transition:opacity 3s}
   .birds svg{width:100%;height:100%}
@@ -692,14 +690,20 @@
   @keyframes fly{0%{transform:translate(0,0)}22%{transform:translate(calc(50vw + 30px),-30px)}45%,100%{transform:translate(calc(100vw + 120px),10px)}}
   @keyframes flap{to{transform:scaleY(.4)}}
   body.murray .hero{padding-bottom:118px}
-  body.murray .place h1{font-family:'Fraunces',serif;font-weight:600;font-size:25px;letter-spacing:0}
-  body.murray .place p{font-style:italic;font-family:'Fraunces',serif}
-  body.murray .temp{font-family:'Fraunces',serif;font-weight:300;letter-spacing:-3px;font-size:108px}
-  body.murray .cond{font-family:'Fraunces',serif;font-style:italic;font-weight:400;font-size:23px}
+  .river .fl{transform-box:fill-box;transform-origin:50% 100%;animation:flick .5s ease-in-out infinite alternate}
+  .river .f2{animation-duration:.37s;animation-delay:-.2s}.river .f3{animation-duration:.43s;animation-delay:-.1s}
+  @keyframes flick{0%{transform:scale(1,1) skewX(0)}50%{transform:scale(.92,1.12) skewX(3deg)}100%{transform:scale(1.06,.9) skewX(-4deg)}}
+  .river .fireflick{animation:glow 1.3s ease-in-out infinite alternate}
+  @keyframes glow{to{opacity:.07}}
+  .river .sparks circle{animation:spark 2.4s linear infinite}
+  .river .sparks circle:nth-child(2){animation-delay:-.8s}.river .sparks circle:nth-child(3){animation-delay:-1.6s}
+  @keyframes spark{0%{transform:translate(0,0);opacity:1}100%{transform:translate(4px,-26px);opacity:0}}
+  .river .bob{animation:bob 3.6s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(1.2px) rotate(-1.2deg)}}
+  #tinny{animation:driftboat 90s ease-in-out infinite alternate}
+  @keyframes driftboat{from{transform:translateX(-14px)}to{transform:translateX(18px)}}
   body.murray .card{background:rgba(255,244,222,.15);border-color:rgba(255,232,196,.3)}
   body.murray .card h2{color:rgba(255,236,206,.85)}
-  body.murray .totd .q,body.murray .fun .fortune p,body.murray .mq .q{font-family:'Fraunces',serif}
-  body.murray .totd .q{font-weight:400;font-size:20px}
   body.murray .chip{background:rgba(255,240,214,.16);border-color:rgba(255,232,196,.35)}
   body.murray .chip.active{background:#F4E6CC;color:#3D3322}
   body.murray .icon-btn{background:rgba(255,240,214,.16);border-color:rgba(255,232,196,.35)}
@@ -1386,23 +1390,37 @@ function buildRiver(){
   $('river').innerHTML = `<svg viewBox="0 0 ${W} 262" preserveAspectRatio="xMidYMax slice">
     <defs>
       <linearGradient id="water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--w1)"/><stop offset="1" style="stop-color:var(--w2)"/></linearGradient>
+      <radialGradient id="fireGlow"><stop offset="0" stop-color="#FF9A3C" stop-opacity=".55"/><stop offset=".5" stop-color="#FF6A2A" stop-opacity=".18"/><stop offset="1" stop-color="#FF6A2A" stop-opacity="0"/></radialGradient>
       <linearGradient id="barkShade" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".35"/><stop offset=".45" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></linearGradient>
     </defs>
     <rect x="0" y="${WAT}" width="${W}" height="${262-WAT}" fill="url(#water)"/>
     ${farG(`transform="translate(0 ${2*WAT}) scale(1 -1)" opacity=".3"`)}
     ${farG('')}
     <rect x="0" y="${HOR}" width="${W}" height="${WAT-HOR+1}" fill="var(--bank)"/>
+    <g id="tinny" opacity="var(--day,1)"><g transform="translate(146 222) scale(1.35) translate(-146 -222)"><g class="bob">
+      <path d="M150 226 q30 -6 60 0" stroke="#EDEFF2" stroke-width=".5" fill="none" opacity=".6"/>
+      <path d="M122 214 L170 214 L164 222 L128 222Z" fill="var(--hull2)"/><path d="M122 214 L170 214" stroke="#E9EDF2" stroke-width="1.2"/>
+      <circle cx="140" cy="205.5" r="3" fill="var(--angler)"/><path d="M135 205 h10 l-1.5 -1.6 h-7z" fill="var(--hat)"/><path d="M137.5 209 h5.5 l1.5 5 h-8.5z" fill="var(--shirt)"/>
+      <path d="M143 210 Q168 186 198 194" stroke="var(--rod)" stroke-width="1" fill="none"/>
+      <path d="M198 194 L201 226" stroke="#ffffff" stroke-width=".4" opacity=".7"/><circle cx="201" cy="226.5" r="1.2" fill="#E8505B"/>
+      <rect x="160" y="210" width="5" height="4" fill="#3A6EA5"/></g></g></g>
+    <path d="M0 246 C60 240 140 249 220 244 C300 239 360 247 400 243 L400 262 L0 262Z" fill="var(--nbank)"/>
+    <g id="camp" opacity="var(--night,0)" transform="translate(262 252) scale(1.75) translate(-262 -252)">
+      <ellipse cx="262" cy="232" rx="70" ry="30" fill="url(#fireGlow)"/>
+      <ellipse cx="262" cy="214" rx="46" ry="6" fill="#FF8A3D" opacity=".18" class="fireflick"/>
+      <path d="M250 252 L274 246 M250 246 L274 252" stroke="#3B2618" stroke-width="3.2" stroke-linecap="round"/>
+      <g class="flames"><path class="fl f1" d="M262 250 C254 244 256 236 261 228 C262 236 268 238 266 244 C270 241 270 236 268 233 C274 240 272 248 262 250Z" fill="#FF7A2F"/>
+        <path class="fl f2" d="M262 250 C257 246 258 240 262 235 C263 240 267 242 265 247 Z" fill="#FFC244"/>
+        <path class="fl f3" d="M258 250 C254 247 255 242 257 239 C258 243 261 244 260 248Z" fill="#FFB238"/></g>
+      <g class="sparks" fill="#FFD27A"><circle cx="260" cy="236" r=".9"/><circle cx="265" cy="232" r=".7"/><circle cx="258" cy="230" r=".6"/></g>
+      <g fill="#20160F"><rect x="226" y="242" width="16" height="5" rx="2"/><rect x="284" y="243" width="14" height="5" rx="2"/></g>
+    </g>
     ${gum(34, 262, 1.15, .5)}
     ${gum(378, 262, .85, -.6)}
     <g stroke="var(--gum)" stroke-width="1.2" fill="none" opacity=".8">${reeds}</g>
   </svg>
   <div class="ripple"></div><div class="rglint" id="rglint"></div>
-  <svg class="steamer" viewBox="0 0 78 34"><g fill="var(--boat)">
-    <path d="M4 26 L74 26 L68 32 L10 32Z"/><rect x="14" y="17" width="44" height="9"/><rect x="20" y="10" width="30" height="7"/>
-    <rect x="30" y="1" width="3.5" height="10"/><rect x="38" y="1" width="3.5" height="10"/>
-    <circle cx="64" cy="24" r="7" fill="none" stroke="var(--boat)" stroke-width="2"/></g>
-    <g fill="#FFD27A" opacity="var(--lights,0)"><rect x="18" y="19" width="3" height="3"/><rect x="25" y="19" width="3" height="3"/><rect x="32" y="19" width="3" height="3"/><rect x="39" y="19" width="3" height="3"/><rect x="46" y="19" width="3" height="3"/><rect x="24" y="12" width="3" height="3"/><rect x="32" y="12" width="3" height="3"/><rect x="40" y="12" width="3" height="3"/></g>
-    <path d="M10 26 L72 26" stroke="#B5432F" stroke-width="1.5"/></svg>`;
+`;
 }
 buildRiver();
 function buildBeach(){
@@ -1623,8 +1641,11 @@ function updateSky(){
     set('--w2', mix('#4B5839', '#04060A', night * .9));
     set('--gum', mix(mute('#4D5A3A', cloud * .4), '#0A0C09', dark));
     set('--bark', mix(mute('#D8CCB6', cloud * .4), '#141613', dark));
-    set('--boat', mix('#F1EBDD', '#22201C', night * .85));
-    set('--lights', night.toFixed(2));
+    set('--hull2', mute('#9EA7AF', cloud * .4)); set('--angler', '#E7B98E'); set('--hat', '#4F5B3A'); set('--shirt', '#C8452F'); set('--rod', '#2B2B2B');
+    set('--day', clamp(1 - night * 1.6).toFixed(2));
+    const rainy = k === 'rain' || k === 'storm';
+    set('--night', (rainy ? 0 : clamp((night - .35) * 2.2)).toFixed(2));
+    set('--nbank', mix(mute('#6B6A45', cloud * .4), '#0B0C09', Math.max(night * .9, twilight * .5)));
     set('--bird', night > .5 ? 'rgba(0,0,0,0)' : twilight > .5 ? '#2A2622' : '#FFFFFF');
     set('--earth', mix(mute('#5E5640', cloud * .5), '#0D0E0F', night * .85));
     set('--earth2', mix('#3A3424', '#07080A', night * .9));
