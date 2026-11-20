@@ -213,6 +213,15 @@
   body.neon .acct-card .btn-p{border-radius:2px;background:#000;font-family:'Anton',sans-serif;font-weight:400;letter-spacing:1px;text-transform:uppercase;font-size:18px}
   body.neon .acct-card input,body.neon .acct-card .btn-s,body.neon .acct-tabs,body.neon .acct-tabs button{border-radius:2px}
 
+  .mv{position:relative;margin-top:14px;border-radius:28px;outline:2px dashed rgba(255,255,255,.55);outline-offset:4px;padding-top:2px}
+  .mv > section,.mv > .card{pointer-events:none;margin-top:8px}
+  .mv-bar{display:flex;align-items:center;gap:8px;padding:2px 4px}
+  .mv-bar span{flex:1;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+  .mv-bar button{width:44px;height:36px;border-radius:12px;border:0;background:#fff;color:#333;font-size:16px;cursor:pointer}
+  .mv-bar button:disabled{opacity:.35}
+  body.neon .mv{border-radius:3px}
+  body.neon .mv-bar button{border-radius:2px;background:#000;color:#fff;border:2px solid #fff}
+  .refresh-wrap .refresh + .refresh{margin-left:8px}
   /* ===== to-do ===== */
   .tp{position:fixed;inset:0;z-index:30;background:rgba(12,10,30,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
     opacity:0;pointer-events:none;transition:opacity .25s;padding:calc(env(safe-area-inset-top) + 12px) 12px 0}
@@ -615,7 +624,7 @@
 const DEFAULT_PLACE = { name:'Maryborough', sub:'Victoria, Australia', lat:-37.0457, lon:143.7393 };
 
 /* ---------- storage (safe) ---------- */
-const SYNC_KEYS = ['wx_saved','wx_last','wx_neon','wx_pz_stats','wx_todo'];
+const SYNC_KEYS = ['wx_saved','wx_last','wx_neon','wx_pz_stats','wx_todo','wx_order'];
 const store = {
   get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch{ return d; } },
   set(k, v, quiet){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} if (!quiet && SYNC_KEYS.includes(k) && window.syncSoon) window.syncSoon(); }
@@ -764,33 +773,17 @@ function render(d){
   const uv = dy.uv_index_max[0] ?? 0;
   const arrow = `<svg viewBox="0 0 24 24"><path d="M12 2l5 14-5-3-5 3z" fill="#fff"/></svg>`;
 
-  $('content').innerHTML = `
-    <section class="hero" id="hero">
-      <div class="temp">${r0(c.temperature_2m)}<sup>°</sup></div>
-      <div class="cond">${LABELS[c.weather_code] || '—'}</div>
-      <div class="hilo">H ${r0(dy.temperature_2m_max[0])}°  ·  L ${r0(dy.temperature_2m_min[0])}°  ·  Feels like ${r0(c.apparent_temperature)}°</div>
-      <div class="wear">${wearTips(d, start).map(t=>`<span>${t}</span>`).join('')}</div>
-    </section>
-
-    ${thoughtCard()}
-
-    ${todoCard()}
-
-    ${puzzleCard()}
-
-    ${nowcastCard(d)}
-
-    <section class="card hourly-card">
+  const SECTIONS = {
+    thought: thoughtCard(), todo: todoCard(), puzzle: puzzleCard(), rain: nowcastCard(d),
+    hourly: `<section class="card hourly-card">
       <h2>${svgClock()} Next 24 hours</h2>
       <div class="hourly">${hours}</div>
-    </section>
-
-    <section class="card daily-card">
+    </section>`,
+    daily: `<section class="card daily-card">
       <h2>${svgCal()} 7-day forecast</h2>
       ${days}
-    </section>
-
-    <section class="grid">
+    </section>`,
+    details: `<section class="grid">
       <div class="card stat">
         <h2>Wind</h2>
         <div class="compass"><em>N</em><b style="transform:rotate(${(c.wind_direction_10m+180)%360}deg)">${arrow}</b></div>
@@ -824,9 +817,21 @@ function render(d){
         <div class="v">${moonPhase().illum}<small>%</small></div>
         <div class="s">${moonPhase().name}</div>
       </div>
+    </section>`
+  };
+  const cardsHTML = layoutHTML(SECTIONS);
+
+  $('content').innerHTML = `
+    <section class="hero" id="hero">
+      <div class="temp">${r0(c.temperature_2m)}<sup>°</sup></div>
+      <div class="cond">${LABELS[c.weather_code] || '—'}</div>
+      <div class="hilo">H ${r0(dy.temperature_2m_max[0])}°  ·  L ${r0(dy.temperature_2m_min[0])}°  ·  Feels like ${r0(c.apparent_temperature)}°</div>
+      <div class="wear">${wearTips(d, start).map(t=>`<span>${t}</span>`).join('')}</div>
     </section>
 
-    <div class="refresh-wrap"><button class="refresh" id="refreshBtn" onclick="refreshNow()">${REFRESH_SVG} Refresh</button></div>
+    ${cardsHTML}
+
+    <div class="refresh-wrap"><button class="refresh" id="refreshBtn" onclick="refreshNow()">${REFRESH_SVG} Refresh</button> <button class="refresh" onclick="toggleLayoutEdit()">${editLayout ? 'Done' : '↕ Edit layout'}</button></div>
     <p class="foot">Updated ${new Date(lastFetch).toLocaleTimeString('en-AU',{hour:'numeric',minute:'2-digit'})} · Data by <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a></p>
   `;
   buildClouds(kind(c.weather_code));
@@ -1285,6 +1290,36 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'Escape') closePuzzle(); else if (/^[a-zA-Z]$/.test(e.key)) pzKey(e.key.toLowerCase());
 });
 
+/* ---------- card layout (reorderable) ---------- */
+const CARD_KEYS = ['thought','todo','puzzle','rain','hourly','daily','details'];
+const CARD_NAMES = { thought:'Thought', todo:'To-do', puzzle:'Daily puzzle', rain:'Next 2 hours', hourly:'Next 24 hours', daily:'7-day forecast', details:'Wind, UV & more' };
+let editLayout = false;
+function layoutOrder(){
+  const o = (store.get('wx_order', []) || []).filter(k => CARD_KEYS.includes(k));
+  CARD_KEYS.forEach(k => { if (!o.includes(k)) o.push(k); });
+  return o;
+}
+function layoutHTML(S){
+  return layoutOrder().map((k, i, arr) => {
+    const html = S[k]; if (!html) return '';
+    if (!editLayout) return html;
+    return `<div class="mv" id="mv-${k}"><div class="mv-bar"><span>${CARD_NAMES[k]}</span>
+      <button ${i===0?'disabled':''} aria-label="Move up" onclick="moveCard('${k}',-1)">▲</button>
+      <button ${i===arr.length-1?'disabled':''} aria-label="Move down" onclick="moveCard('${k}',1)">▼</button></div>${html}</div>`;
+  }).join('\n');
+}
+function moveCard(k, dir){
+  const o = layoutOrder(), i = o.indexOf(k), j = i + dir;
+  if (j < 0 || j >= o.length) return;
+  [o[i], o[j]] = [o[j], o[i]];
+  store.set('wx_order', o); render(lastData);
+  const el = $('mv-' + k); if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
+function toggleLayoutEdit(){
+  editLayout = !editLayout; render(lastData);
+  if (editLayout){ const el = document.querySelector('.mv'); if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); }
+}
+
 /* ---------- daily to-do list ---------- */
 // Items live in wx_todo (synced with the account). At the start of each new day, ticked items are archived under
 // the day they were ticked; unticked ones roll over into today.
@@ -1639,6 +1674,7 @@ function mergeData(remote, local){
   out.wx_saved = [...r, ...l.filter(p => !r.some(q => same(p,q)))];
   out.wx_last  = remote.wx_last ?? local.wx_last;
   out.wx_neon  = remote.wx_neon ?? local.wx_neon;
+  out.wx_order = local.wx_order ?? remote.wx_order;
   // today's puzzle: keep the further-along game for the same day, else the newer day
   const rp = remote.wx_pz, lp = local.wx_pz;
   if (rp && lp){
