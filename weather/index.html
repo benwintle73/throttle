@@ -1447,13 +1447,21 @@ async function initReminders(){ if (!serverMode()) return; await checkPush(); aw
 function wearTips(d, start){
   const c = d.current, h = d.hourly, dy = d.daily;
   const f = c.apparent_temperature, tips = [];
-  tips.push(f <= 5 ? '🧣 Beanie + heavy jacket' : f <= 11 ? '🧥 Proper jacket' : f <= 16 ? '🧥 Hoodie or light jacket'
-          : f <= 21 ? '👕 Long sleeves' : f <= 27 ? '👕 T-shirt weather' : '🩳 Shorts + singlet');
   const next3 = h.precipitation_probability.slice(start, start+3);
-  const raining = ['rain','storm'].includes(kind(c.weather_code)) || (c.precipitation||0) > 0;
-  if (raining || Math.max(0, ...next3) >= 50) tips.push('☂️ Umbrella');
+  const wet = ['rain','storm'].includes(kind(c.weather_code)) || (c.precipitation||0) > 0 || Math.max(0, ...next3) >= 50;
+  const storm = kind(c.weather_code) === 'storm';
+  if (wet){
+    // one sensible tip for wet weather instead of "T-shirt" next to "Umbrella"
+    tips.push(f <= 11 ? '🧥 Cold and wet — warm waterproof jacket'
+            : f <= 18 ? '🧥 Rain jacket over a warm layer'
+            : '☔ Warm but wet — rain jacket or umbrella');
+    if (storm) tips.push('⚡ Storms about — stay off open ground');
+  } else {
+    tips.push(f <= 5 ? '🧣 Beanie + heavy jacket' : f <= 11 ? '🧥 Proper jacket' : f <= 16 ? '🧥 Hoodie or light jacket'
+            : f <= 21 ? '👕 Long sleeves' : f <= 27 ? '👕 T-shirt weather' : '🩳 Shorts + singlet');
+  }
   if (c.wind_gusts_10m >= 45 || c.wind_speed_10m >= 30) tips.push('💨 Windproof layer');
-  if (c.is_day && (dy.uv_index_max[0] ?? 0) >= 6 && !['rain','storm','fog','cloudy'].includes(kind(c.weather_code))) tips.push('🕶️ Sunnies + SPF');
+  if (c.is_day && (dy.uv_index_max[0] ?? 0) >= 6 && !wet && kind(c.weather_code) !== 'cloudy' && kind(c.weather_code) !== 'fog') tips.push('🕶️ Sunnies + SPF');
   return tips;
 }
 
