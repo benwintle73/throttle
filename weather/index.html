@@ -1528,12 +1528,14 @@ let wasLand = null;
 function drawLand(){
   const L = LANDSCAPE(); if (L !== wasLand){ const first = wasLand === null; wasLand = L; if (!first || L){ buildRiver(); } if (lastData) updateSky(); }
   if (!LANDSCAPE()) return;
-  const P = placeNow(lastData), h = P.getUTCHours(), m = String(P.getUTCMinutes()).padStart(2, '0');
+  const n = new Date(), h = n.getHours(), m = String(n.getMinutes()).padStart(2, '0');
   $('landT').innerHTML = `${h % 12 || 12}:${m}<small>${h < 12 ? 'am' : 'pm'}</small>`;
-  $('landD').textContent = P.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
+  $('landD').textContent = n.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' });
   if (lastData && lastData.current){
     const c = lastData.current;
-    $('landW').innerHTML = `<b>${Math.round(c.temperature_2m)}°</b> · ${LABELS[c.weather_code] || ''}${current && current.name ? ` · ${esc(current.name)}` : ''}`;
+    const off = (lastData.utc_offset_seconds || 0) + n.getTimezoneOffset() * 60, P = placeNow(lastData), ph = P.getUTCHours();
+    const there = Math.abs(off) < 60 ? '' : ` · <b>${ph % 12 || 12}:${String(P.getUTCMinutes()).padStart(2, '0')} ${ph < 12 ? 'am' : 'pm'}</b> there${P.getUTCDate() !== n.getDate() ? ` (${P.toLocaleDateString('en-AU', { weekday: 'short', timeZone: 'UTC' })})` : ''}`;
+    $('landW').innerHTML = `<b>${Math.round(c.temperature_2m)}°</b> · ${LABELS[c.weather_code] || ''}${current && current.name ? ` · ${esc(current.name)}` : ''}${there}`;
   }
 }
 setInterval(drawLand, 5000);
@@ -3555,7 +3557,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.97', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.98', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
