@@ -296,10 +296,10 @@
   .todo-card .t1{font-size:18px;font-weight:600}
   .todo-card .t2{font-size:13px;color:var(--soft);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .todo-card .mid{flex:1;min-width:0}
-  .todo-card .go,.saju .go{border:0;font-family:inherit;cursor:pointer;padding:9px 16px;border-radius:999px;background:#fff;color:#333;font-weight:600;font-size:14px;flex-shrink:0}
+  .todo-card .go,.saju .go,.mind .go{border:0;font-family:inherit;cursor:pointer;padding:9px 16px;border-radius:999px;background:#fff;color:#333;font-weight:600;font-size:14px;flex-shrink:0}
   body.neon .todo-card{background:linear-gradient(150deg,#7B3FF0,#E0368F)}
   body.neon .todo-card .t1{font-family:'Anton',sans-serif;font-weight:400;font-size:22px;letter-spacing:.5px;text-transform:uppercase}
-  body.neon .todo-card .go,body.neon .saju .go{border-radius:2px;background:#000;color:#fff;border:2px solid #fff;text-transform:uppercase;font-weight:800;font-size:12px;letter-spacing:1px}
+  body.neon .todo-card .go,body.neon .saju .go,body.neon .mind .go{border-radius:2px;background:#000;color:#fff;border:2px solid #fff;text-transform:uppercase;font-weight:800;font-size:12px;letter-spacing:1px}
   .todo .top-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
   .todo .ask{font-size:17px;font-weight:600}
   .todo .prog{font-size:13px;color:var(--soft);font-weight:600}
@@ -775,19 +775,40 @@
   .appear .pv-retro{background:linear-gradient(180deg,#141339 0%,#C8452F 55%,#FF9B2E 70%,#0b0b0e 70%);position:relative}
   .appear .pv-retro::after{content:'12:00';position:absolute;left:0;right:0;bottom:2px;text-align:center;font:700 11px 'Orbitron',monospace;color:#FFB000;text-shadow:0 0 4px #FFB000}
 
+  /* ===== Mind Reader (20 questions) ===== */
+  .mind .sj-ani{background:linear-gradient(135deg,#7A5CFF,#FF5FA8)}
+  .md-orb{width:120px;height:120px;margin:14px auto 6px;border-radius:50%;display:grid;place-items:center;font-size:56px;
+    background:radial-gradient(circle at 35% 30%,#B9A6FF,#6A4CFF 45%,#2A1A6E 80%);box-shadow:0 0 40px rgba(140,110,255,.55),inset 0 -8px 20px rgba(0,0,0,.3);animation:orb 4s ease-in-out infinite}
+  @keyframes orb{50%{box-shadow:0 0 60px rgba(255,95,168,.55),inset 0 -8px 20px rgba(0,0,0,.3);transform:scale(1.03)}}
+  .md-q{font-size:24px;font-weight:700;text-align:center;line-height:1.3;margin:16px 10px 18px;min-height:62px}
+  .md-n{text-align:center;font-size:13px;opacity:.75;font-weight:600}
+  .md-bar{height:6px;border-radius:3px;background:rgba(255,255,255,.15);margin:8px 30px 0;overflow:hidden}
+  .md-bar i{display:block;height:100%;background:linear-gradient(90deg,#7A5CFF,#FF5FA8);border-radius:3px;transition:width .3s}
+  .md-ans{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 6px}
+  .md-ans button{border:0;border-radius:16px;padding:15px 8px;font:700 17px inherit;font-family:inherit;color:#fff;background:rgba(255,255,255,.14)}
+  .md-ans button.y{background:#2FBF71}.md-ans button.n{background:#E5484D}
+  .md-ans button.p{background:rgba(47,191,113,.45)}.md-ans button.d{background:rgba(229,72,77,.45)}
+  .md-ans button:active{transform:scale(.97)}
+  .md-ans .wide{grid-column:1/-1}
+  .md-undo{display:block;margin:14px auto 0;border:0;background:none;color:inherit;opacity:.7;font:600 14px inherit;font-family:inherit;text-decoration:underline}
+  .md-guess{font-size:30px;font-weight:800;text-align:center;margin:8px 10px 18px;text-transform:capitalize}
+  .md-msg{text-align:center;font-size:16px;line-height:1.45;margin:6px 16px 14px;opacity:.9}
+  .md-surp div{font-size:14px;line-height:1.4;padding:7px 0;border-top:1px solid rgba(255,255,255,.1)}
+  .md-surp div:first-of-type{border-top:0}
+  .md-cta{display:block;margin:16px auto 0;border:0;border-radius:999px;padding:13px 28px;font:700 17px inherit;font-family:inherit;background:#fff;color:#2A1A6E}
   /* ===== Korean fortune (운세) ===== */
-  .saju .sj-top{display:flex;align-items:center;gap:12px}
-  .saju .sj-ani{font-size:40px;line-height:1;width:52px;height:52px;display:grid;place-items:center;border-radius:16px;background:rgba(255,255,255,.14);flex-shrink:0}
-  .saju .sj-mid{flex:1;min-width:0}
-  .saju .sj-mid b{display:block;font-size:16px}
-  .saju .sj-mid small{display:block;font-size:12px;opacity:.75;margin-top:1px}
+  .saju .sj-top,.mind .sj-top{display:flex;align-items:center;gap:12px}
+  .saju .sj-ani,.mind .sj-ani{font-size:40px;line-height:1;width:52px;height:52px;display:grid;place-items:center;border-radius:16px;background:rgba(255,255,255,.14);flex-shrink:0}
+  .saju .sj-mid,.mind .sj-mid{flex:1;min-width:0}
+  .saju .sj-mid b,.mind .sj-mid b{display:block;font-size:16px}
+  .saju .sj-mid small,.mind .sj-mid small{display:block;font-size:12px;opacity:.75;margin-top:1px}
   .sj-stars{color:#FFD45C;letter-spacing:1px;font-size:14px}
   .sj-stars i{font-style:normal;opacity:.3}
   .saju .sj-line{font-size:15px;font-weight:600;margin:10px 0 8px;line-height:1.4}
   .sj-lucky{display:flex;flex-wrap:wrap;gap:6px}
   .sj-lucky span{font-size:12px;font-weight:600;padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.14)}
   .sj-lucky span i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:0;border:1px solid rgba(255,255,255,.5)}
-  .saju .go{margin-left:auto}
+  .saju .go,.mind .go{margin-left:auto}
   .sj-tabs{display:flex;gap:6px;overflow-x:auto;padding:8px 4px 6px;flex-shrink:0;scrollbar-width:none}
   .sj-tabs::-webkit-scrollbar{display:none}
   .sj-tabs button{flex-shrink:0;border:0;border-radius:999px;padding:8px 14px;font:600 14px inherit;font-family:inherit;color:inherit;background:rgba(255,255,255,.12)}
@@ -1038,7 +1059,7 @@
   body.drop .card h2{font-family:'Luckiest Guy',cursive;font-weight:400;letter-spacing:1.2px;color:#FFE45C}
   body.drop .chip.active{background:#FFE45C;color:#2A1A6E}
   body.drop .tmrw{background:rgba(40,30,120,.3)}
-  body.drop .todo-card .go,body.drop .saju .go,body.drop .pz-card .go,body.drop .radar-card .go{background:#FFE45C;color:#2A1A6E;font-family:'Luckiest Guy',cursive;font-weight:400;letter-spacing:.8px}
+  body.drop .todo-card .go,body.drop .saju .go,body.drop .mind .go,body.drop .pz-card .go,body.drop .radar-card .go{background:#FFE45C;color:#2A1A6E;font-family:'Luckiest Guy',cursive;font-weight:400;letter-spacing:.8px}
   .appear .pv-drop{background:linear-gradient(180deg,#2F7BFF 0%,#7FD2FF 50%,#5FD067 51%,#2F8C45 100%);position:relative;overflow:hidden}
   .appear .pv-drop::before{content:'';position:absolute;left:0;top:10%;width:22%;height:60%;background:linear-gradient(90deg,#8A3DFF,#B66BFF);opacity:.85}
   .appear .pv-drop::after{content:'🪂';position:absolute;right:16%;top:12%;font-size:13px;line-height:1}
@@ -1116,7 +1137,7 @@
   body.pro .totd .q{font-weight:500;font-size:17px}
   body.pro .fun .fortune{background:#E9EDF3;color:#1A2230}
   body.pro .place h1{font-weight:600;letter-spacing:-.2px}
-  body.pro .todo-card .go,body.pro .saju .go,body.pro .pz-card .go,body.pro .radar-card .go{background:#3B82F6;color:#fff}
+  body.pro .todo-card .go,body.pro .saju .go,body.pro .mind .go,body.pro .pz-card .go,body.pro .radar-card .go{background:#3B82F6;color:#fff}
   .appear .pv-pro{background:linear-gradient(180deg,#111722 0 40%,#1A2230 40% 100%);position:relative}
   .appear .pv-pro::after{content:'24°';position:absolute;left:0;right:0;top:20%;text-align:center;font:300 15px 'Outfit',sans-serif;color:#E8ECF2}
   body.pro .lhills{display:none!important}
@@ -1312,6 +1333,12 @@
     <div class="todo tp-body" id="todoBody"></div>
   </div>
 </div>
+<div class="tp md" id="mdPage">
+  <div class="tp-in">
+    <div class="pz-head"><h3>Mind Reader <small id="mdSub">20 questions</small></h3><button class="icon-btn" id="mdClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="tp-body" id="mdBody"></div>
+  </div>
+</div>
 <div class="tp sj" id="sjPage">
   <div class="tp-in">
     <div class="pz-head"><h3>Korean fortune <small>운세 · for fun</small></h3><button class="icon-btn" id="sjClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
@@ -1331,13 +1358,14 @@
 <script src="fortunes.js"></script>
 <script src="fun.js"></script>
 <script src="saju.js"></script>
+<script src="mind.js"></script>
 <script src="movies.js"></script>
 <script src="puzzle-words.js"></script>
 <script>
 const DEFAULT_PLACE = { name:'Maryborough', sub:'Victoria, Australia', lat:-37.0457, lon:143.7393 };
 
 /* ---------- storage (safe) ---------- */
-const SYNC_KEYS = ['wx_saved','wx_last','wx_neon','wx_theme','wx_pz_stats','wx_todo','wx_order','wx_tips','wx_otd_on','wx_saju_on','wx_movie_on'];
+const SYNC_KEYS = ['wx_saved','wx_last','wx_neon','wx_theme','wx_pz_stats','wx_todo','wx_order','wx_tips','wx_otd_on','wx_saju_on','wx_movie_on','wx_mind_on'];
 const store = {
   get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch{ return d; } },
   set(k, v, quiet){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} if (!quiet && SYNC_KEYS.includes(k) && window.syncSoon) window.syncSoon(); }
@@ -1526,7 +1554,7 @@ function render(d){
   const arrow = `<svg viewBox="0 0 24 24"><path d="M12 2l5 14-5-3-5 3z" fill="#fff"/></svg>`;
 
   const SECTIONS = {
-    thought: thoughtCard(), todo: todoCard(), puzzle: puzzleCard(), fun: funCard(), saju: sajuCard(), rain: nowcastCard(d), radar: radarCard(), climate: climateCard(d), tips: tipsCard(),
+    thought: thoughtCard(), todo: todoCard(), puzzle: puzzleCard(), fun: funCard(), saju: sajuCard(), mind: mindCard(), rain: nowcastCard(d), radar: radarCard(), climate: climateCard(d), tips: tipsCard(),
     hourly: `<section class="card hourly-card">
       <h2>${svgClock()} Next 24 hours</h2>
       <div class="hourly">${hours}</div>
@@ -2711,6 +2739,114 @@ async function loadOTD(){
   }catch(e){}
   otdLoading = false;
 }
+/* ---------- Mind Reader: 20 questions that learns ---------- */
+const MD_ANS = [['y','Yes',1],['n','No',-1],['p','Probably',.6],['d','Doubtful',-.6],['s','Sometimes',0],['u','Don’t know',null]];
+let md = null, mdShared = null, mdSharedAt = 0;
+const mdLocal = () => store.get('wx_mind_learn', {});                     // { target: { key: [sum, n] } } learned on this device
+const mdStats = () => store.get('wx_mind_stats', { played: 0, won: 0 });
+async function mdLoadShared(){
+  if (!sb || !user || Date.now() - mdSharedAt < 10 * 60e3) return;
+  mdSharedAt = Date.now();
+  try { const { data } = await sb.rpc('weather_mind_knowledge'); if (Array.isArray(data)) { const o = {}; for (const r of data) (o[r.target] ||= {})[r.k] = [+r.s, +r.n]; mdShared = o; } } catch(e){}
+}
+function mdThings(){
+  // base things plus anything players have taught it (shared when signed in, plus this device)
+  const L = mdLocal(), S = mdShared || {}, list = MIND.things.map(t => ({ name: t.name, v: t.v, base: true }));
+  const have = new Set(list.map(t => t.name.toLowerCase()));
+  for (const name of new Set([...Object.keys(S), ...Object.keys(L)])) if (!have.has(name)) { list.push({ name, v: {}, base: false }); have.add(name); }
+  return list.map(t => { const key = t.name.toLowerCase(), a = S[key] || {}, b = L[key] || {}; return { ...t, learn: (k) => { const x = a[k] || [0, 0], y = b[k] || [0, 0]; return [x[0] + y[0], x[1] + y[1]]; } }; });
+}
+function mdExp(t, k){ // what this thing's answer to question k should be, -1..1: built-in knowledge blended with what players taught it
+  const [s, n] = t.learn(k);
+  if (!t.base) return n ? Math.max(-1, Math.min(1, s / n)) * Math.min(1, .4 + n * .2) : 0;
+  return (MIND.val(t, k) * 2 + s) / (2 + n);
+}
+function mdStart(){
+  const T = mdThings();
+  md = { T, p: T.map(() => 1 / T.length), asked: [], q: 0, wrong: new Set(), phase: 'ask', cur: null, history: [] };
+  mdNext();
+}
+function mdLik(a, e){ return a === null ? 1 : .04 + .96 * Math.exp(-((a - e) ** 2) / .45); }
+function mdNext(){
+  const { T, p } = md; const tot = p.reduce((x, y) => x + y, 0) || 1;
+  const rank = T.map((t, i) => [i, p[i] / tot]).filter(([i]) => !md.wrong.has(i)).sort((a, z) => z[1] - a[1]);
+  const top = rank[0];
+  const want = top && ((md.q >= 5 && top[1] > .85) || (md.q >= 12 && top[1] > .55) || md.q >= 20 && md.q % 5 === 0 || (md.q >= 18 && top[1] > .3));
+  if (top && want && !md.justGuessed){ md.phase = 'guess'; md.cur = top[0]; md.justGuessed = true; return mdDraw(); }
+  md.justGuessed = false;
+  if (md.q >= 30 || !top){ md.phase = 'lost'; return mdDraw(); }
+  // pick the question that best splits the likely things (most information)
+  const cand = rank.filter(([, w]) => w > 1e-4).slice(0, 60);
+  const H = x => x <= 0 || x >= 1 ? 0 : -(x * Math.log2(x) + (1 - x) * Math.log2(1 - x));
+  let best = null, bestGain = -1;
+  for (const [k] of MIND.Q){ if (md.asked.includes(k)) continue;
+    let py = 0, cond = 0, W = 0;
+    for (const [i, w] of cand){ const y = (1 + mdExp(T[i], k)) / 2; py += w * y; cond += w * H(y); W += w; }
+    const g = H(py / W) - cond / W; if (g > bestGain){ bestGain = g; best = k; } }
+  if (!best){ md.phase = 'lost'; return mdDraw(); }
+  md.phase = 'ask'; md.cur = best; mdDraw();
+}
+function mdAnswer(code){
+  const a = MD_ANS.find(x => x[0] === code)[2], k = md.cur;
+  md.history.push({ p: md.p.slice(), k, a });
+  md.asked.push(k); md.q++;
+  md.p = md.p.map((w, i) => w * mdLik(a, mdExp(md.T[i], k)));
+  const sum = md.p.reduce((x, y) => x + y, 0); if (sum > 0) md.p = md.p.map(w => w / sum);
+  mdNext();
+}
+function mdUndo(){ const h = md.history.pop(); if (!h) return; md.p = h.p; md.asked.pop(); md.q--; md.cur = h.k; md.phase = 'ask'; md.justGuessed = false; mdDraw(); }
+function mdGuess(yes){
+  if (yes){ mdFinish(md.T[md.cur].name, true); return; }
+  md.wrong.add(md.cur); md.p[md.cur] = 0; md.justGuessed = true; mdNext(); md.justGuessed = false;
+}
+function mdFinish(name, won){
+  const target = name.trim().toLowerCase(); if (!target) return;
+  const answers = {}; md.history.forEach(h => { if (h.a !== null) answers[h.k] = h.a; });
+  // learn: locally always, and shared when signed in
+  const L = mdLocal(); const e = (L[target] ||= {}); for (const [k, a] of Object.entries(answers)){ const x = e[k] || [0, 0]; e[k] = [x[0] + a, x[1] + 1]; }
+  store.set('wx_mind_learn', L, true);
+  if (sb && user) sb.rpc('weather_mind_teach', { p_target: target, p_answers: answers, p_won: won }).then(() => { mdSharedAt = 0; }).catch(() => {});
+  const st = mdStats(); st.played++; if (won) st.won++; store.set('wx_mind_stats', st, true);
+  // surprises: answers that disagreed with what it believed about the thing
+  const t = md.T.find(x => x.name.toLowerCase() === target), sur = [];
+  if (t) for (const h of md.history){ if (h.a === null) continue; const ex = mdExp(t, h.k); if (Math.abs(h.a - ex) >= 1.2) sur.push({ k: h.k, a: h.a, ex }); }
+  md.phase = won ? 'won' : 'taught'; md.target = target; md.sur = sur.slice(0, 5); mdDraw();
+}
+function mdQText(k){ return (MIND.Q.find(q => q[0] === k) || [k, k])[1]; }
+function mdDraw(){
+  const b = $('mdBody'), st = mdStats();
+  $('mdSub').textContent = st.played ? `${st.won} of ${st.played} read correctly` : '20 questions';
+  if (!md){ b.innerHTML = `<div class="md-orb">🔮</div><div class="md-msg">Think of something — an animal, food, object, place or person.<br>I’ll read your mind in 20 questions or fewer.</div>
+    <button class="md-cta" onclick="mdStart()">I’ve got one</button><div class="sj-note" style="text-align:center">It learns from every game${user ? ', and what it learns is shared with everyone who plays' : '. Sign in to share what it learns'}.</div>`; return; }
+  if (md.phase === 'ask'){
+    b.innerHTML = `<div class="md-orb" style="width:84px;height:84px;font-size:38px">🔮</div><div class="md-n">Question ${md.q + 1}</div><div class="md-bar"><i style="width:${Math.min(100, (md.q / 20) * 100)}%"></i></div>
+      <div class="md-q">${esc(mdQText(md.cur))}</div>
+      <div class="md-ans">${MD_ANS.map(([c, l]) => `<button class="${c}" onclick="mdAnswer('${c}')">${l}</button>`).join('')}</div>
+      ${md.q ? '<button class="md-undo" onclick="mdUndo()">Undo last answer</button>' : ''}`;
+  } else if (md.phase === 'guess'){
+    b.innerHTML = `<div class="md-orb">✨</div><div class="md-n">After ${md.q} question${md.q === 1 ? '' : 's'}…</div><div class="md-msg">You’re thinking of</div><div class="md-guess">${esc(md.T[md.cur].name)}</div>
+      <div class="md-ans"><button class="y" onclick="mdGuess(true)">Yes! 🎉</button><button class="n" onclick="mdGuess(false)">No</button></div>`;
+  } else if (md.phase === 'lost'){
+    b.innerHTML = `<div class="md-orb">🤯</div><div class="md-msg">You beat me! What were you thinking of?<br><small style="opacity:.7">Tell me and I’ll remember it next time.</small></div>
+      <div class="sj-box sj-form"><input id="mdName" list="mdList" maxlength="40" placeholder="e.g. trampoline" autocomplete="off"><datalist id="mdList">${md.T.map(t => `<option value="${esc(t.name)}">`).join('')}</datalist>
+      <button class="sj-btn" onclick="mdFinish($('mdName').value, false)">Teach me</button></div>`;
+  } else {
+    const won = md.phase === 'won';
+    b.innerHTML = `<div class="md-orb">${won ? '🎉' : '🧠'}</div><div class="md-guess">${esc(md.target)}</div>
+      <div class="md-msg">${won ? `Read your mind in ${md.q} question${md.q === 1 ? '' : 's'}!` : 'Got it — I’ll know that one next time.'}</div>
+      ${md.sur.length ? `<div class="sj-box md-surp"><h4>You surprised me</h4>${md.sur.map(x => `<div>${esc(mdQText(x.k))} You said <b>${x.a > .3 ? 'yes' : x.a < -.3 ? 'no' : 'sometimes'}</b> — I thought ${x.ex > .3 ? 'yes' : x.ex < -.3 ? 'no' : 'sometimes'}.</div>`).join('')}</div>` : ''}
+      <button class="md-cta" onclick="mdStart()">Play again</button>`;
+  }
+}
+function openMind(){ mdLoadShared(); if (md && (md.phase === 'won' || md.phase === 'taught')) md = null; mdDraw(); $('mdPage').classList.add('open'); }
+$('mdClose').onclick = () => { $('mdPage').classList.remove('open'); if (lastData) render(lastData); };
+function mindCard(){
+  if (!window.MIND || !store.get('wx_mind_on', true)) return '';
+  const st = mdStats(), live = md && md.phase === 'ask';
+  return `<section class="card mind" id="mindCard"><h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="11" r="7"/><path d="M8 21h8M9.5 17.5v3M14.5 17.5v3"/><path d="M9.5 9a2.5 2.5 0 0 1 4.6 1.3c0 1.5-2.1 1.7-2.1 3"/></svg> Mind Reader</h2>
+    <div class="sj-top"><div class="sj-ani">🔮</div><div class="sj-mid"><b>${live ? `Game on — question ${md.q + 1}` : 'Think of something…'}</b><small>${st.played ? `I’ve read ${st.won} of ${st.played} minds` : 'I’ll guess it in 20 questions'}</small></div>
+    <button class="go" onclick="openMind()">${live ? 'Resume' : 'Play'}</button></div></section>`;
+}
 /* ---------- Korean fortune (운세): 띠, Saju four pillars, today, year, gunghap, dreams. Birthday stays on this device. ---------- */
 const SJ_HOURS = [['','I don’t know'],[0,'11pm–1am (자)'],[2,'1–3am (축)'],[4,'3–5am (인)'],[6,'5–7am (묘)'],[8,'7–9am (진)'],[10,'9–11am (사)'],
   [12,'11am–1pm (오)'],[14,'1–3pm (미)'],[16,'3–5pm (신)'],[18,'5–7pm (유)'],[20,'7–9pm (술)'],[22,'9–11pm (해)']];
@@ -3463,8 +3599,8 @@ function closeRadar(){ stopRadar(); $('radarPage').classList.remove('open'); }
 $('rpClose').onclick = closeRadar;
 
 /* ---------- card layout (reorderable) ---------- */
-const CARD_KEYS = ['thought','todo','puzzle','fun','saju','tips','rain','radar','hourly','daily','climate','details'];
-const CARD_NAMES = { thought:'Thought', todo:'To-do', puzzle:'Daily puzzle', fun:'Just for fun', saju:'Korean fortune', tips:'Best bets', rain:'Next 2 hours', radar:'Rain radar', hourly:'Next 24 hours', daily:'7-day forecast', climate:'Typical weather', details:'Wind, UV & more' };
+const CARD_KEYS = ['thought','todo','puzzle','fun','saju','mind','tips','rain','radar','hourly','daily','climate','details'];
+const CARD_NAMES = { thought:'Thought', todo:'To-do', puzzle:'Daily puzzle', fun:'Just for fun', saju:'Korean fortune', mind:'Mind Reader', tips:'Best bets', rain:'Next 2 hours', radar:'Rain radar', hourly:'Next 24 hours', daily:'7-day forecast', climate:'Typical weather', details:'Wind, UV & more' };
 let editLayout = false;
 function layoutOrder(){
   const o = (store.get('wx_order', []) || []).filter(k => CARD_KEYS.includes(k));
@@ -4080,7 +4216,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.19', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.20', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
@@ -4094,7 +4230,9 @@ function appearanceHTML(){
     <label class="sw-row"><span>Show Korean fortune<small>Your 띠, today’s 운세, Saju and dream meanings.</small></span>
       <input type="checkbox" id="sajuToggle" ${store.get('wx_saju_on', true) ? 'checked' : ''}><i class="sw"></i></label>
     <label class="sw-row"><span>Show movie quote quiz<small>Guess the film from a famous line, in Just for fun.</small></span>
-      <input type="checkbox" id="movieToggle" ${store.get('wx_movie_on', true) ? 'checked' : ''}><i class="sw"></i></label></div>
+      <input type="checkbox" id="movieToggle" ${store.get('wx_movie_on', true) ? 'checked' : ''}><i class="sw"></i></label>
+    <label class="sw-row"><span>Show Mind Reader<small>Think of something and it guesses it in 20 questions.</small></span>
+      <input type="checkbox" id="mindToggle" ${store.get('wx_mind_on', true) ? 'checked' : ''}><i class="sw"></i></label></div>
   <div class="appear"><h4>Appearance</h4><div class="opts">
     <button type="button" data-theme="classic" class="${theme==='classic'?'on':''}"><i class="pv-classic"></i><span>Classic<b></b></span></button>
     <button type="button" data-theme="neon" class="${theme==='neon'?'on':''}"><i class="pv-neon"></i><span>🌴 Neon<b></b></span></button>
@@ -4119,6 +4257,8 @@ function bindAppearance(){
   if (sjt) sjt.onchange = () => { store.set('wx_saju_on', sjt.checked); if (lastData) render(lastData); };
   const mvt = $('movieToggle');
   if (mvt) mvt.onchange = () => { store.set('wx_movie_on', mvt.checked); if (lastData) render(lastData); };
+  const mdt = $('mindToggle');
+  if (mdt) mdt.onchange = () => { store.set('wx_mind_on', mdt.checked); if (lastData) render(lastData); };
   $('acctBody').querySelectorAll('[data-theme]').forEach(b => b.onclick = () => {
     const want = b.dataset.theme; if (want === theme) return;
     theme = want; store.set('wx_theme', theme); store.set('wx_neon', theme === 'neon'); applyMode(); drawAcct();
