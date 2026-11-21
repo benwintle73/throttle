@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Jua&family=Pacifico&family=Orbitron:wght@500;700;900&family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Jua&family=Luckiest+Guy&family=Pacifico&family=Orbitron:wght@500;700;900&family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --g1:#FFD166; --g2:#FF8A5B; --g3:#FF5E7E;
@@ -871,7 +871,7 @@
     .app,.ptr,#editDone{display:none!important}
     .scene{position:fixed!important;top:0!important;height:100vh!important}
     .river{height:100vh!important}
-    body:not(.neon):not(.murray):not(.beach):not(.island):not(.retro) .lhills{display:block;position:absolute;left:0;right:0;bottom:0;height:42%}
+    body:not(.neon):not(.murray):not(.beach):not(.island):not(.drop):not(.retro) .lhills{display:block;position:absolute;left:0;right:0;bottom:0;height:42%}
     .lhills svg{width:100%;height:100%;display:block}
     body.retro .lgrid{display:block;position:absolute;left:0;right:0;bottom:0;height:44%}
     .lgrid .mtn{position:absolute;left:0;right:0;bottom:62%;width:100%;height:38%;opacity:var(--mtn,1)}
@@ -961,8 +961,38 @@
   body.island .tmrw{background:rgba(0,90,100,.3)}
   .appear .pv-island{background:linear-gradient(180deg,#0A9BEA 0%,#7FDDF7 48%,#2FE0D0 49%,#00A7B5 72%,#F7E7BF 73%);position:relative;overflow:hidden}
   .appear .pv-island::after{content:'🌴';position:absolute;right:14%;bottom:18%;font-size:15px;line-height:1}
-  .river,.bscene,.iscene,.lhills,.lgrid,.skyline,.sea,.palm{transition:opacity .6s}
-  body:not(.skyready) .river,body:not(.skyready) .bscene,body:not(.skyready) .iscene,body:not(.skyready) .lhills,body:not(.skyready) .lgrid,body:not(.skyready) .skyline,body:not(.skyready) .sea,body:not(.skyready) .palm{opacity:0}
+  /* ===== Drop Zone mode (original battle-royale style): cartoon hills, hilltop town, lookout tower, storm wall, gliders ===== */
+  .drop-only{display:none}
+  body.drop .drop-only{display:block}
+  body.drop .bg{background:linear-gradient(180deg,var(--g1) 0%,var(--g2) 28%,var(--g3) 46%,var(--earth,#4FB85A) 72%,var(--earth2,#2F8C45) 100%)}
+  .dscene{position:absolute;left:0;right:0;bottom:0;height:262px;pointer-events:none}
+  .dscene > svg:first-child{position:absolute;inset:0;width:100%;height:100%}
+  .dscene .storm{animation:stormpulse 6s ease-in-out infinite}
+  @keyframes stormpulse{50%{opacity:.82}}
+  .dscene .bolt{opacity:0;animation:bolt 7s infinite}
+  .dscene .bolt.b2{animation-delay:-3.4s;animation-duration:9s}
+  @keyframes bolt{0%,88%,100%{opacity:0}89%,91%{opacity:1}90%{opacity:.2}}
+  .dscene .glider{position:absolute;top:-30px;width:44px;height:50px;animation:glide 26s linear infinite}
+  .dscene .glider.g2{animation-duration:34s;animation-delay:-14s}
+  .dscene .glider.g3{animation-duration:30s;animation-delay:-22s}
+  @keyframes glide{0%{transform:translate(0,-40px) rotate(-4deg);opacity:0}6%{opacity:1}50%{transform:translate(60px,90px) rotate(4deg)}92%{opacity:1}100%{transform:translate(110px,190px) rotate(-3deg);opacity:0}}
+  .dscene .glider svg{width:100%;height:100%;animation:swing 2.4s ease-in-out infinite alternate;transform-origin:50% 0}
+  @keyframes swing{from{transform:rotate(-6deg)}to{transform:rotate(6deg)}}
+  @media (orientation:landscape) and (max-height:520px){ .dscene{height:100vh!important} }
+  body.drop .hero{padding-bottom:120px}
+  body.drop .place h1{font-family:'Luckiest Guy',cursive;font-weight:400;font-size:28px;letter-spacing:.8px;line-height:1.15;text-shadow:0 3px 0 rgba(30,20,80,.45)}
+  body.drop .temp{font-family:'Luckiest Guy',cursive;font-weight:400;letter-spacing:1px;text-shadow:0 5px 0 rgba(40,20,110,.35)}
+  body.drop .cond{font-family:'Luckiest Guy',cursive;font-weight:400;letter-spacing:.8px;font-size:22px}
+  body.drop .card{background:rgba(40,30,120,.24);border:2px solid rgba(255,255,255,.35);border-radius:22px}
+  body.drop .card h2{font-family:'Luckiest Guy',cursive;font-weight:400;letter-spacing:1.2px;color:#FFE45C}
+  body.drop .chip.active{background:#FFE45C;color:#2A1A6E}
+  body.drop .tmrw{background:rgba(40,30,120,.3)}
+  body.drop .todo-card .go,body.drop .pz-card .go,body.drop .radar-card .go{background:#FFE45C;color:#2A1A6E;font-family:'Luckiest Guy',cursive;font-weight:400;letter-spacing:.8px}
+  .appear .pv-drop{background:linear-gradient(180deg,#2F7BFF 0%,#7FD2FF 50%,#5FD067 51%,#2F8C45 100%);position:relative;overflow:hidden}
+  .appear .pv-drop::before{content:'';position:absolute;left:0;top:10%;width:22%;height:60%;background:linear-gradient(90deg,#8A3DFF,#B66BFF);opacity:.85}
+  .appear .pv-drop::after{content:'🪂';position:absolute;right:16%;top:12%;font-size:13px;line-height:1}
+  .river,.bscene,.iscene,.dscene,.lhills,.lgrid,.skyline,.sea,.palm{transition:opacity .6s}
+  body:not(.skyready) .river,body:not(.skyready) .bscene,body:not(.skyready) .iscene,body:not(.skyready) .dscene,body:not(.skyready) .lhills,body:not(.skyready) .lgrid,body:not(.skyready) .skyline,body:not(.skyready) .sea,body:not(.skyready) .palm{opacity:0}
   /* ===== Seoul theme ===== */
   .seoul-only{display:none}
   body.seoul .seoul-only{display:block}
@@ -1073,6 +1103,7 @@
   <div class="river murray-only" id="river"></div>
   <div class="bscene beach-only" id="beach"></div>
   <div class="iscene island-only" id="island"></div>
+  <div class="dscene drop-only" id="drop"></div>
   <div class="phz pro-only" id="phz"><i id="phzGlow"></i><svg viewBox="0 0 800 60" preserveAspectRatio="none">
     <path d="M0 44 L50 30 L95 38 L150 14 L205 33 L250 24 L300 40 L360 20 L410 6 L455 26 L500 18 L560 36 L615 22 L660 30 L720 12 L770 28 L800 22 L800 60 L0 60Z" fill="#151C29"/>
     <path d="M0 50 L70 40 L130 46 L210 32 L280 44 L340 36 L430 48 L520 34 L600 46 L680 38 L760 46 L800 42 L800 60 L0 60Z" fill="#131A26"/>
@@ -1237,7 +1268,7 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="suncalc.js"></script>
-<script>const WALL_CSS = "\n    html,body{overflow:hidden!important;height:100%}\n    .land{display:flex;position:fixed;inset:0;z-index:90;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;color:#fff;text-align:center;pointer-events:none;\n      padding:max(14px,env(safe-area-inset-top)) env(safe-area-inset-right) 0 env(safe-area-inset-left);text-shadow:0 2px 18px rgba(0,0,0,.35)}\n    .app,.ptr,#editDone{display:none!important}\n    .scene{position:fixed!important;top:0!important;height:100vh!important}\n    .river{height:100vh!important}\n    body:not(.neon):not(.murray):not(.beach):not(.island):not(.retro) .lhills{display:block;position:absolute;left:0;right:0;bottom:0;height:42%}\n    .lhills svg{width:100%;height:100%;display:block}\n    body.retro .lgrid{display:block;position:absolute;left:0;right:0;bottom:0;height:44%}\n    .lgrid .mtn{position:absolute;left:0;right:0;bottom:62%;width:100%;height:38%;opacity:var(--mtn,1)}\n    .lgrid .floor{position:absolute;left:-50%;right:-50%;top:38%;height:170%;transform:perspective(220px) rotateX(58deg);transform-origin:50% 0;\n      background:linear-gradient(180deg,rgba(255,63,142,.0),rgba(255,63,142,.12)),\n        repeating-linear-gradient(90deg,rgba(255,63,142,.85) 0 2px,transparent 2px 60px),\n        repeating-linear-gradient(0deg,rgba(255,63,142,.85) 0 2px,transparent 2px 40px),#140A2E;\n      background-position:0 0,0 0,0 0,0 0;animation:gridrun 2.5s linear infinite}\n    @keyframes gridrun{to{background-position:0 0,0 0,0 40px,0 0}}\n    .land .lt{font-size:min(24vh,18vw);font-weight:200;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}\n    .land .lt small{font-size:.22em;font-weight:500;margin-left:.15em;letter-spacing:0;opacity:.85}\n    .land .ld{font-size:min(6vh,30px);font-weight:600;opacity:.9;margin-top:6px}\n    .land .lw{font-size:min(8vh,40px);font-weight:500;margin-top:10px;opacity:.95}\n    .land .lw b{font-weight:700}\n    body.retro .land .lt{font-family:'Orbitron',sans-serif;font-weight:700;color:#FFB000;text-shadow:0 0 18px rgba(255,176,0,.6)}\n    body.neon .land .lt{font-family:'Anton',sans-serif;font-weight:400}\n  ";</script>
+<script>const WALL_CSS = "\n    html,body{overflow:hidden!important;height:100%}\n    .land{display:flex;position:fixed;inset:0;z-index:90;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;color:#fff;text-align:center;pointer-events:none;\n      padding:max(14px,env(safe-area-inset-top)) env(safe-area-inset-right) 0 env(safe-area-inset-left);text-shadow:0 2px 18px rgba(0,0,0,.35)}\n    .app,.ptr,#editDone{display:none!important}\n    .scene{position:fixed!important;top:0!important;height:100vh!important}\n    .river{height:100vh!important}\n    body:not(.neon):not(.murray):not(.beach):not(.island):not(.drop):not(.retro) .lhills{display:block;position:absolute;left:0;right:0;bottom:0;height:42%}\n    .lhills svg{width:100%;height:100%;display:block}\n    body.retro .lgrid{display:block;position:absolute;left:0;right:0;bottom:0;height:44%}\n    .lgrid .mtn{position:absolute;left:0;right:0;bottom:62%;width:100%;height:38%;opacity:var(--mtn,1)}\n    .lgrid .floor{position:absolute;left:-50%;right:-50%;top:38%;height:170%;transform:perspective(220px) rotateX(58deg);transform-origin:50% 0;\n      background:linear-gradient(180deg,rgba(255,63,142,.0),rgba(255,63,142,.12)),\n        repeating-linear-gradient(90deg,rgba(255,63,142,.85) 0 2px,transparent 2px 60px),\n        repeating-linear-gradient(0deg,rgba(255,63,142,.85) 0 2px,transparent 2px 40px),#140A2E;\n      background-position:0 0,0 0,0 0,0 0;animation:gridrun 2.5s linear infinite}\n    @keyframes gridrun{to{background-position:0 0,0 0,0 40px,0 0}}\n    .land .lt{font-size:min(24vh,18vw);font-weight:200;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}\n    .land .lt small{font-size:.22em;font-weight:500;margin-left:.15em;letter-spacing:0;opacity:.85}\n    .land .ld{font-size:min(6vh,30px);font-weight:600;opacity:.9;margin-top:6px}\n    .land .lw{font-size:min(8vh,40px);font-weight:500;margin-top:10px;opacity:.95}\n    .land .lw b{font-weight:700}\n    body.retro .land .lt{font-family:'Orbitron',sans-serif;font-weight:700;color:#FFB000;text-shadow:0 0 18px rgba(255,176,0,.6)}\n    body.neon .land .lt{font-family:'Anton',sans-serif;font-weight:400}\n  ";</script>
 <script src="quotes.js"></script>
 <script src="fortunes.js"></script>
 <script src="fun.js"></script>
@@ -1564,6 +1595,17 @@ const ISLAND_SKY = [
   [ 1.06, ['#1B1F63','#863C82','#F2687A']],
   [ 1.16, ['#06122B','#0B2146','#103A5A']],
 ];
+const DROP_SKY = [
+  [-0.16, ['#120A3A','#24145E','#3A1F7A']],
+  [-0.06, ['#2B2A8A','#7A4FD0','#FF8FB8']],
+  [ 0.02, ['#3F7CFF','#FF9FC0','#FFDD8A']],
+  [ 0.14, ['#1F74FF','#4FB4FF','#B8ECFF']],
+  [ 0.50, ['#1A6BFF','#3AA8FF','#A8E6FF']],
+  [ 0.86, ['#2A72F0','#7AB8FF','#FFE09A']],
+  [ 0.98, ['#4A2FB8','#FF5FA8','#FFB040']],
+  [ 1.06, ['#26157A','#7A2FA8','#FF6A9A']],
+  [ 1.16, ['#120A3A','#24145E','#3A1F7A']],
+];
 const KST_SKY = [
   [-0.16, ['#140A33','#2B1258','#4A1E78']],
   [-0.06, ['#3A1E78','#8A4FB8','#FF8FC4']],
@@ -1598,7 +1640,7 @@ const NEON_SKY = [
   [ 1.16, ['#0D0221','#26083F','#541066']],
 ];
 let theme = store.get('wx_theme', null) || (store.get('wx_neon', false) ? 'neon' : 'classic');
-{ const t = new URLSearchParams(location.search).get('theme'); if (['classic','neon','murray','retro','beach','island','seoul','kstreet','pro'].includes(t)) theme = t; }
+{ const t = new URLSearchParams(location.search).get('theme'); if (['classic','neon','murray','retro','beach','island','drop','seoul','kstreet','pro'].includes(t)) theme = t; }
 let neon = theme === 'neon';
 /* ---------- Time Warp theme: clock-radio style segment display + time-jump flash ---------- */
 const SEG = { '0':'abcdef','1':'bc','2':'abged','3':'abgcd','4':'fgbc','5':'afgcd','6':'afgedc','7':'abc','8':'abcdefg','9':'abcdfg','-':'g',' ':'' };
@@ -1688,7 +1730,7 @@ function placeTimeText(d){
 }
 setInterval(() => { const el = $('ptime'); if (el && lastData) el.textContent = placeTimeText(lastData); }, 15000);
 function setThemeClass(){
-  ['neon','murray','retro','beach','island','seoul','kstreet','pro'].forEach(t => document.body.classList.toggle(t, theme === t));
+  ['neon','murray','retro','beach','island','drop','seoul','kstreet','pro'].forEach(t => document.body.classList.toggle(t, theme === t));
 }
 function applyMode(){
   neon = theme === 'neon';
@@ -2018,7 +2060,7 @@ function buildKStreet(){
 buildKStreet();
 let sceneWas = sceneW();
 let sceneT = 0;
-addEventListener("resize", () => { clearTimeout(sceneT); sceneT = setTimeout(() => { const w = sceneW(); if (Math.abs(w - sceneWas) < 20) return; sceneWas = w; buildRiver(); buildSeoul(); buildKStreet(); buildBeach(); buildIsland(); if (lastData) updateSky(); }, 250); });
+addEventListener("resize", () => { clearTimeout(sceneT); sceneT = setTimeout(() => { const w = sceneW(); if (Math.abs(w - sceneWas) < 20) return; sceneWas = w; buildRiver(); buildSeoul(); buildKStreet(); buildBeach(); buildIsland(); buildDrop(); if (lastData) updateSky(); }, 250); });
 function buildBeach(){
   // original bay-side beach: calm bay, long timber pier, a row of striped bathing boxes, umbrella
   const W = sceneW(), H = 262, HOR = 176, SH = 214, DX = (W - 400) / 2;   // horizon, shoreline
@@ -2126,6 +2168,47 @@ function buildIsland(){
     <path d="M50 13 L59 20" stroke="#4A4A4A" stroke-width="1.4"/></svg></div>`;
 }
 buildIsland();
+function buildDrop(){
+  // original cartoon battle-royale landscape: storm wall on the horizon, rolling hills, a hilltop town and lookout tower
+  const W = sceneW(), H = 262, HOR = 158, DX = (W - 400) / 2, L = -DX, R = W - DX;
+  let seed = 23; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const pine = (x, y, s) => `<g><rect x="${x - 1.2 * s}" y="${y - 4 * s}" width="${2.4 * s}" height="${5 * s}" fill="var(--dtrunk)"/>
+      <path d="M${x} ${y - 22 * s} L${x + 8 * s} ${y - 8 * s} L${x + 5 * s} ${y - 8 * s} L${x + 9 * s} ${y - 2 * s} L${x - 9 * s} ${y - 2 * s} L${x - 5 * s} ${y - 8 * s} L${x - 8 * s} ${y - 8 * s}Z" fill="var(--dpine)"/></g>`;
+  const house = (x, y, w, h, roof, wall) => `<g><rect x="${x}" y="${y - h}" width="${w}" height="${h}" fill="${wall}" stroke="var(--dline)" stroke-width="1.2"/>
+      <path d="M${x - 3} ${y - h} L${x + w / 2} ${y - h - w * .55} L${x + w + 3} ${y - h}Z" fill="${roof}" stroke="var(--dline)" stroke-width="1.2" stroke-linejoin="round"/>
+      <rect x="${x + w * .2}" y="${y - h * .7}" width="${w * .25}" height="${h * .3}" fill="#FFE27A" opacity="var(--dlit)" stroke="var(--dline)" stroke-width=".8"/>
+      <rect x="${x + w * .58}" y="${y - h * .55}" width="${w * .22}" height="${h * .55}" fill="var(--ddoor)" stroke="var(--dline)" stroke-width=".8"/></g>`;
+  // storm wall: tall purple band on the left horizon, swirling edge, lightning
+  const storm = `<g class="storm"><path d="M${L} ${HOR + 4} L${L} 40 C${L + 60} 44 30 30 60 52 C78 64 70 96 92 112 C108 124 96 146 118 ${HOR + 4}Z" fill="url(#stormg)"/>
+      <path d="M60 52 C78 64 70 96 92 112 C108 124 96 146 118 ${HOR + 4}" stroke="var(--dstorm2)" stroke-width="2.5" fill="none" opacity=".8"/>
+      <g fill="none" stroke="#E2C6FF" stroke-width="1.6" stroke-linecap="round" opacity=".45">
+        <path d="M${L + 6} 62 C10 56 30 66 46 60"/><path d="M${L + 4} 90 C18 82 40 94 64 86"/><path d="M${L + 8} 118 C24 110 50 122 82 114"/><path d="M${L + 2} 144 C30 136 60 148 100 140"/>
+        <path d="M-4 76 q8 -8 16 0 q8 8 16 0"/><path d="M10 104 q8 -8 16 0 q8 8 16 0"/><path d="M28 130 q8 -8 16 0 q8 8 16 0"/></g>
+      <g fill="var(--dstorm2)" opacity=".9"><circle cx="64" cy="54" r="9"/><circle cx="80" cy="78" r="8"/><circle cx="90" cy="104" r="9"/><circle cx="104" cy="128" r="8"/><circle cx="114" cy="150" r="7"/></g></g>
+    <path class="bolt" d="M34 56 L24 86 L34 86 L20 120" stroke="#F4E9FF" stroke-width="2.4" fill="none" stroke-linejoin="round"/>
+    <path class="bolt b2" d="M70 74 L62 98 L72 98 L60 126" stroke="#F4E9FF" stroke-width="2" fill="none" stroke-linejoin="round"/>`;
+  const farHills = `<path d="M${L} ${HOR + 6} C40 ${HOR - 14} 120 ${HOR - 4} 190 ${HOR - 16} C260 ${HOR - 28} 330 ${HOR - 6} ${R} ${HOR - 12} L${R} ${HOR + 30} L${L} ${HOR + 30}Z" fill="var(--dfar)"/>`;
+  const midHill = `<path d="M${L} ${HOR + 40} C60 ${HOR + 20} 150 ${HOR + 26} 220 ${HOR + 4} C270 ${HOR - 12} 330 ${HOR - 4} ${R} ${HOR + 14} L${R} ${H} L${L} ${H}Z" fill="var(--dmid)" stroke="var(--dline)" stroke-width="1.5"/>`;
+  const front = `<path d="M${L} ${H - 30} C80 ${H - 44} 180 ${H - 30} 260 ${H - 40} C320 ${H - 48} 370 ${H - 38} ${R} ${H - 42} L${R} ${H} L${L} ${H}Z" fill="var(--dnear)" stroke="var(--dline)" stroke-width="1.5"/>`;
+  // lookout tower on the hill
+  const tower = `<g><path d="M300 ${HOR - 4} L306 ${HOR - 58} M324 ${HOR - 4} L318 ${HOR - 58} M302 ${HOR - 24} L322 ${HOR - 40} M322 ${HOR - 24} L302 ${HOR - 40}" stroke="var(--dwood)" stroke-width="2.6" stroke-linecap="round"/>
+      <rect x="300" y="${HOR - 70}" width="24" height="13" fill="var(--dwall2)" stroke="var(--dline)" stroke-width="1.2"/>
+      <rect x="305" y="${HOR - 67}" width="14" height="6" fill="#FFE27A" opacity="var(--dlit)"/>
+      <path d="M296 ${HOR - 70} L312 ${HOR - 84} L328 ${HOR - 70}Z" fill="var(--droof3)" stroke="var(--dline)" stroke-width="1.2" stroke-linejoin="round"/>
+      <path d="M312 ${HOR - 84} L312 ${HOR - 96}" stroke="var(--dline)" stroke-width="1.4"/><path d="M312 ${HOR - 96} L322 ${HOR - 92} L312 ${HOR - 89}Z" fill="#FFE45C"/></g>`;
+  const town = house(214, HOR + 10, 22, 16, 'var(--droof1)', 'var(--dwall1)') + house(242, HOR + 4, 26, 20, 'var(--droof2)', 'var(--dwall2)') + house(272, HOR + 2, 20, 14, 'var(--droof3)', 'var(--dwall1)') + house(340, HOR + 4, 24, 17, 'var(--droof1)', 'var(--dwall2)');
+  let trees = '';
+  for (const [x, y, sc] of [[140, HOR + 26, .9], [158, HOR + 22, 1.1], [176, HOR + 20, .8], [372, HOR + 8, 1], [390, HOR + 12, .8], [20, H - 34, 1.3], [44, H - 38, 1], [380, H - 40, 1.2]]) trees += pine(x, y, sc);
+  let flowers = ''; for (let i = 0; i < 26; i++) { const x = L + r() * W, y = H - 26 + r() * 22; flowers += `<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="1.6" fill="${['#FFE45C','#FF6FB5','#FFFFFF'][i % 3]}" opacity=".85"/>`; }
+  const glider = (cls, x, c1, c2) => `<div class="glider ${cls}" style="left:${x}%"><svg viewBox="0 0 30 34"><path d="M2 12 Q15 -4 28 12 Q22 9 15 10 Q8 9 2 12Z" fill="${c1}" stroke="#2A1A6E" stroke-width="1"/><path d="M8 11 Q15 6 22 11" fill="none" stroke="${c2}" stroke-width="2.2"/>
+      <path d="M4 12 L14 25 M26 12 L16 25" stroke="#2A1A6E" stroke-width=".7"/><circle cx="15" cy="26" r="3" fill="#FFCF9E" stroke="#2A1A6E" stroke-width=".8"/><rect x="12.5" y="28.5" width="5" height="5" rx="1.5" fill="${c2}" stroke="#2A1A6E" stroke-width=".8"/></svg></div>`;
+  $('drop').innerHTML = `<svg viewBox="${-DX} 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice">
+    <defs><linearGradient id="stormg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--dstorm)"/><stop offset="1" style="stop-color:var(--dstorm2)"/></linearGradient></defs>
+    ${storm}${farHills}${midHill}${town}${tower}${trees.slice(0, 0)}${trees}${front}${flowers}
+  </svg>
+  ${glider('g1', 30, '#FF5FA2', '#FFE45C')}${glider('g2', 58, '#3AD1FF', '#FF8A3D')}${glider('g3', 76, '#FFE45C', '#8A3DFF')}`;
+}
+buildDrop();
 const CLOUDINESS = {clear:0, partly:.18, cloudy:.78, fog:.72, rain:.8, snow:.6, storm:.88};
 // overcast palettes (top, middle, horizon) the sky blends towards: day / night, and storm
 const GREY_DAY   = ['#8E9AA8','#A7B0BA','#C2C8CE'], GREY_NIGHT = ['#1D2129','#262A33','#30343D'];
@@ -2141,7 +2224,7 @@ function mute(hex, amt){ // desaturate + dim for overcast skies
 }
 function mixSet(a, b, t){ return a.map((c, i) => mix(c, b[i], t)); }
 function skyAt(p){
-  const K = neon ? NEON_SKY : theme === 'murray' ? MURRAY_SKY : theme === 'retro' ? RETRO_SKY : theme === 'beach' ? BEACH_SKY : theme === 'island' ? ISLAND_SKY : theme === 'seoul' ? SEOUL_SKY : theme === 'kstreet' ? KST_SKY : SKY;
+  const K = neon ? NEON_SKY : theme === 'murray' ? MURRAY_SKY : theme === 'retro' ? RETRO_SKY : theme === 'beach' ? BEACH_SKY : theme === 'island' ? ISLAND_SKY : theme === 'drop' ? DROP_SKY : theme === 'seoul' ? SEOUL_SKY : theme === 'kstreet' ? KST_SKY : SKY;
   if (p <= K[0][0] || p >= K[K.length-1][0]) return K[0][1];
   for (let i=0;i<K.length-1;i++){
     const [p0,c0] = K[i], [p1,c1] = K[i+1];
@@ -2258,7 +2341,7 @@ function updateSky(){
     scene.style.height = H + 'px';
     W = scene.clientWidth;
   }
-  const murray = theme === 'murray', base = murray ? H - 64 : theme === 'beach' ? H - 86 : theme === 'island' ? H - 94 : theme === 'pro' ? H - (LANDSCAPE() ? innerHeight * .22 : 70) : theme === 'seoul' ? H - 70 : theme === 'kstreet' ? H - 120 : H;   // in Murray mode the sun sets behind the far bank
+  const murray = theme === 'murray', base = murray ? H - 64 : theme === 'beach' ? H - 86 : theme === 'island' ? H - 94 : theme === 'drop' ? H - 104 : theme === 'pro' ? H - (LANDSCAPE() ? innerHeight * .22 : 70) : theme === 'seoul' ? H - 70 : theme === 'kstreet' ? H - 120 : H;   // in Murray mode the sun sets behind the far bank
   const place = (el, t) => {
     el.style.left = (W*(0.07 + t*0.86)) + 'px';
     el.style.top  = (base - Math.sin(Math.PI*t)*(base - (neon ? 95 : Math.max(165, H * 0.42)))) + 'px';   // peak sits below the header, visible
@@ -2327,6 +2410,20 @@ function updateSky(){
       g.style.setProperty('--phzc', sunUp ? mix('#FF7A3D', '#FFC98A', 1 - low) : '#B8C6E0');
       g.style.opacity = ((1 - cloud * .8) * low * (sunUp ? .75 : .35)).toFixed(2);
     } else if (g) g.style.opacity = 0;
+  }
+  if (theme === 'drop'){
+    const set = (k, v) => r.setProperty(k, v), dark = Math.max(night * .88, twilight * .35);
+    set('--dstorm', mix('#6A2FD8', '#2A1060', night * .6)); set('--dstorm2', mix('#B66BFF', '#5A2AA0', night * .5));
+    set('--dfar', mix(mix(cols[2], '#5FB8A0', .5), '#141A3A', night * .85));
+    set('--dmid', mix(mute('#5FD067', cloud * .4), '#10261C', dark)); set('--dnear', mix(mute('#3FB255', cloud * .4), '#0B1E16', dark));
+    set('--dline', mix('#2A4A2A', '#05080A', dark));
+    set('--dpine', mix(mute('#1F8C4A', cloud * .35), '#08180F', dark)); set('--dtrunk', mix('#7A4A2A', '#120C08', dark));
+    set('--dwall1', mix('#FFF1D6', '#2A2630', dark)); set('--dwall2', mix('#BDE7FF', '#1E2433', dark));
+    set('--droof1', mix('#FF5F6D', '#2A1018', dark)); set('--droof2', mix('#3A7BFF', '#101A33', dark)); set('--droof3', mix('#FFB03A', '#2A1C08', dark));
+    set('--ddoor', mix('#8A4FD0', '#1A1028', dark)); set('--dwood', mix('#A8743F', '#1A120A', dark));
+    set('--dlit', Math.min(1, night * 1.2 + twilight * .5).toFixed(2));
+    set('--earth', mix(mute('#3FB255', cloud * .4), '#0B1E16', dark)); set('--earth2', mix('#2F8C45', '#07140E', night * .9));
+    document.querySelectorAll('#drop .glider').forEach(g => g.style.display = (k === 'storm' || night > .6) ? 'none' : '');
   }
   if (theme === 'island'){
     const set = (k, v) => r.setProperty(k, v), dark = Math.max(night * .9, twilight * .35);
@@ -3819,7 +3916,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.13', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.14', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
@@ -3835,6 +3932,7 @@ function appearanceHTML(){
     <button type="button" data-theme="retro" class="${theme==='retro'?'on':''}"><i class="pv-retro"></i><span>⚡ Time Warp<b></b></span></button>
     <button type="button" data-theme="beach" class="${theme==='beach'?'on':''}"><i class="pv-beach"></i><span>🏖️ Beach<b></b></span></button>
     <button type="button" data-theme="island" class="${theme==='island'?'on':''}"><i class="pv-island"></i><span>🇹🇭 Thailand<b></b></span></button>
+    <button type="button" data-theme="drop" class="${theme==='drop'?'on':''}"><i class="pv-drop"></i><span>🪂 Drop Zone<b></b></span></button>
     <button type="button" data-theme="seoul" class="${theme==='seoul'?'on':''}"><i class="pv-seoul"></i><span>🌸 Seoul<b></b></span></button>
     <button type="button" data-theme="kstreet" class="${theme==='kstreet'?'on':''}"><i class="pv-kst"></i><span>💜 K-Street<b></b></span></button>
     <button type="button" data-theme="pro" class="${theme==='pro'?'on':''}"><i class="pv-pro"></i><span>💼 Business<b></b></span></button>
