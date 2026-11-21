@@ -898,7 +898,7 @@
   .tips .tp-ic{font-size:20px;width:26px;text-align:center;flex-shrink:0}
   .tips .tp-mid{flex:1;min-width:0}
   .tips .tp-mid b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .tips .tp-mid small{display:block;font-size:12px;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tips .tp-mid small{display:block;font-size:12px;opacity:.8;line-height:1.5}
   .tips .tp-b{font-size:12px;font-weight:700;padding:4px 9px;border-radius:999px;flex-shrink:0;background:rgba(255,255,255,.16)}
   .tips .tp-b.w{background:#2ECC71;color:#fff}.tips .tp-b.p{background:#F5B942;color:#3a2a00}.tips .tp-b.l{background:rgba(0,0,0,.25);opacity:.8}.tips .tp-b.x{opacity:.6}
   .tips h2{position:relative}
@@ -908,6 +908,8 @@
   .tips .tp-rough{margin-top:4px;border-top:1px dashed rgba(255,255,255,.25)}
   .tips .tp-rough .tp-row{border-top:0}
   .tips .tp-rough .tp-b.q{background:linear-gradient(90deg,#FF8A3D,#FF3D7F);color:#fff}
+  .tips .tp-k{font-style:normal;font-weight:800;font-size:10px;letter-spacing:.6px;text-transform:uppercase;padding:2px 6px;border-radius:6px;margin-right:6px;background:rgba(255,255,255,.18);vertical-align:1px}
+  .tips .tp-k.k-win{background:#2E86FF;color:#fff}.tips .tp-k.k-ew{background:#8E5BFF;color:#fff}.tips .tp-k.k-tri{background:#00B39B;color:#fff}.tips .tp-k.k-rough{background:linear-gradient(90deg,#FF8A3D,#FF3D7F);color:#fff}
   .tips .tp-note{font-size:12px;opacity:.7;margin-top:6px}
   .tips .tp-link{display:inline-block;margin-top:8px;font-size:13px;font-weight:600;color:inherit;text-decoration:none;opacity:.9}
   .clim .cl-sum{font-size:15px;line-height:1.4;margin:2px 0 12px}
@@ -2983,18 +2985,21 @@ function tipsCard(){
   const link = `<a class="tp-link" href="${NAN_URL}" target="_blank" rel="noopener">Open Nan’s Tips ›</a>`;
   if (!d || !d.ready) return `<section class="card tips" id="tipsCard">${head}<div class="tp-note">${d ? 'No picks yet — check back soon.' : 'Loading today’s picks…'}</div>${link}</section>`;
   const ICON = { H: '🏇', D: '🐕', N: '🐎' };
-  const BADGE = { won: ['Won', 'w'], placed: ['Placed', 'p'], lost: ['Lost', 'l'], scratched: ['Scratched', 'x'], abandoned: ['Abandoned', 'x'], pending: ['', ''] };
+  const BADGE = { won: ['Won', 'w'], placed: ['', 'p'], lost: ['Lost', 'l'], scratched: ['Scratched', 'x'], abandoned: ['Abandoned', 'x'], pending: ['', ''] };
   const jt = p => p.jump ? Date.parse(p.jump) : Infinity;
   const tm = p => p.jump ? new Date(p.jump).toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' }).replace(/\s/g, '').toLowerCase() + ' · ' : '';
-  const RR = d.roughie || 10;
-  const row = (p, rough) => { const [t, c] = BADGE[p.status] || BADGE.pending;
-    const extra = p.status === 'won' && p.win ? ` $${(+p.win).toFixed(2)}` : p.status === 'placed' && p.pos ? ` ${p.pos}${['','st','nd','rd'][p.pos] || 'th'}` : '';
+  const KIND = { win: 'Win', ew: 'Each way', tri: 'Trifecta', rough: 'Roughie', best: 'Best bet' };
+  const kindOf = p => p.kind || (p.rank >= 10 && p.rank < 20 ? 'rough' : 'best');
+  const row = p => { const k = kindOf(p), [t, c] = BADGE[p.status] || BADGE.pending;
+    const ord = n => n + (['','st','nd','rd'][n] || 'th');
+    const extra = p.status === 'won' && p.win ? ` $${(+p.win).toFixed(2)}` : p.status === 'placed' && p.pos ? ` ${ord(p.pos)}${p.place ? ' $' + (+p.place).toFixed(2) : ''}` : p.status === 'lost' && k === 'tri' && p.pos ? ` · ${p.pos} of 3` : '';
+    const name = k === 'tri' ? esc(p.runner) : `${p.no ? p.no + '. ' : ''}${esc(p.runner)}`;
+    const sub = k === 'tri' ? esc(p.note || '') : esc((p.note || '').replace(/^Roughie · /, ''));
     return `<div class="tp-row"><span class="tp-ic">${ICON[p.code] || '🏁'}</span>
-      <div class="tp-mid"><b>${p.no ? p.no + '. ' : ''}${esc(p.runner)}</b><small>${tm(p)}${esc(p.venue)} R${p.race} · ${esc((p.note || '').replace(/^Roughie · /, ''))}</small></div>
-      ${t ? `<span class="tp-b ${c}">${t}${extra}</span>` : `<span class="tp-b q">${rough ? 'Roughie' : 'Today'}</span>`}</div>`; };
-  const byTime = (a, z) => jt(a) - jt(z) || a.rank - z.rank;
-  const best = d.picks.filter(p => p.rank < RR).sort(byTime), rough = d.picks.filter(p => p.rank >= RR);
-  const rows = best.map(p => row(p, false)).join('') + rough.map(p => `<div class="tp-rough">${row(p, true)}</div>`).join('');
+      <div class="tp-mid"><b>${name}</b><small><i class="tp-k k-${k}">${KIND[k]}</i>${tm(p)}${esc(p.venue)} R${p.race}${sub ? ' · ' + sub : ''}</small></div>
+      <span class="tp-b ${p.status === 'pending' ? 'q' : c}">${p.status === 'pending' ? 'To run' : (t + extra).trim()}</span></div>`; };
+  const ORDER = { win: 1, ew: 2, tri: 3, rough: 4, best: 5 };
+  const rows = [...d.picks].sort((a, z) => jt(a) - jt(z) || ORDER[kindOf(a)] - ORDER[kindOf(z)]).map(row).join('');
   const won = d.picks.filter(p => p.status === 'won').length, done = d.picks.filter(p => p.status !== 'pending').length;
   const sum = done ? `<div class="tp-note">${won} of ${done} won so far${done === d.picks.length ? ' · all settled' : ''}</div>` : `<div class="tp-note">Today’s top picks from Nan’s Tips</div>`;
   return `<section class="card tips" id="tipsCard">${head}${rows}${sum}${link}</section>`;
@@ -3662,7 +3667,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.08', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.09', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
