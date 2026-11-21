@@ -2950,11 +2950,12 @@ function climateCard(d){
 }
 /* ---------- best bets (Nan's Tips) — off unless switched on in Settings ---------- */
 const NAN_URL = 'https://benwintle73.github.io/dusty-flat-races/nan.html';
-let tipsData = store.get('wx_tipsdata', null), tipsAt = 0, tipsBusy = false;
+let tipsData = store.get('wx_tipsdata', null), tipsAt = 0, tipsBusy = false, tipsSpin = false;
 const tipsOn = () => !!store.get('wx_tips', false);
 async function refreshTips(){
-  if (tipsBusy) return; const t0 = Date.now(); tipsBusy = true; const b = document.querySelector('#tipsCard .tp-ref'); if (b) b.classList.add('spinning');
-  tipsBusy = false; await loadTips(true);
+  if (tipsSpin) return; const t0 = Date.now(); tipsSpin = true; const b = document.querySelector('#tipsCard .tp-ref'); if (b) b.classList.add('spinning');
+  while (tipsBusy) await new Promise(r => setTimeout(r, 150));
+  await loadTips(); tipsSpin = false;
   const wait = 900 - (Date.now() - t0); if (wait > 0) await new Promise(r => setTimeout(r, wait));
   const el = $('tipsCard'); if (el) el.outerHTML = tipsCard();
   const nb = document.querySelector('#tipsCard .tp-ref'); if (nb){ nb.classList.add('done'); nb.innerHTML = TICK_SVG; setTimeout(() => { nb.classList.remove('done'); nb.innerHTML = REFRESH_SVG; }, 1400); }
@@ -2963,9 +2964,10 @@ async function loadTips(){
   if (!sb || !user || tipsBusy) return; tipsBusy = true;
   try{
     const { data, error } = await sb.functions.invoke('weather-tips', { method: 'GET' });
-    if (!error && data && !data.error){ tipsData = data; tipsAt = Date.now(); store.set('wx_tipsdata', data, true); const el = $('tipsCard'); if (el) el.outerHTML = tipsCard(); }
+    if (!error && data && !data.error){ tipsData = data; store.set('wx_tipsdata', data, true); }
   }catch(e){}
-  tipsBusy = false;
+  tipsAt = Date.now(); tipsBusy = false;
+  if (!tipsSpin){ const el = $('tipsCard'); if (el) el.outerHTML = tipsCard(); }
 }
 function tipsCard(){
   if (!tipsOn()) return '';
@@ -2974,7 +2976,7 @@ function tipsCard(){
   const d = tipsData && tipsData.date === today ? tipsData : null;
   const pending = d && d.picks.some(p => p.status === 'pending');
   if (!tipsAt || Date.now() - tipsAt > (pending || !d || !d.ready ? 5 : 30) * 60e3) setTimeout(loadTips, 0);
-  const head = `<h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg> Best bets<button class="tp-ref ${tipsBusy ? 'spinning' : ''}" onclick="event.stopPropagation();refreshTips()" aria-label="Refresh tips">${REFRESH_SVG}</button></h2>`;
+  const head = `<h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg> Best bets<button class="tp-ref ${tipsSpin ? 'spinning' : ''}" onclick="event.stopPropagation();refreshTips()" aria-label="Refresh tips">${REFRESH_SVG}</button></h2>`;
   const link = `<a class="tp-link" href="${NAN_URL}" target="_blank" rel="noopener">Open Nan’s Tips ›</a>`;
   if (!d || !d.ready) return `<section class="card tips" id="tipsCard">${head}<div class="tp-note">${d ? 'No picks yet — they show up once the winning tipsters post today’s tips.' : 'Loading today’s picks…'}</div>${link}</section>`;
   const ICON = { H: '🏇', D: '🐕', N: '🐎' };
@@ -3651,7 +3653,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.03', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.04', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
