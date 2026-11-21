@@ -1042,11 +1042,10 @@
   /* Business: a subtle horizon the sun and moon rise and set behind */
   .pro-only{display:none}
   body.pro .pro-only{display:block}
-  .phz{position:absolute;left:0;right:0;bottom:0;height:64px;pointer-events:none;background:linear-gradient(180deg,#141B28 0%,#111722 100%);border-top:1px solid rgba(140,160,190,.22)}
-  .phz::before{content:'';position:absolute;left:0;right:0;top:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(170,190,220,.35) 20%,rgba(170,190,220,.35) 80%,transparent)}
-  .phz i{position:absolute;top:-34px;width:260px;height:68px;margin-left:-130px;border-radius:50%;background:radial-gradient(ellipse at 50% 50%,var(--phzc,#FF9A4D) 0%,transparent 65%);opacity:0;transition:left 3s linear,opacity 3s;mix-blend-mode:screen;
-    -webkit-mask-image:linear-gradient(180deg,#000 50%,rgba(0,0,0,.25) 51%);mask-image:linear-gradient(180deg,#000 50%,rgba(0,0,0,.25) 51%)}
-  @media (orientation:landscape) and (max-height:520px){ .phz{height:22vh} }
+  .phz{position:absolute;left:0;right:0;bottom:0;height:40px;pointer-events:none;background:#121925}
+  .phz svg{position:absolute;left:0;right:0;bottom:100%;width:100%;height:56px;display:block}
+  .phz i{position:absolute;top:-76px;width:260px;height:70px;margin-left:-130px;border-radius:50%;background:radial-gradient(ellipse at 50% 60%,var(--phzc,#FF9A4D) 0%,transparent 65%);opacity:0;transition:left 3s linear,opacity 3s;mix-blend-mode:screen}
+  @media (orientation:landscape) and (max-height:520px){ .phz{height:14vh} .phz svg{height:16vh} }
   @media (orientation:landscape) and (max-height:520px){ body.pro .land .ld,body.pro .land .lw{color:#C9D2DF} }
 </style>
 </head>
@@ -1074,7 +1073,10 @@
   <div class="river murray-only" id="river"></div>
   <div class="bscene beach-only" id="beach"></div>
   <div class="iscene island-only" id="island"></div>
-  <div class="phz pro-only" id="phz"><i id="phzGlow"></i></div>
+  <div class="phz pro-only" id="phz"><i id="phzGlow"></i><svg viewBox="0 0 800 60" preserveAspectRatio="none">
+    <path d="M0 44 L50 30 L95 38 L150 14 L205 33 L250 24 L300 40 L360 20 L410 6 L455 26 L500 18 L560 36 L615 22 L660 30 L720 12 L770 28 L800 22 L800 60 L0 60Z" fill="#151C29"/>
+    <path d="M0 50 L70 40 L130 46 L210 32 L280 44 L340 36 L430 48 L520 34 L600 46 L680 38 L760 46 L800 42 L800 60 L0 60Z" fill="#131A26"/>
+    <path d="M0 44 L50 30 L95 38 L150 14 L205 33 L250 24 L300 40 L360 20 L410 6 L455 26 L500 18 L560 36 L615 22 L660 30 L720 12 L770 28 L800 22" fill="none" stroke="rgba(160,180,210,.22)" stroke-width="1.2" vector-effect="non-scaling-stroke"/></svg></div>
   <div class="kscene seoul-only" id="kscene"></div>
   <div class="kst kstreet-only" id="kst"></div>
   <div class="petals seoul-only" id="petals"></div>
@@ -2256,7 +2258,7 @@ function updateSky(){
     scene.style.height = H + 'px';
     W = scene.clientWidth;
   }
-  const murray = theme === 'murray', base = murray ? H - 64 : theme === 'beach' ? H - 86 : theme === 'island' ? H - 94 : theme === 'pro' ? H - (LANDSCAPE() ? innerHeight * .22 : 64) : theme === 'seoul' ? H - 70 : theme === 'kstreet' ? H - 120 : H;   // in Murray mode the sun sets behind the far bank
+  const murray = theme === 'murray', base = murray ? H - 64 : theme === 'beach' ? H - 86 : theme === 'island' ? H - 94 : theme === 'pro' ? H - (LANDSCAPE() ? innerHeight * .22 : 70) : theme === 'seoul' ? H - 70 : theme === 'kstreet' ? H - 120 : H;   // in Murray mode the sun sets behind the far bank
   const place = (el, t) => {
     el.style.left = (W*(0.07 + t*0.86)) + 'px';
     el.style.top  = (base - Math.sin(Math.PI*t)*(base - (neon ? 95 : Math.max(165, H * 0.42)))) + 'px';   // peak sits below the header, visible
@@ -3817,7 +3819,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.12', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.13', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
