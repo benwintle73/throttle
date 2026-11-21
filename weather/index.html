@@ -957,6 +957,29 @@
   .appear .pv-kst::after{content:'♥';position:absolute;left:44%;top:34%;color:#fff;font-size:13px;text-shadow:0 0 6px #FF6FB5}
   @media (orientation:landscape) and (max-height:520px){ .kst{height:100vh!important} }
   .ptime{font-size:13px;font-weight:600;opacity:.85;margin-top:4px;letter-spacing:.2px}
+  /* ===== Business theme: calm, static, solid slate — no animated sky ===== */
+  body.pro{--glass:#1C2433;--line:#2C3648;--text:#E8ECF2;--soft:#9AA6B8;background:#111722}
+  body.pro .bg{display:none}
+  body.pro .scene,body.pro .petals,body.pro::before,body.pro::after{display:none!important}
+  body.pro .card{background:#1A2230;border:1px solid #2A3446;box-shadow:0 1px 2px rgba(0,0,0,.3);backdrop-filter:none;-webkit-backdrop-filter:none;border-radius:14px}
+  body.pro .card::before{display:none}
+  body.pro .card,body.pro .hero{text-shadow:none!important}
+  body.pro .card h2{color:#8C98AC;font-weight:600;letter-spacing:.8px}
+  body.pro .hero{padding:26px 0 18px}
+  body.pro .temp{font-weight:300;font-size:84px;letter-spacing:-2px;color:#F2F5F9}
+  body.pro .cond{display:flex;align-items:center;justify-content:center;gap:8px;font-weight:500;font-size:18px;color:#C9D2DF}
+  body.pro .proicon svg,body.pro .proicon img{width:26px;height:26px;display:block}
+  body.pro .hilo,body.pro .ptime{color:#8C98AC}
+  body.pro .icon-btn,body.pro .chip{background:#1A2230;border-color:#2C3648;backdrop-filter:none;-webkit-backdrop-filter:none}
+  body.pro .wear span{background:#1A2230;border-color:#2C3648;backdrop-filter:none;-webkit-backdrop-filter:none}
+  body.pro .tmrw{background:#1A2230;border:1px solid #2C3648}
+  body.pro .totd .q{font-weight:500;font-size:17px}
+  body.pro .fun .fortune{background:#E9EDF3;color:#1A2230}
+  body.pro .place h1{font-weight:600;letter-spacing:-.2px}
+  body.pro .todo-card .go,body.pro .pz-card .go,body.pro .radar-card .go{background:#3B82F6;color:#fff}
+  .appear .pv-pro{background:linear-gradient(180deg,#111722 0 40%,#1A2230 40% 100%);position:relative}
+  .appear .pv-pro::after{content:'24°';position:absolute;left:0;right:0;top:20%;text-align:center;font:300 15px 'Outfit',sans-serif;color:#E8ECF2}
+  @media (orientation:landscape) and (max-height:520px){ body.pro .land{background:#111722} }
 </style>
 </head>
 <body>
@@ -1384,7 +1407,7 @@ function render(d){
   $('content').innerHTML = `
     <section class="hero" id="hero">
       <div class="temp">${r0(c.temperature_2m)}<sup>°</sup></div>
-      <div class="cond">${LABELS[c.weather_code] || '—'}</div>
+      <div class="cond">${theme === 'pro' ? `<span class="proicon">${icon(c.weather_code, c.is_day)}</span>` : ''}${LABELS[c.weather_code] || '—'}</div>
       <div class="hilo">H ${r0(dy.temperature_2m_max[0])}°  ·  L ${r0(dy.temperature_2m_min[0])}°  ·  Feels like ${r0(c.apparent_temperature)}°</div>
       <div class="ptime" id="ptime">${placeTimeText(d)}</div>
       ${theme === 'retro' ? dashHTML(d) : ''}
@@ -1484,7 +1507,7 @@ const NEON_SKY = [
   [ 1.16, ['#0D0221','#26083F','#541066']],
 ];
 let theme = store.get('wx_theme', null) || (store.get('wx_neon', false) ? 'neon' : 'classic');
-{ const t = new URLSearchParams(location.search).get('theme'); if (['classic','neon','murray','retro','beach','seoul','kstreet'].includes(t)) theme = t; }
+{ const t = new URLSearchParams(location.search).get('theme'); if (['classic','neon','murray','retro','beach','seoul','kstreet','pro'].includes(t)) theme = t; }
 let neon = theme === 'neon';
 /* ---------- Time Warp theme: clock-radio style segment display + time-jump flash ---------- */
 const SEG = { '0':'abcdef','1':'bc','2':'abged','3':'abgcd','4':'fgbc','5':'afgcd','6':'afgedc','7':'abc','8':'abcdefg','9':'abcdfg','-':'g',' ':'' };
@@ -1574,13 +1597,13 @@ function placeTimeText(d){
 }
 setInterval(() => { const el = $('ptime'); if (el && lastData) el.textContent = placeTimeText(lastData); }, 15000);
 function setThemeClass(){
-  ['neon','murray','retro','beach','seoul','kstreet'].forEach(t => document.body.classList.toggle(t, theme === t));
+  ['neon','murray','retro','beach','seoul','kstreet','pro'].forEach(t => document.body.classList.toggle(t, theme === t));
 }
 function applyMode(){
   neon = theme === 'neon';
   setThemeClass();
   renderChips();
-  updateSky();
+  if (lastData) render(lastData); else updateSky();
 }
 function buildSkyline(){
   // original generic skyline: deterministic block towers with lit windows
@@ -2211,6 +2234,7 @@ function updateSky(){
   else moon.style.opacity = 0;
   // clear nights: full stars; cloudy/stormy nights: a faint sparkle peeking through so it still reads as night
   skyNow = { night, cloud };
+  if (theme === 'pro') document.documentElement.style.setProperty('--shade', '0');
   { const R = document.documentElement.style;   // classic landscape hills follow the sky
     R.setProperty('--hl1', mix(mix(cols[2], '#9DBF8E', .65), '#141A26', night*.85));
     R.setProperty('--hl2', mix(mix(cols[2], '#6F9C68', .7), '#0E1320', night*.88));
@@ -3557,7 +3581,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '1.98', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '1.99', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
@@ -3571,6 +3595,7 @@ function appearanceHTML(){
     <button type="button" data-theme="beach" class="${theme==='beach'?'on':''}"><i class="pv-beach"></i><span>🏖️ Beach<b></b></span></button>
     <button type="button" data-theme="seoul" class="${theme==='seoul'?'on':''}"><i class="pv-seoul"></i><span>🌸 Seoul<b></b></span></button>
     <button type="button" data-theme="kstreet" class="${theme==='kstreet'?'on':''}"><i class="pv-kst"></i><span>💜 K-Street<b></b></span></button>
+    <button type="button" data-theme="pro" class="${theme==='pro'?'on':''}"><i class="pv-pro"></i><span>💼 Business<b></b></span></button>
   </div></div>`;
 }
 function bindAppearance(){
