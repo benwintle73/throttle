@@ -910,6 +910,7 @@
   .tips .tp-rough .tp-b.q{background:linear-gradient(90deg,#FF8A3D,#FF3D7F);color:#fff}
   .tips .tp-k{font-style:normal;font-weight:800;font-size:10px;letter-spacing:.6px;text-transform:uppercase;padding:2px 6px;border-radius:6px;margin-right:6px;background:rgba(255,255,255,.18);vertical-align:1px}
   .tips .tp-k.k-win{background:#2E86FF;color:#fff}.tips .tp-k.k-ew{background:#8E5BFF;color:#fff}.tips .tp-k.k-tri{background:#00B39B;color:#fff}.tips .tp-k.k-rough{background:linear-gradient(90deg,#FF8A3D,#FF3D7F);color:#fff}
+  .tips .tp-daily{font-size:12px;font-weight:600;opacity:.75;margin:-4px 0 6px}
   .tips .tp-note{font-size:12px;opacity:.7;margin-top:6px}
   .tips .tp-link{display:inline-block;margin-top:8px;font-size:13px;font-weight:600;color:inherit;text-decoration:none;opacity:.9}
   .clim .cl-sum{font-size:15px;line-height:1.4;margin:2px 0 12px}
@@ -3232,7 +3233,7 @@ function tipsCard(){
   if (!tipsAt || Date.now() - tipsAt > (pending || !d || !d.ready ? 5 : 30) * 60e3) setTimeout(loadTips, 0);
   const head = `<h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg> Best bets<button class="tp-ref ${tipsSpin ? 'spinning' : ''}" onclick="event.stopPropagation();refreshTips()" aria-label="Refresh tips">${REFRESH_SVG}</button></h2>`;
   const link = `<a class="tp-link" href="${NAN_URL}" target="_blank" rel="noopener">Open Nan’s Tips ›</a>`;
-  if (!d || !d.ready) return `<section class="card tips" id="tipsCard">${head}<div class="tp-note">${d ? 'No picks yet — check back soon.' : 'Loading today’s picks…'}</div>${link}</section>`;
+  if (!d || !d.ready) return `<section class="card tips" id="tipsCard">${head}<div class="tp-note">${d ? 'Today’s tips land from 8:30am — check back soon.' : 'Loading today’s picks…'}</div>${link}</section>`;
   const ICON = { H: '🏇', D: '🐕', N: '🐎' };
   const BADGE = { won: ['Won', 'w'], placed: ['', 'p'], lost: ['', 'l'], scratched: ['Scratched', 'x'], abandoned: ['Abandoned', 'x'], pending: ['', ''] };
   const jt = p => p.jump ? Date.parse(p.jump) : Infinity;
@@ -3250,8 +3251,10 @@ function tipsCard(){
   const ORDER = { win: 1, ew: 2, tri: 3, rough: 4, best: 5 };
   const rows = [...d.picks].sort((a, z) => jt(a) - jt(z) || ORDER[kindOf(a)] - ORDER[kindOf(z)]).map(row).join('');
   const won = d.picks.filter(p => p.status === 'won').length, done = d.picks.filter(p => p.status !== 'pending').length;
-  const sum = done ? `<div class="tp-note">${won} of ${done} won so far${done === d.picks.length ? ' · all settled' : ''}</div>` : `<div class="tp-note">Today’s top picks from Nan’s Tips</div>`;
-  return `<section class="card tips" id="tipsCard">${head}${rows}${sum}${link}</section>`;
+  const all = done === d.picks.length;
+  const sum = `<div class="tp-note">${done ? `${won} of ${all ? d.picks.length : done} won${all ? ' today' : ' so far'} · ` : ''}${all ? 'new tips tomorrow from 8:30am' : 'new tips every morning from 8:30am'}</div>`;
+  const daily = `<div class="tp-daily">Daily tips · ${new Date().toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' })}</div>`;
+  return `<section class="card tips" id="tipsCard">${head}${daily}${rows}${sum}${link}</section>`;
 }
 function radarCard(){
   return `<section class="card radar-card" onclick="openRadar()">
@@ -3916,7 +3919,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.14', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.15', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
