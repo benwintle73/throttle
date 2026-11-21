@@ -983,7 +983,8 @@
   body.pro .todo-card .go,body.pro .pz-card .go,body.pro .radar-card .go{background:#3B82F6;color:#fff}
   .appear .pv-pro{background:linear-gradient(180deg,#111722 0 40%,#1A2230 40% 100%);position:relative}
   .appear .pv-pro::after{content:'24°';position:absolute;left:0;right:0;top:20%;text-align:center;font:300 15px 'Outfit',sans-serif;color:#E8ECF2}
-  @media (orientation:landscape) and (max-height:520px){ body.pro .land{background:#111722} }
+  body.pro .lhills{display:none!important}
+  @media (orientation:landscape) and (max-height:520px){ body.pro .land .ld,body.pro .land .lw{color:#C9D2DF} }
 </style>
 </head>
 <body>
@@ -3585,7 +3586,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.00', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.01', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
