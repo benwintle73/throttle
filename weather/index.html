@@ -1337,7 +1337,7 @@
 const DEFAULT_PLACE = { name:'Maryborough', sub:'Victoria, Australia', lat:-37.0457, lon:143.7393 };
 
 /* ---------- storage (safe) ---------- */
-const SYNC_KEYS = ['wx_saved','wx_last','wx_neon','wx_theme','wx_pz_stats','wx_todo','wx_order','wx_tips','wx_otd_on'];
+const SYNC_KEYS = ['wx_saved','wx_last','wx_neon','wx_theme','wx_pz_stats','wx_todo','wx_order','wx_tips','wx_otd_on','wx_saju_on'];
 const store = {
   get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch{ return d; } },
   set(k, v, quiet){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} if (!quiet && SYNC_KEYS.includes(k) && window.syncSoon) window.syncSoon(); }
@@ -2719,7 +2719,7 @@ const stars = n => '★'.repeat(n) + `<i>${'★'.repeat(5 - n)}</i>`;
 const elDot = e => `<i style="background:${SAJU.EL[e].color}"></i>`;
 const COLOR_CSS = { green:'#3FAE6A', red:'#F0643C', yellow:'#F2C230', white:'#FFFFFF', navy:'#1E3A8A' };
 function sajuCard(){
-  if (!window.SAJU) return '';
+  if (!window.SAJU || !store.get('wx_saju_on', true)) return '';
   const head = `<h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a4.5 4.5 0 0 1 0 9a4.5 4.5 0 0 0 0 9"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/><circle cx="12" cy="16.5" r="1" fill="currentColor"/></svg> Korean fortune</h2>`;
   const b = sjBirth();
   if (!b) return `<section class="card saju" id="sajuCard">${head}<div class="sj-top"><div class="sj-ani">🐲</div><div class="sj-mid"><b>Your 띠 and today’s 운세</b><small>Korean zodiac, Saju and dream meanings</small></div>
@@ -4079,7 +4079,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.17', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.18', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
@@ -4089,7 +4089,9 @@ function appearanceHTML(){
     <label class="sw-row"><span>Show Best bets<small>A few daily racing picks from Nan’s Tips, marked won or lost after the races.</small></span>
       <input type="checkbox" id="tipsToggle" ${tipsOn() ? 'checked' : ''}><i class="sw"></i></label>
     <label class="sw-row"><span>Show On this day<small>A moment from history on today’s date, in Just for fun.</small></span>
-      <input type="checkbox" id="otdToggle" ${store.get('wx_otd_on', false) ? 'checked' : ''}><i class="sw"></i></label></div>
+      <input type="checkbox" id="otdToggle" ${store.get('wx_otd_on', false) ? 'checked' : ''}><i class="sw"></i></label>
+    <label class="sw-row"><span>Show Korean fortune<small>Your 띠, today’s 운세, Saju and dream meanings.</small></span>
+      <input type="checkbox" id="sajuToggle" ${store.get('wx_saju_on', true) ? 'checked' : ''}><i class="sw"></i></label></div>
   <div class="appear"><h4>Appearance</h4><div class="opts">
     <button type="button" data-theme="classic" class="${theme==='classic'?'on':''}"><i class="pv-classic"></i><span>Classic<b></b></span></button>
     <button type="button" data-theme="neon" class="${theme==='neon'?'on':''}"><i class="pv-neon"></i><span>🌴 Neon<b></b></span></button>
@@ -4110,6 +4112,8 @@ function bindAppearance(){
   if (tt) tt.onchange = () => { store.set('wx_tips', tt.checked); if (tt.checked) tipsAt = 0; if (lastData) render(lastData); };
   const ot = $('otdToggle');
   if (ot) ot.onchange = () => { store.set('wx_otd_on', ot.checked); if (lastData) render(lastData); };
+  const sjt = $('sajuToggle');
+  if (sjt) sjt.onchange = () => { store.set('wx_saju_on', sjt.checked); if (lastData) render(lastData); };
   $('acctBody').querySelectorAll('[data-theme]').forEach(b => b.onclick = () => {
     const want = b.dataset.theme; if (want === theme) return;
     theme = want; store.set('wx_theme', theme); store.set('wx_neon', theme === 'neon'); applyMode(); drawAcct();
