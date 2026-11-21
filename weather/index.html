@@ -2985,19 +2985,19 @@ function tipsCard(){
   const link = `<a class="tp-link" href="${NAN_URL}" target="_blank" rel="noopener">Open Nan’s Tips ›</a>`;
   if (!d || !d.ready) return `<section class="card tips" id="tipsCard">${head}<div class="tp-note">${d ? 'No picks yet — check back soon.' : 'Loading today’s picks…'}</div>${link}</section>`;
   const ICON = { H: '🏇', D: '🐕', N: '🐎' };
-  const BADGE = { won: ['Won', 'w'], placed: ['', 'p'], lost: ['Lost', 'l'], scratched: ['Scratched', 'x'], abandoned: ['Abandoned', 'x'], pending: ['', ''] };
+  const BADGE = { won: ['Won', 'w'], placed: ['', 'p'], lost: ['', 'l'], scratched: ['Scratched', 'x'], abandoned: ['Abandoned', 'x'], pending: ['', ''] };
   const jt = p => p.jump ? Date.parse(p.jump) : Infinity;
   const tm = p => p.jump ? new Date(p.jump).toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' }).replace(/\s/g, '').toLowerCase() + ' · ' : '';
   const KIND = { win: 'Win', ew: 'Each way', tri: 'Trifecta', rough: 'Roughie', best: 'Best bet' };
   const kindOf = p => p.kind || (p.rank >= 10 && p.rank < 20 ? 'rough' : 'best');
   const row = p => { const k = kindOf(p), [t, c] = BADGE[p.status] || BADGE.pending;
     const ord = n => n + (['','st','nd','rd'][n] || 'th');
-    const extra = p.status === 'won' && p.win ? ` $${(+p.win).toFixed(2)}` : p.status === 'placed' && p.pos ? ` ${ord(p.pos)}${p.place ? ' $' + (+p.place).toFixed(2) : ''}` : p.status === 'lost' && k === 'tri' && p.pos ? ` · ${p.pos} of 3` : '';
+    const extra = p.status === 'won' && p.win ? ` $${(+p.win).toFixed(2)}` : p.status === 'placed' && p.pos ? ` ${ord(p.pos)}${p.place ? ' $' + (+p.place).toFixed(2) : ''}` : '';
     const name = k === 'tri' ? esc(p.runner) : `${p.no ? p.no + '. ' : ''}${esc(p.runner)}`;
     const sub = k === 'tri' ? esc(p.note || '') : esc((p.note || '').replace(/^Roughie · /, ''));
     return `<div class="tp-row"><span class="tp-ic">${ICON[p.code] || '🏁'}</span>
       <div class="tp-mid"><b>${name}</b><small><i class="tp-k k-${k}">${KIND[k]}</i>${tm(p)}${esc(p.venue)} R${p.race}${sub ? ' · ' + sub : ''}</small></div>
-      <span class="tp-b ${p.status === 'pending' ? 'q' : c}">${p.status === 'pending' ? 'To run' : (t + extra).trim()}</span></div>`; };
+      <span class="tp-b ${p.status === 'pending' ? 'q' : c}">${p.status === 'pending' ? 'To run' : p.status === 'lost' ? (k === 'tri' ? `${p.pos || 0} of 3 placed` : p.pos ? `Ran ${ord(p.pos)}` : 'Unplaced') : (t + extra).trim()}</span></div>`; };
   const ORDER = { win: 1, ew: 2, tri: 3, rough: 4, best: 5 };
   const rows = [...d.picks].sort((a, z) => jt(a) - jt(z) || ORDER[kindOf(a)] - ORDER[kindOf(z)]).map(row).join('');
   const won = d.picks.filter(p => p.status === 'won').length, done = d.picks.filter(p => p.status !== 'pending').length;
@@ -3667,7 +3667,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.09', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.10', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
