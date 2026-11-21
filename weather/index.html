@@ -2981,10 +2981,12 @@ function tipsCard(){
   if (!d || !d.ready) return `<section class="card tips" id="tipsCard">${head}<div class="tp-note">${d ? 'No picks yet — check back soon.' : 'Loading today’s picks…'}</div>${link}</section>`;
   const ICON = { H: '🏇', D: '🐕', N: '🐎' };
   const BADGE = { won: ['Won', 'w'], placed: ['Placed', 'p'], lost: ['Lost', 'l'], scratched: ['Scratched', 'x'], abandoned: ['Abandoned', 'x'], pending: ['', ''] };
-  const rows = d.picks.map(p => { const [t, c] = BADGE[p.status] || BADGE.pending;
+  const jt = p => p.jump ? Date.parse(p.jump) : Infinity;
+  const tm = p => p.jump ? new Date(p.jump).toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' }).replace(/\s/g, '').toLowerCase() + ' · ' : '';
+  const rows = [...d.picks].sort((a, z) => jt(a) - jt(z) || a.rank - z.rank).map(p => { const [t, c] = BADGE[p.status] || BADGE.pending;
     const extra = p.status === 'won' && p.win ? ` $${(+p.win).toFixed(2)}` : p.status === 'placed' && p.pos ? ` ${p.pos}${['','st','nd','rd'][p.pos] || 'th'}` : '';
     return `<div class="tp-row"><span class="tp-ic">${ICON[p.code] || '🏁'}</span>
-      <div class="tp-mid"><b>${p.no ? p.no + '. ' : ''}${esc(p.runner)}</b><small>${esc(p.venue)} R${p.race} · ${esc(p.note || '')}</small></div>
+      <div class="tp-mid"><b>${p.no ? p.no + '. ' : ''}${esc(p.runner)}</b><small>${tm(p)}${esc(p.venue)} R${p.race} · ${esc(p.note || '')}</small></div>
       ${t ? `<span class="tp-b ${c}">${t}${extra}</span>` : `<span class="tp-b q">Today</span>`}</div>`; }).join('');
   const won = d.picks.filter(p => p.status === 'won').length, done = d.picks.filter(p => p.status !== 'pending').length;
   const sum = done ? `<div class="tp-note">${won} of ${done} won so far${done === d.picks.length ? ' · all settled' : ''}</div>` : `<div class="tp-note">Today’s top picks from Nan’s Tips</div>`;
@@ -3653,7 +3655,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.05', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.06', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
