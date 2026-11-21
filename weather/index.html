@@ -871,7 +871,7 @@
     .app,.ptr,#editDone{display:none!important}
     .scene{position:fixed!important;top:0!important;height:100vh!important}
     .river{height:100vh!important}
-    body:not(.neon):not(.murray):not(.beach):not(.retro) .lhills{display:block;position:absolute;left:0;right:0;bottom:0;height:42%}
+    body:not(.neon):not(.murray):not(.beach):not(.island):not(.retro) .lhills{display:block;position:absolute;left:0;right:0;bottom:0;height:42%}
     .lhills svg{width:100%;height:100%;display:block}
     body.retro .lgrid{display:block;position:absolute;left:0;right:0;bottom:0;height:44%}
     .lgrid .mtn{position:absolute;left:0;right:0;bottom:62%;width:100%;height:38%;opacity:var(--mtn,1)}
@@ -928,8 +928,41 @@
   .tile{container-type:size;min-height:34px}
   .tile{font-size:min(clamp(18px,5.4vw,28px),58cqh)}
   @media (max-height:700px){ .pz .pz-help{display:none} }
-  .river,.bscene,.lhills,.lgrid,.skyline,.sea,.palm{transition:opacity .6s}
-  body:not(.skyready) .river,body:not(.skyready) .bscene,body:not(.skyready) .lhills,body:not(.skyready) .lgrid,body:not(.skyready) .skyline,body:not(.skyready) .sea,body:not(.skyready) .palm{opacity:0}
+  /* ===== Thailand mode: Andaman lagoon, limestone karsts, a hilltop temple, palm island, overwater bungalows, longtail boat ===== */
+  .island-only{display:none}
+  body.island .island-only{display:block}
+  body.island .bg{background:linear-gradient(180deg,var(--g1) 0%,var(--g2) 28%,var(--g3) 46%,var(--earth,#F3E2B8) 72%,var(--earth2,#E5CB92) 100%)}
+  .iscene{position:absolute;left:0;right:0;bottom:0;height:262px;pointer-events:none}
+  .iscene > svg:first-child{position:absolute;inset:0;width:100%;height:100%}
+  .iscene .lap{animation:lap 4.5s ease-in-out infinite}
+  .iscene .shim{animation:shim 3.2s ease-in-out infinite}
+  .iscene .shim:nth-child(2n){animation-delay:-1.6s}
+  @keyframes shim{0%,100%{opacity:.15}50%{opacity:.7}}
+  .iscene .sway{transform-box:fill-box;transform-origin:50% 100%;animation:sway 5s ease-in-out infinite alternate}
+  .iscene .sway.b{animation-duration:6.2s;animation-delay:-2s}
+  .iscene .sway.c{animation-duration:4.4s;animation-delay:-1s}
+  @keyframes sway{from{transform:rotate(-2.5deg)}to{transform:rotate(2.5deg)}}
+  .iscene .iglint{position:absolute;bottom:62px;height:40px;width:120px;margin-left:-60px;transition:left 3s linear,opacity 3s;opacity:0;mix-blend-mode:screen;
+    background:radial-gradient(ellipse at 50% 0%,var(--glint,#fff) 0%,transparent 70%)}
+  .iscene .iglint::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(180deg,transparent 0 4px,rgba(0,0,0,.3) 4px 6px)}
+  .iscene .longtail{position:absolute;bottom:40px;left:-70px;width:58px;height:22px;animation:sail 300s linear infinite;animation-delay:-60s}
+  .iscene .longtail svg{width:100%;height:100%;animation:bob 3s ease-in-out infinite}
+  @keyframes bob{50%{transform:translateY(2px) rotate(-1deg)}}
+  .iscene .torch{animation:flick 1.4s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% 100%}
+  @keyframes flick{to{transform:scaleY(.8);opacity:.75}}
+  @media (orientation:landscape) and (max-height:520px){ .iscene{height:100vh!important} }
+  body.island .hero{padding-bottom:128px}
+  body.island .place h1{font-family:'Pacifico',cursive;font-weight:400;font-size:24px;letter-spacing:0;line-height:1.3;padding:0 4px .38em 0;margin-bottom:-.3em}
+  body.island .temp{font-weight:300;text-shadow:0 3px 24px rgba(0,70,80,.35)}
+  body.island .cond{font-weight:600}
+  body.island .card{background:rgba(0,110,120,.18);border-color:rgba(190,255,245,.38)}
+  body.island .card h2{color:#E4FFF8}
+  body.island .chip.active{background:#fff;color:#007A78}
+  body.island .tmrw{background:rgba(0,90,100,.3)}
+  .appear .pv-island{background:linear-gradient(180deg,#0A9BEA 0%,#7FDDF7 48%,#2FE0D0 49%,#00A7B5 72%,#F7E7BF 73%);position:relative;overflow:hidden}
+  .appear .pv-island::after{content:'🌴';position:absolute;right:14%;bottom:18%;font-size:15px;line-height:1}
+  .river,.bscene,.iscene,.lhills,.lgrid,.skyline,.sea,.palm{transition:opacity .6s}
+  body:not(.skyready) .river,body:not(.skyready) .bscene,body:not(.skyready) .iscene,body:not(.skyready) .lhills,body:not(.skyready) .lgrid,body:not(.skyready) .skyline,body:not(.skyready) .sea,body:not(.skyready) .palm{opacity:0}
   /* ===== Seoul theme ===== */
   .seoul-only{display:none}
   body.seoul .seoul-only{display:block}
@@ -1022,7 +1055,7 @@
   <div class="sea neon-only" id="sea"><div class="glint" id="glint"></div></div>
   <svg class="palm l neon-only" viewBox="0 0 150 200"><use href="#palmShape"/></svg>
   <svg class="palm r neon-only" viewBox="0 0 150 200"><use href="#palmShape"/></svg>
-  <div class="birds murray-only beach-only" id="birds"><svg viewBox="0 0 60 24" fill="none" stroke="var(--bird,#fff)" stroke-width="1.8" stroke-linecap="round"><path d="M2 10q4-5 8 0q4-5 8 0"/><path d="M22 4q3-4 6 0q3-4 6 0"/><path d="M30 16q4-5 8 0q4-5 8 0"/><path d="M46 8q3-4 6 0q3-4 6 0"/></svg></div>
+  <div class="birds murray-only beach-only island-only" id="birds"><svg viewBox="0 0 60 24" fill="none" stroke="var(--bird,#fff)" stroke-width="1.8" stroke-linecap="round"><path d="M2 10q4-5 8 0q4-5 8 0"/><path d="M22 4q3-4 6 0q3-4 6 0"/><path d="M30 16q4-5 8 0q4-5 8 0"/><path d="M46 8q3-4 6 0q3-4 6 0"/></svg></div>
   <div class="lhills" id="lhills"><svg viewBox="0 0 800 200" preserveAspectRatio="none">
     <path d="M0 120 C90 70 170 95 250 80 C340 62 420 100 520 82 C610 66 700 92 800 74 L800 200 L0 200Z" fill="var(--hl1,#8FB39A)"/>
     <path d="M0 150 C120 118 210 140 320 128 C430 116 520 146 640 132 C710 124 760 136 800 130 L800 200 L0 200Z" fill="var(--hl2,#6E9878)"/>
@@ -1032,6 +1065,7 @@
   <div class="lgrid" id="lgrid"><svg class="mtn" viewBox="0 0 800 120" preserveAspectRatio="none"><path d="M0 120 L60 70 L110 95 L190 30 L260 88 L330 52 L400 100 L470 46 L540 84 L620 22 L700 80 L760 58 L800 76 L800 120Z" fill="#2A1450"/><path d="M0 120 L60 70 L110 95 L190 30 L260 88 L330 52 L400 100 L470 46 L540 84 L620 22 L700 80 L760 58 L800 76" fill="none" stroke="#FF3F8E" stroke-width="2"/></svg><div class="floor"></div></div>
   <div class="river murray-only" id="river"></div>
   <div class="bscene beach-only" id="beach"></div>
+  <div class="iscene island-only" id="island"></div>
   <div class="kscene seoul-only" id="kscene"></div>
   <div class="kst kstreet-only" id="kst"></div>
   <div class="petals seoul-only" id="petals"></div>
@@ -1192,7 +1226,7 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="suncalc.js"></script>
-<script>const WALL_CSS = "\n    html,body{overflow:hidden!important;height:100%}\n    .land{display:flex;position:fixed;inset:0;z-index:90;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;color:#fff;text-align:center;pointer-events:none;\n      padding:max(14px,env(safe-area-inset-top)) env(safe-area-inset-right) 0 env(safe-area-inset-left);text-shadow:0 2px 18px rgba(0,0,0,.35)}\n    .app,.ptr,#editDone{display:none!important}\n    .scene{position:fixed!important;top:0!important;height:100vh!important}\n    .river{height:100vh!important}\n    body:not(.neon):not(.murray):not(.beach):not(.retro) .lhills{display:block;position:absolute;left:0;right:0;bottom:0;height:42%}\n    .lhills svg{width:100%;height:100%;display:block}\n    body.retro .lgrid{display:block;position:absolute;left:0;right:0;bottom:0;height:44%}\n    .lgrid .mtn{position:absolute;left:0;right:0;bottom:62%;width:100%;height:38%;opacity:var(--mtn,1)}\n    .lgrid .floor{position:absolute;left:-50%;right:-50%;top:38%;height:170%;transform:perspective(220px) rotateX(58deg);transform-origin:50% 0;\n      background:linear-gradient(180deg,rgba(255,63,142,.0),rgba(255,63,142,.12)),\n        repeating-linear-gradient(90deg,rgba(255,63,142,.85) 0 2px,transparent 2px 60px),\n        repeating-linear-gradient(0deg,rgba(255,63,142,.85) 0 2px,transparent 2px 40px),#140A2E;\n      background-position:0 0,0 0,0 0,0 0;animation:gridrun 2.5s linear infinite}\n    @keyframes gridrun{to{background-position:0 0,0 0,0 40px,0 0}}\n    .land .lt{font-size:min(24vh,18vw);font-weight:200;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}\n    .land .lt small{font-size:.22em;font-weight:500;margin-left:.15em;letter-spacing:0;opacity:.85}\n    .land .ld{font-size:min(6vh,30px);font-weight:600;opacity:.9;margin-top:6px}\n    .land .lw{font-size:min(8vh,40px);font-weight:500;margin-top:10px;opacity:.95}\n    .land .lw b{font-weight:700}\n    body.retro .land .lt{font-family:'Orbitron',sans-serif;font-weight:700;color:#FFB000;text-shadow:0 0 18px rgba(255,176,0,.6)}\n    body.neon .land .lt{font-family:'Anton',sans-serif;font-weight:400}\n  ";</script>
+<script>const WALL_CSS = "\n    html,body{overflow:hidden!important;height:100%}\n    .land{display:flex;position:fixed;inset:0;z-index:90;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;color:#fff;text-align:center;pointer-events:none;\n      padding:max(14px,env(safe-area-inset-top)) env(safe-area-inset-right) 0 env(safe-area-inset-left);text-shadow:0 2px 18px rgba(0,0,0,.35)}\n    .app,.ptr,#editDone{display:none!important}\n    .scene{position:fixed!important;top:0!important;height:100vh!important}\n    .river{height:100vh!important}\n    body:not(.neon):not(.murray):not(.beach):not(.island):not(.retro) .lhills{display:block;position:absolute;left:0;right:0;bottom:0;height:42%}\n    .lhills svg{width:100%;height:100%;display:block}\n    body.retro .lgrid{display:block;position:absolute;left:0;right:0;bottom:0;height:44%}\n    .lgrid .mtn{position:absolute;left:0;right:0;bottom:62%;width:100%;height:38%;opacity:var(--mtn,1)}\n    .lgrid .floor{position:absolute;left:-50%;right:-50%;top:38%;height:170%;transform:perspective(220px) rotateX(58deg);transform-origin:50% 0;\n      background:linear-gradient(180deg,rgba(255,63,142,.0),rgba(255,63,142,.12)),\n        repeating-linear-gradient(90deg,rgba(255,63,142,.85) 0 2px,transparent 2px 60px),\n        repeating-linear-gradient(0deg,rgba(255,63,142,.85) 0 2px,transparent 2px 40px),#140A2E;\n      background-position:0 0,0 0,0 0,0 0;animation:gridrun 2.5s linear infinite}\n    @keyframes gridrun{to{background-position:0 0,0 0,0 40px,0 0}}\n    .land .lt{font-size:min(24vh,18vw);font-weight:200;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}\n    .land .lt small{font-size:.22em;font-weight:500;margin-left:.15em;letter-spacing:0;opacity:.85}\n    .land .ld{font-size:min(6vh,30px);font-weight:600;opacity:.9;margin-top:6px}\n    .land .lw{font-size:min(8vh,40px);font-weight:500;margin-top:10px;opacity:.95}\n    .land .lw b{font-weight:700}\n    body.retro .land .lt{font-family:'Orbitron',sans-serif;font-weight:700;color:#FFB000;text-shadow:0 0 18px rgba(255,176,0,.6)}\n    body.neon .land .lt{font-family:'Anton',sans-serif;font-weight:400}\n  ";</script>
 <script src="quotes.js"></script>
 <script src="fortunes.js"></script>
 <script src="fun.js"></script>
@@ -1508,6 +1542,17 @@ const BEACH_SKY = [
   [ 1.06, ['#1C2160','#7A3B78','#E0607A']],
   [ 1.16, ['#081430','#10244A','#1B3A5E']],
 ];
+const ISLAND_SKY = [
+  [-0.16, ['#06122B','#0B2146','#103A5A']],
+  [-0.06, ['#1A2F6B','#5E5AA0','#FF9A7E']],
+  [ 0.02, ['#3D7BD0','#FF9F8A','#FFD99A']],
+  [ 0.14, ['#0B95EE','#55C8F7','#C8F6F4']],
+  [ 0.50, ['#0287E8','#36BDF7','#B4F2F0']],
+  [ 0.86, ['#0F8BE6','#6CCCF4','#FFE6A8']],
+  [ 0.98, ['#3A3A9E','#FF5F7E','#FFA340']],
+  [ 1.06, ['#1B1F63','#863C82','#F2687A']],
+  [ 1.16, ['#06122B','#0B2146','#103A5A']],
+];
 const KST_SKY = [
   [-0.16, ['#140A33','#2B1258','#4A1E78']],
   [-0.06, ['#3A1E78','#8A4FB8','#FF8FC4']],
@@ -1542,7 +1587,7 @@ const NEON_SKY = [
   [ 1.16, ['#0D0221','#26083F','#541066']],
 ];
 let theme = store.get('wx_theme', null) || (store.get('wx_neon', false) ? 'neon' : 'classic');
-{ const t = new URLSearchParams(location.search).get('theme'); if (['classic','neon','murray','retro','beach','seoul','kstreet','pro'].includes(t)) theme = t; }
+{ const t = new URLSearchParams(location.search).get('theme'); if (['classic','neon','murray','retro','beach','island','seoul','kstreet','pro'].includes(t)) theme = t; }
 let neon = theme === 'neon';
 /* ---------- Time Warp theme: clock-radio style segment display + time-jump flash ---------- */
 const SEG = { '0':'abcdef','1':'bc','2':'abged','3':'abgcd','4':'fgbc','5':'afgcd','6':'afgedc','7':'abc','8':'abcdefg','9':'abcdfg','-':'g',' ':'' };
@@ -1632,7 +1677,7 @@ function placeTimeText(d){
 }
 setInterval(() => { const el = $('ptime'); if (el && lastData) el.textContent = placeTimeText(lastData); }, 15000);
 function setThemeClass(){
-  ['neon','murray','retro','beach','seoul','kstreet','pro'].forEach(t => document.body.classList.toggle(t, theme === t));
+  ['neon','murray','retro','beach','island','seoul','kstreet','pro'].forEach(t => document.body.classList.toggle(t, theme === t));
 }
 function applyMode(){
   neon = theme === 'neon';
@@ -1962,7 +2007,7 @@ function buildKStreet(){
 buildKStreet();
 let sceneWas = sceneW();
 let sceneT = 0;
-addEventListener("resize", () => { clearTimeout(sceneT); sceneT = setTimeout(() => { const w = sceneW(); if (Math.abs(w - sceneWas) < 20) return; sceneWas = w; buildRiver(); buildSeoul(); buildKStreet(); buildBeach(); if (lastData) updateSky(); }, 250); });
+addEventListener("resize", () => { clearTimeout(sceneT); sceneT = setTimeout(() => { const w = sceneW(); if (Math.abs(w - sceneWas) < 20) return; sceneWas = w; buildRiver(); buildSeoul(); buildKStreet(); buildBeach(); buildIsland(); if (lastData) updateSky(); }, 250); });
 function buildBeach(){
   // original bay-side beach: calm bay, long timber pier, a row of striped bathing boxes, umbrella
   const W = sceneW(), H = 262, HOR = 176, SH = 214, DX = (W - 400) / 2;   // horizon, shoreline
@@ -2008,6 +2053,68 @@ function buildBeach(){
   <svg class="yacht" viewBox="0 0 30 34"><path d="M15 2 L15 26 L4 26Z" fill="var(--sail)"/><path d="M16 6 L16 26 L25 26Z" fill="var(--sail)" opacity=".85"/><path d="M3 27 L27 27 L24 31 L6 31Z" fill="var(--hull)"/></svg>`;
 }
 buildBeach();
+function buildIsland(){
+  // original tropical island: turquoise lagoon, limestone islands on the horizon, a palm island, overwater bungalows
+  const W = sceneW(), H = 262, HOR = 168, DX = (W - 400) / 2;
+  const palm = (x, y, h, lean, cls) => {
+    const tx = x + lean, ty = y - h, fr = [[-34,-6],[-26,10],[-10,16],[12,15],[28,8],[34,-8],[6,-14],[-18,-14]];
+    const leaves = fr.map(([dx, dy]) => `<path d="M${tx} ${ty} Q${tx + dx * .5} ${ty + dy * .2 - 8} ${tx + dx} ${ty + dy} Q${tx + dx * .55} ${ty + dy * .45 - 2} ${tx} ${ty}Z" fill="var(--ileaf)"/>`).join('');
+    return `<g class="sway ${cls}"><path d="M${x} ${y} Q${x + lean * .2} ${y - h * .55} ${tx} ${ty}" stroke="var(--itrunk)" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+      ${[.25,.45,.65].map(f => `<path d="M${x + lean * f * f - 2} ${y - h * f} l4 -1" stroke="var(--itrunk2)" stroke-width="1"/>`).join('')}
+      ${leaves}<circle cx="${tx - 2}" cy="${ty + 3}" r="2.2" fill="#6B4A2A"/><circle cx="${tx + 2}" cy="${ty + 4}" r="2" fill="#5A3D22"/></g>`;
+  };
+  const hut = (x, y) => `<g>
+      ${[2, 9, 16, 23].map(o => `<rect x="${x + o}" y="${y}" width="1.6" height="13" fill="var(--iwood2)"/>`).join('')}
+      <rect x="${x - 3}" y="${y - 2}" width="31" height="3" fill="var(--iwood)"/>
+      <rect x="${x + 2}" y="${y - 14}" width="21" height="12" fill="var(--iwall)"/>
+      <rect x="${x + 9}" y="${y - 10}" width="7" height="8" fill="#FFD27A" opacity="var(--ilit)"/>
+      <path d="M${x - 4} ${y - 13} L${x + 12.5} ${y - 27} L${x + 29} ${y - 13}Z" fill="var(--ithatch)"/>
+      <path d="M${x - 4} ${y - 13} L${x + 29} ${y - 13}" stroke="var(--ithatch2)" stroke-width="1.5"/></g>`;
+  const karst = `<g fill="var(--ikarst)" opacity=".85">
+      <path d="M${-DX} ${HOR} L18 ${HOR} C22 ${HOR - 30} 34 ${HOR - 44} 46 ${HOR - 40} C56 ${HOR - 36} 58 ${HOR - 18} 62 ${HOR} Z"/>
+      <path d="M58 ${HOR} C62 ${HOR - 18} 72 ${HOR - 26} 80 ${HOR - 22} C88 ${HOR - 18} 90 ${HOR - 8} 96 ${HOR} Z"/>
+    </g>`;
+  // headland on the right with a Thai temple: tiered red-and-gold roof hall with chofa finials, and a golden chedi
+  const roof = (x, y, w, h) => `<path d="M${x} ${y} L${x + w / 2} ${y - h} L${x + w} ${y}Z" fill="var(--iroof)"/><path d="M${x} ${y} L${x + w / 2} ${y - h} L${x + w} ${y}" stroke="var(--igold)" stroke-width="1" fill="none"/>
+      <path d="M${x + w / 2} ${y - h} q1 -4 3 -5" stroke="var(--igold)" stroke-width="1.2" fill="none"/><path d="M${x} ${y} q-3 -1 -4 -4 M${x + w} ${y} q3 -1 4 -4" stroke="var(--igold)" stroke-width="1" fill="none"/>`;
+  const temple = `<path d="M318 ${HOR} C326 ${HOR - 20} 344 ${HOR - 28} 366 ${HOR - 26} C384 ${HOR - 25} ${W - DX - 4} ${HOR - 20} ${W - DX} ${HOR - 16} L${W - DX} ${HOR} Z" fill="var(--ikarst)"/>
+      <path d="M328 ${HOR - 14} C336 ${HOR - 24} 354 ${HOR - 27} 368 ${HOR - 23} L368 ${HOR - 12} L328 ${HOR - 10}Z" fill="var(--ibush)" opacity=".9"/>
+      <g transform="translate(-26 ${HOR - 23})">
+        <rect x="360" y="-10" width="22" height="10" fill="var(--iwhite)"/><rect x="364" y="-7" width="3" height="5" fill="#FFD27A" opacity="var(--ilit)"/><rect x="375" y="-7" width="3" height="5" fill="#FFD27A" opacity="var(--ilit)"/>
+        ${roof(358, -10, 26, 9)}${roof(362, -16, 18, 7)}${roof(365.5, -21, 11, 6)}
+        <path d="M391 0 L391 -6 Q391 -13 396 -15 Q401 -13 401 -6 L401 0Z" fill="var(--igold)"/><path d="M396 -15 L396 -26" stroke="var(--igold)" stroke-width="1.6"/>
+        <circle cx="396" cy="-18" r="1.6" fill="var(--igold)"/><rect x="389" y="-1" width="14" height="2" fill="var(--iwhite)"/></g>`;
+  const isle = `<path d="M222 ${HOR + 33} C240 ${HOR + 22} 300 ${HOR + 18} 352 ${HOR + 26} C370 ${HOR + 29} 376 ${HOR + 33} 372 ${HOR + 35} L226 ${HOR + 36}Z" fill="var(--isand)"/>
+      <path d="M232 ${HOR + 30} C250 ${HOR + 16} 280 ${HOR + 14} 296 ${HOR + 20} C310 ${HOR + 12} 336 ${HOR + 16} 344 ${HOR + 26} Z" fill="var(--ibush)"/>
+      ${palm(262, HOR + 26, 46, -14, 'a')}${palm(296, HOR + 22, 58, 6, 'b')}${palm(326, HOR + 26, 40, 16, 'c')}`;
+  const walk = `<rect x="${-DX}" y="${HOR + 41}" width="${DX + 158}" height="3" fill="var(--iwood)"/>
+      ${Array.from({ length: Math.ceil((DX + 158) / 12) }, (_, i) => `<rect x="${-DX + i * 12}" y="${HOR + 44}" width="1.4" height="9" fill="var(--iwood2)"/>`).join('')}`;
+  const huts = hut(22, HOR + 43) + hut(70, HOR + 43) + hut(118, HOR + 43);
+  const torches = [16, 64, 112, 160].map(x => `<rect x="${x}" y="${HOR + 30}" width="1.4" height="12" fill="var(--iwood2)"/><ellipse class="torch" cx="${x + .7}" cy="${HOR + 28}" rx="2" ry="3.4" fill="#FFB03A" opacity="var(--ilit)"/>`).join('');
+  let shim = ''; let seed = 7; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 16; i++){ const x = -DX + r() * W, y = HOR + 6 + r() * 70; shim += `<rect class="shim" x="${x.toFixed(0)}" y="${y.toFixed(0)}" width="${(8 + r() * 16).toFixed(0)}" height="1.3" rx=".6" fill="#fff"/>`; }
+  const SH = 236;
+  $('island').innerHTML = `<svg viewBox="${-DX} 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice">
+    <defs>
+      <linearGradient id="lagoon" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--isea1)"/><stop offset=".45" style="stop-color:var(--isea2)"/><stop offset="1" style="stop-color:var(--isea3)"/></linearGradient>
+      <linearGradient id="isand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--isand)"/><stop offset="1" style="stop-color:var(--isand2)"/></linearGradient>
+    </defs>
+    ${karst}${temple}
+    <rect x="${-DX}" y="${HOR}" width="${W}" height="${H - HOR}" fill="url(#lagoon)"/>
+    <g>${shim}</g>
+    ${isle}
+    ${walk}${huts}${torches}
+    <path d="M${-DX} ${SH + 6} L0 ${SH + 6} C90 ${SH} 170 ${SH + 8} 250 ${SH + 2} C320 ${SH - 2} 370 ${SH + 4} 400 ${SH + 1} L${W - DX} ${SH + 1} L${W - DX} ${H} L${-DX} ${H}Z" fill="url(#isand)"/>
+    <path class="lap" d="M${-DX} ${SH + 6} L0 ${SH + 6} C90 ${SH} 170 ${SH + 8} 250 ${SH + 2} C320 ${SH - 2} 370 ${SH + 4} 400 ${SH + 1} L${W - DX} ${SH + 1}" fill="none" stroke="#fff" stroke-width="2.2" opacity=".8"/>
+  </svg>
+  <div class="iglint" id="iglint"></div>
+  <div class="longtail"><svg viewBox="0 0 60 22"><path d="M2 14 Q4 8 9 7 L10 13 L50 13 Q55 13 57 16 L8 17Z" fill="var(--ihull)"/><path d="M2 14 Q4 8 9 7" stroke="#F2C230" stroke-width="1.4" fill="none"/>
+    <path d="M8 6 l2 -4 l2 4" stroke="#E8505B" stroke-width="1.2" fill="none"/><path d="M8 5 q-3 -2 -5 0" stroke="#2BB3C0" stroke-width="1.2" fill="none"/>
+    <circle cx="5" cy="9" r="1.3" fill="#FF8FB1"/><circle cx="7" cy="10.5" r="1.3" fill="#FFD54A"/><circle cx="9" cy="9.5" r="1.3" fill="#FF8FB1"/>
+    <path d="M22 13 L22 6 L40 6 L40 13" fill="var(--icanopy)"/><path d="M20 6 L42 6" stroke="#fff" stroke-width="1"/>
+    <path d="M50 13 L59 20" stroke="#4A4A4A" stroke-width="1.4"/></svg></div>`;
+}
+buildIsland();
 const CLOUDINESS = {clear:0, partly:.18, cloudy:.78, fog:.72, rain:.8, snow:.6, storm:.88};
 // overcast palettes (top, middle, horizon) the sky blends towards: day / night, and storm
 const GREY_DAY   = ['#8E9AA8','#A7B0BA','#C2C8CE'], GREY_NIGHT = ['#1D2129','#262A33','#30343D'];
@@ -2023,7 +2130,7 @@ function mute(hex, amt){ // desaturate + dim for overcast skies
 }
 function mixSet(a, b, t){ return a.map((c, i) => mix(c, b[i], t)); }
 function skyAt(p){
-  const K = neon ? NEON_SKY : theme === 'murray' ? MURRAY_SKY : theme === 'retro' ? RETRO_SKY : theme === 'beach' ? BEACH_SKY : theme === 'seoul' ? SEOUL_SKY : theme === 'kstreet' ? KST_SKY : SKY;
+  const K = neon ? NEON_SKY : theme === 'murray' ? MURRAY_SKY : theme === 'retro' ? RETRO_SKY : theme === 'beach' ? BEACH_SKY : theme === 'island' ? ISLAND_SKY : theme === 'seoul' ? SEOUL_SKY : theme === 'kstreet' ? KST_SKY : SKY;
   if (p <= K[0][0] || p >= K[K.length-1][0]) return K[0][1];
   for (let i=0;i<K.length-1;i++){
     const [p0,c0] = K[i], [p1,c1] = K[i+1];
@@ -2140,7 +2247,7 @@ function updateSky(){
     scene.style.height = H + 'px';
     W = scene.clientWidth;
   }
-  const murray = theme === 'murray', base = murray ? H - 64 : theme === 'beach' ? H - 86 : theme === 'seoul' ? H - 70 : theme === 'kstreet' ? H - 120 : H;   // in Murray mode the sun sets behind the far bank
+  const murray = theme === 'murray', base = murray ? H - 64 : theme === 'beach' ? H - 86 : theme === 'island' ? H - 94 : theme === 'seoul' ? H - 70 : theme === 'kstreet' ? H - 120 : H;   // in Murray mode the sun sets behind the far bank
   const place = (el, t) => {
     el.style.left = (W*(0.07 + t*0.86)) + 'px';
     el.style.top  = (base - Math.sin(Math.PI*t)*(base - (neon ? 95 : Math.max(165, H * 0.42)))) + 'px';   // peak sits below the header, visible
@@ -2199,6 +2306,30 @@ function updateSky(){
     set('--earth', mix(mute('#C9B8C9', cloud * .4), '#120F22', night * .85)); set('--earth2', mix('#8E7A92', '#0A0816', night * .9));
     $('petals').style.opacity = (k === 'rain' || k === 'storm' || night > .6) ? 0 : 1;
     document.querySelectorAll('#kscene .lan').forEach(l => l.style.filter = night > .4 ? 'drop-shadow(0 0 4px #FFB24A)' : '');
+  }
+  if (theme === 'island'){
+    const set = (k, v) => r.setProperty(k, v), dark = Math.max(night * .9, twilight * .35);
+    set('--isea1', mix(mix(cols[2], '#1FC7E0', .5), '#08162E', night * .85));
+    set('--isea2', mix(mute('#11D2C8', cloud * .5), '#061428', night * .9));
+    set('--isea3', mix(mute('#7FEADB', cloud * .45), '#0B1A2A', night * .88));
+    set('--isand', mix(mute('#FBEFD0', cloud * .4), '#2A2620', night * .85)); set('--isand2', mix(mute('#EFD7A2', cloud * .4), '#1A1814', night * .88));
+    set('--ikarst', mix(mix(cols[2], '#4C8C78', .55), '#0A1424', night * .85));
+    set('--ibush', mix(mute('#2E9E5B', cloud * .4), '#0A1A14', dark)); set('--ileaf', mix(mute('#2DB36A', cloud * .4), '#0B1A12', dark));
+    set('--itrunk', mix('#9A7650', '#141110', dark)); set('--itrunk2', mix('#6E5236', '#0B0908', dark));
+    set('--iwood', mix('#A9845A', '#16120E', dark)); set('--iwood2', mix('#6E5236', '#0B0908', dark));
+    set('--iwall', mix('#E9D2A6', '#3A2E22', dark)); set('--ithatch', mix('#C99A4E', '#241A10', dark)); set('--ithatch2', mix('#8E6A32', '#140E08', dark));
+    set('--ilit', Math.min(1, night * 1.2 + twilight * .5).toFixed(2));
+    set('--iroof', mix('#C8372D', '#2A1210', dark)); set('--igold', mix('#E9B93A', '#8A6A20', night * .6)); set('--iwhite', mix('#F4EBDD', '#2E2A26', dark));
+    set('--ihull', mix('#1F7FA8', '#14202C', night * .85)); set('--icanopy', mix('#F2C230', '#2A2414', night * .85));
+    set('--bird', night > .5 ? 'rgba(0,0,0,0)' : twilight > .5 ? '#2A2622' : '#F4F6F8');
+    set('--earth', mix(mute('#F3E2B8', cloud * .45), '#14161C', night * .85)); set('--earth2', mix('#E5CB92', '#0B0C10', night * .9));
+    $('birds').style.opacity = (k === 'rain' || k === 'storm' || night > .5) ? 0 : 1;
+    const g = $('iglint'), src = (p > -0.05 && p < 1.05) ? p : (q >= 0 ? q : -1);
+    if (g && src >= 0){
+      g.style.left = (W*(0.07 + src*0.86)) + 'px';
+      g.style.setProperty('--glint', night > .5 ? '#FFF4C8' : mix('#FF8A50', '#FFFFFF', elev));
+      g.style.opacity = (1 - cloud) * (night > .5 ? .5 : .85);
+    } else if (g) g.style.opacity = 0;
   }
   if (theme === 'beach'){
     const set = (k, v) => r.setProperty(k, v), dark = Math.max(night * .9, twilight * .35);
@@ -3667,7 +3798,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.10', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.11', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
@@ -3682,6 +3813,7 @@ function appearanceHTML(){
     <button type="button" data-theme="murray" class="${theme==='murray'?'on':''}"><i class="pv-murray"></i><span>🌳 Murray<b></b></span></button>
     <button type="button" data-theme="retro" class="${theme==='retro'?'on':''}"><i class="pv-retro"></i><span>⚡ Time Warp<b></b></span></button>
     <button type="button" data-theme="beach" class="${theme==='beach'?'on':''}"><i class="pv-beach"></i><span>🏖️ Beach<b></b></span></button>
+    <button type="button" data-theme="island" class="${theme==='island'?'on':''}"><i class="pv-island"></i><span>🇹🇭 Thailand<b></b></span></button>
     <button type="button" data-theme="seoul" class="${theme==='seoul'?'on':''}"><i class="pv-seoul"></i><span>🌸 Seoul<b></b></span></button>
     <button type="button" data-theme="kstreet" class="${theme==='kstreet'?'on':''}"><i class="pv-kst"></i><span>💜 K-Street<b></b></span></button>
     <button type="button" data-theme="pro" class="${theme==='pro'?'on':''}"><i class="pv-pro"></i><span>💼 Business<b></b></span></button>
