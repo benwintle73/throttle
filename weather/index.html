@@ -296,10 +296,10 @@
   .todo-card .t1{font-size:18px;font-weight:600}
   .todo-card .t2{font-size:13px;color:var(--soft);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .todo-card .mid{flex:1;min-width:0}
-  .todo-card .go{padding:9px 16px;border-radius:999px;background:#fff;color:#333;font-weight:600;font-size:14px;flex-shrink:0}
+  .todo-card .go,.saju .go{border:0;font-family:inherit;cursor:pointer;padding:9px 16px;border-radius:999px;background:#fff;color:#333;font-weight:600;font-size:14px;flex-shrink:0}
   body.neon .todo-card{background:linear-gradient(150deg,#7B3FF0,#E0368F)}
   body.neon .todo-card .t1{font-family:'Anton',sans-serif;font-weight:400;font-size:22px;letter-spacing:.5px;text-transform:uppercase}
-  body.neon .todo-card .go{border-radius:2px;background:#000;color:#fff;border:2px solid #fff;text-transform:uppercase;font-weight:800;font-size:12px;letter-spacing:1px}
+  body.neon .todo-card .go,body.neon .saju .go{border-radius:2px;background:#000;color:#fff;border:2px solid #fff;text-transform:uppercase;font-weight:800;font-size:12px;letter-spacing:1px}
   .todo .top-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
   .todo .ask{font-size:17px;font-weight:600}
   .todo .prog{font-size:13px;color:var(--soft);font-weight:600}
@@ -775,6 +775,56 @@
   .appear .pv-retro{background:linear-gradient(180deg,#141339 0%,#C8452F 55%,#FF9B2E 70%,#0b0b0e 70%);position:relative}
   .appear .pv-retro::after{content:'12:00';position:absolute;left:0;right:0;bottom:2px;text-align:center;font:700 11px 'Orbitron',monospace;color:#FFB000;text-shadow:0 0 4px #FFB000}
 
+  /* ===== Korean fortune (운세) ===== */
+  .saju .sj-top{display:flex;align-items:center;gap:12px}
+  .saju .sj-ani{font-size:40px;line-height:1;width:52px;height:52px;display:grid;place-items:center;border-radius:16px;background:rgba(255,255,255,.14);flex-shrink:0}
+  .saju .sj-mid{flex:1;min-width:0}
+  .saju .sj-mid b{display:block;font-size:16px}
+  .saju .sj-mid small{display:block;font-size:12px;opacity:.75;margin-top:1px}
+  .sj-stars{color:#FFD45C;letter-spacing:1px;font-size:14px}
+  .sj-stars i{font-style:normal;opacity:.3}
+  .saju .sj-line{font-size:15px;font-weight:600;margin:10px 0 8px;line-height:1.4}
+  .sj-lucky{display:flex;flex-wrap:wrap;gap:6px}
+  .sj-lucky span{font-size:12px;font-weight:600;padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.14)}
+  .sj-lucky span i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:0;border:1px solid rgba(255,255,255,.5)}
+  .saju .go{margin-left:auto}
+  .sj-tabs{display:flex;gap:6px;overflow-x:auto;padding:8px 4px 6px;flex-shrink:0;scrollbar-width:none}
+  .sj-tabs::-webkit-scrollbar{display:none}
+  .sj-tabs button{flex-shrink:0;border:0;border-radius:999px;padding:8px 14px;font:600 14px inherit;font-family:inherit;color:inherit;background:rgba(255,255,255,.12)}
+  .sj-tabs button.on{background:#fff;color:#2A1A4E}
+  .sj-box{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:18px;padding:14px 16px;margin:10px 4px}
+  .sj-box h4{font-size:12px;letter-spacing:1px;text-transform:uppercase;opacity:.7;margin-bottom:8px}
+  .sj-big{font-size:19px;font-weight:700;line-height:1.35;margin:4px 0 6px}
+  .sj-row{display:flex;gap:10px;padding:8px 0;border-top:1px solid rgba(255,255,255,.1);font-size:14px;line-height:1.4}
+  .sj-row:first-of-type{border-top:0}
+  .sj-row b{width:64px;flex-shrink:0;opacity:.75;font-weight:600}
+  .sj-pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center}
+  .sj-pillars .ph{font-size:11px;opacity:.7;font-weight:600;margin-bottom:4px}
+  .sj-pillars .ch{border-radius:12px;padding:6px 2px;margin-bottom:5px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+  .sj-pillars .ch b{display:block;font-size:24px;line-height:1.1;font-weight:700}
+  .sj-pillars .ch small{display:block;font-size:11px;opacity:.95}
+  .sj-pillars .na{border-radius:12px;padding:22px 2px;margin-bottom:5px;background:rgba(255,255,255,.08);font-size:11px;opacity:.6}
+  .sj-bars .r{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px}
+  .sj-bars .r span{width:72px}
+  .sj-bars .r i{display:block;height:10px;border-radius:5px;min-width:3px}
+  .sj-bars .r em{font-style:normal;opacity:.7;margin-left:auto}
+  .sj-months .m{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px solid rgba(255,255,255,.1);font-size:14px}
+  .sj-months .m:first-child{border-top:0}
+  .sj-months .m b{width:40px;flex-shrink:0;opacity:.75}
+  .sj-months .m i{width:9px;height:9px;border-radius:50%;margin-top:5px;flex-shrink:0}
+  .sj-form label{display:block;font-size:13px;opacity:.8;margin:8px 0 4px}
+  .sj-form input,.sj-form select{width:100%;font:500 16px inherit;font-family:inherit;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:inherit;-webkit-appearance:none;appearance:none}
+  .sj-form select option{color:#222}
+  .sj-btn{display:inline-block;margin-top:12px;border:0;border-radius:999px;padding:10px 18px;font:700 15px inherit;font-family:inherit;background:#fff;color:#2A1A4E}
+  .sj-score{font-size:46px;font-weight:800;line-height:1}
+  .sj-score small{font-size:16px;opacity:.7;font-weight:600}
+  .sj-dream{display:flex;gap:10px;padding:9px 0;border-top:1px solid rgba(255,255,255,.1)}
+  .sj-dream:first-child{border-top:0}
+  .sj-dream .e{font-size:24px;width:32px;text-align:center;flex-shrink:0}
+  .sj-dream b{display:block;font-size:14px}
+  .sj-dream b small{font-weight:500;opacity:.65;margin-left:6px}
+  .sj-dream p{font-size:13.5px;opacity:.85;line-height:1.4;margin-top:2px}
+  .sj-note{font-size:12px;opacity:.6;margin:10px 6px 0;line-height:1.4}
   /* ===== Summer Beach mode: bay-side beach, bathing boxes and pier ===== */
   .beach-only{display:none}
   body.beach .beach-only{display:block}
@@ -988,7 +1038,7 @@
   body.drop .card h2{font-family:'Luckiest Guy',cursive;font-weight:400;letter-spacing:1.2px;color:#FFE45C}
   body.drop .chip.active{background:#FFE45C;color:#2A1A6E}
   body.drop .tmrw{background:rgba(40,30,120,.3)}
-  body.drop .todo-card .go,body.drop .pz-card .go,body.drop .radar-card .go{background:#FFE45C;color:#2A1A6E;font-family:'Luckiest Guy',cursive;font-weight:400;letter-spacing:.8px}
+  body.drop .todo-card .go,body.drop .saju .go,body.drop .pz-card .go,body.drop .radar-card .go{background:#FFE45C;color:#2A1A6E;font-family:'Luckiest Guy',cursive;font-weight:400;letter-spacing:.8px}
   .appear .pv-drop{background:linear-gradient(180deg,#2F7BFF 0%,#7FD2FF 50%,#5FD067 51%,#2F8C45 100%);position:relative;overflow:hidden}
   .appear .pv-drop::before{content:'';position:absolute;left:0;top:10%;width:22%;height:60%;background:linear-gradient(90deg,#8A3DFF,#B66BFF);opacity:.85}
   .appear .pv-drop::after{content:'🪂';position:absolute;right:16%;top:12%;font-size:13px;line-height:1}
@@ -1066,7 +1116,7 @@
   body.pro .totd .q{font-weight:500;font-size:17px}
   body.pro .fun .fortune{background:#E9EDF3;color:#1A2230}
   body.pro .place h1{font-weight:600;letter-spacing:-.2px}
-  body.pro .todo-card .go,body.pro .pz-card .go,body.pro .radar-card .go{background:#3B82F6;color:#fff}
+  body.pro .todo-card .go,body.pro .saju .go,body.pro .pz-card .go,body.pro .radar-card .go{background:#3B82F6;color:#fff}
   .appear .pv-pro{background:linear-gradient(180deg,#111722 0 40%,#1A2230 40% 100%);position:relative}
   .appear .pv-pro::after{content:'24°';position:absolute;left:0;right:0;top:20%;text-align:center;font:300 15px 'Outfit',sans-serif;color:#E8ECF2}
   body.pro .lhills{display:none!important}
@@ -1262,6 +1312,13 @@
     <div class="todo tp-body" id="todoBody"></div>
   </div>
 </div>
+<div class="tp sj" id="sjPage">
+  <div class="tp-in">
+    <div class="pz-head"><h3>Korean fortune <small>운세 · for fun</small></h3><button class="icon-btn" id="sjClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="sj-tabs" id="sjTabs"></div>
+    <div class="tp-body" id="sjBody"></div>
+  </div>
+</div>
 <div class="sheet" id="acct">
   <div class="panel">
     <div class="acct-card" id="acctBody"></div>
@@ -1273,6 +1330,7 @@
 <script src="quotes.js"></script>
 <script src="fortunes.js"></script>
 <script src="fun.js"></script>
+<script src="saju.js"></script>
 <script src="movies.js"></script>
 <script src="puzzle-words.js"></script>
 <script>
@@ -1468,7 +1526,7 @@ function render(d){
   const arrow = `<svg viewBox="0 0 24 24"><path d="M12 2l5 14-5-3-5 3z" fill="#fff"/></svg>`;
 
   const SECTIONS = {
-    thought: thoughtCard(), todo: todoCard(), puzzle: puzzleCard(), fun: funCard(), rain: nowcastCard(d), radar: radarCard(), climate: climateCard(d), tips: tipsCard(),
+    thought: thoughtCard(), todo: todoCard(), puzzle: puzzleCard(), fun: funCard(), saju: sajuCard(), rain: nowcastCard(d), radar: radarCard(), climate: climateCard(d), tips: tipsCard(),
     hourly: `<section class="card hourly-card">
       <h2>${svgClock()} Next 24 hours</h2>
       <div class="hourly">${hours}</div>
@@ -2652,6 +2710,107 @@ async function loadOTD(){
   }catch(e){}
   otdLoading = false;
 }
+/* ---------- Korean fortune (운세): 띠, Saju four pillars, today, year, gunghap, dreams. Birthday stays on this device. ---------- */
+const SJ_HOURS = [['','I don’t know'],[0,'11pm–1am (자)'],[2,'1–3am (축)'],[4,'3–5am (인)'],[6,'5–7am (묘)'],[8,'7–9am (진)'],[10,'9–11am (사)'],
+  [12,'11am–1pm (오)'],[14,'1–3pm (미)'],[16,'3–5pm (신)'],[18,'5–7pm (유)'],[20,'7–9pm (술)'],[22,'9–11pm (해)']];
+let sjTab = 'today', sjYear = new Date().getFullYear();
+const sjBirth = () => (window.SAJU ? SAJU.parse(store.get('wx_saju', null)) : null);
+const stars = n => '★'.repeat(n) + `<i>${'★'.repeat(5 - n)}</i>`;
+const elDot = e => `<i style="background:${SAJU.EL[e].color}"></i>`;
+const COLOR_CSS = { green:'#3FAE6A', red:'#F0643C', yellow:'#F2C230', white:'#FFFFFF', navy:'#1E3A8A' };
+function sajuCard(){
+  if (!window.SAJU) return '';
+  const head = `<h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a4.5 4.5 0 0 1 0 9a4.5 4.5 0 0 0 0 9"/><circle cx="12" cy="7.5" r="1" fill="currentColor"/><circle cx="12" cy="16.5" r="1" fill="currentColor"/></svg> Korean fortune</h2>`;
+  const b = sjBirth();
+  if (!b) return `<section class="card saju" id="sajuCard">${head}<div class="sj-top"><div class="sj-ani">🐲</div><div class="sj-mid"><b>Your 띠 and today’s 운세</b><small>Korean zodiac, Saju and dream meanings</small></div>
+    <button class="go" onclick="openSaju('saju')">Start</button></div></section>`;
+  const t = SAJU.today(b), a = SAJU.BRANCHES[SAJU.tti(b)];
+  return `<section class="card saju" id="sajuCard">${head}
+    <div class="sj-top"><div class="sj-ani">${a[5]}</div><div class="sj-mid"><b>${a[4]}띠 · ${a[3]}</b><small class="sj-stars">${stars(t.stars)}</small></div><button class="go" onclick="openSaju('today')">Open</button></div>
+    <div class="sj-line">${esc(t.line)}</div>
+    <div class="sj-lucky"><span><i style="background:${COLOR_CSS[t.lucky.color]}"></i>${t.lucky.color}</span><span>🔢 ${t.lucky.num}</span><span>🧭 ${t.lucky.dir}</span></div>
+  </section>`;
+}
+function openSaju(tab){ if (tab) sjTab = tab; if (!sjBirth()) sjTab = 'saju'; drawSaju(); $('sjPage').classList.add('open'); }
+$('sjClose').onclick = () => { $('sjPage').classList.remove('open'); if (lastData) render(lastData); };
+function pillarHTML(p, label){
+  if (!p) return `<div><div class="ph">${label}</div><div class="na">unknown</div><div class="na">time</div></div>`;
+  const S = SAJU.STEMS[p.s], B = SAJU.BRANCHES[p.b];
+  return `<div><div class="ph">${label}</div><div class="ch" style="background:${SAJU.EL[S[2]].color}"><b>${S[1]}</b><small>${S[0]} · ${SAJU.EL[S[2]].name}</small></div>
+    <div class="ch" style="background:${SAJU.EL[B[2]].color}"><b>${B[1]}</b><small>${B[0]} · ${B[5]} ${B[3]}</small></div></div>`;
+}
+function birthForm(b){
+  const v = store.get('wx_saju', null) || {};
+  return `<div class="sj-box sj-form"><h4>${b ? 'Your birthday' : 'Start with your birthday'}</h4>
+    <label for="sjD">Date of birth</label><input type="date" id="sjD" value="${esc(v.d || '')}" max="${new Date().toISOString().slice(0,10)}">
+    <label for="sjH">Time of birth (optional — adds your hour pillar)</label><select id="sjH">${SJ_HOURS.map(([h, l]) => `<option value="${h}" ${String(v.h ?? '') === String(h) ? 'selected' : ''}>${l}</option>`).join('')}</select>
+    <button class="sj-btn" onclick="saveBirth()">${b ? 'Update' : 'Show my fortune'}</button>
+    <div class="sj-note">Kept on this device only.</div></div>`;
+}
+function saveBirth(){
+  const d = $('sjD').value, h = $('sjH').value;
+  if (!/^\d{4}-\d\d-\d\d$/.test(d)) { $('sjD').focus(); return; }
+  store.set('wx_saju', { d, h: h === '' ? '' : +h }, true); sjTab = 'today'; drawSaju();
+}
+function drawSaju(){
+  const b = sjBirth(), tabs = [['today','Today'],['saju','Saju 사주'],['year','Year'],['gunghap','Gunghap 궁합'],['dreams','Dreams 꿈']];
+  $('sjTabs').innerHTML = tabs.map(([k, l]) => `<button class="${sjTab === k ? 'on' : ''}" onclick="sjTab='${k}';drawSaju()">${l}</button>`).join('');
+  const body = $('sjBody'); let h = '';
+  if (sjTab === 'dreams') h = dreamsHTML();
+  else if (!b) h = birthForm(null) + `<div class="sj-note">Saju (사주, Four Pillars) reads your year, month, day and hour of birth as pairs of heavenly stems and earthly branches, each with one of the five elements. Your 띠 is your zodiac animal. Just for fun.</div>`;
+  else if (sjTab === 'today'){
+    const t = SAJU.today(b), P = t.pillar, a = SAJU.BRANCHES[SAJU.tti(b)];
+    h = `<div class="sj-box"><h4>Today · ${SAJU.STEMS[P.s][1]}${SAJU.BRANCHES[P.b][1]} day (${SAJU.STEMS[P.s][0]}${SAJU.BRANCHES[P.b][0]}일)</h4>
+      <div class="sj-stars" style="font-size:20px">${stars(t.stars)}</div><div class="sj-big">${esc(t.line)}</div>${t.bond ? `<div style="opacity:.85;font-size:14px">${a[5]} ${esc(t.bond)}</div>` : ''}</div>
+      <div class="sj-box"><div class="sj-row"><b>Love</b><span>${esc(t.love)}</span></div><div class="sj-row"><b>Money</b><span>${esc(t.money)}</span></div>
+      <div class="sj-row"><b>Work</b><span>${esc(t.work)}</span></div><div class="sj-row"><b>Health</b><span>${esc(t.health)}</span></div></div>
+      <div class="sj-box"><h4>Lucky today</h4><div class="sj-lucky"><span><i style="background:${COLOR_CSS[t.lucky.color]}"></i>${t.lucky.color}</span><span>🔢 ${t.lucky.num}</span><span>🧭 ${t.lucky.dir}</span><span>${SAJU.EL[t.lucky.el].emoji} ${SAJU.EL[t.lucky.el].name} energy</span></div>
+      <div class="sj-note" style="margin:8px 0 0">Your lucky element is the one your chart has least of.</div></div>`;
+  }
+  else if (sjTab === 'saju'){
+    const c = SAJU.chart(b), a = SAJU.BRANCHES[SAJU.tti(b)], dm = SAJU.STEMS[c.dmStem], E = SAJU.EL[c.dm];
+    const max = Math.max(...Object.values(c.count)), strong = SAJU.ORDER.filter(e => c.count[e] === max), miss = SAJU.ORDER.filter(e => c.count[e] === 0);
+    h = `<div class="sj-box"><h4>Your four pillars · 사주팔자</h4><div class="sj-pillars">${pillarHTML(c.hour, 'Hour 시')}${pillarHTML(c.day, 'Day 일')}${pillarHTML(c.month, 'Month 월')}${pillarHTML(c.year, 'Year 년')}</div></div>
+      <div class="sj-box"><h4>Day master · 일간</h4><div class="sj-big">${dm[1]} ${dm[0]} — ${dm[3] ? 'Yang' : 'Yin'} ${E.name} ${E.emoji}</div><div style="font-size:14.5px;line-height:1.45">${esc(SAJU.DM[c.dm][dm[3] ? 0 : 1])}</div></div>
+      <div class="sj-box sj-bars"><h4>Five elements · 오행</h4>${SAJU.ORDER.map(e => `<div class="r"><span>${SAJU.EL[e].emoji} ${SAJU.EL[e].name}</span><i style="width:${Math.max(3, c.count[e] / Math.max(1, max) * 60)}%;background:${SAJU.EL[e].color}"></i><em>${c.count[e]}</em></div>`).join('')}
+        <div style="font-size:14px;line-height:1.45;margin-top:8px">Strongest: <b>${strong.map(e => SAJU.EL[e].name).join(', ')}</b>.${miss.length ? ` Missing: <b>${miss.map(e => SAJU.EL[e].name).join(', ')}</b> — bring it in with its colour, ${miss.map(e => SAJU.EL[e].lucky).join(' / ')}.` : ' Nicely balanced — no element missing.'}</div></div>
+      <div class="sj-box"><h4>Your animal · 띠</h4><div class="sj-big">${a[5]} ${a[4]}띠 · ${a[3]}</div><div style="font-size:14.5px">${esc(SAJU.TTI[a[3]])}</div></div>
+      ${birthForm(b)}`;
+  }
+  else if (sjTab === 'year'){
+    const y = SAJU.year(b, sjYear), P = y.pillar, S = SAJU.STEMS[P.s], B = SAJU.BRANCHES[P.b], a = SAJU.BRANCHES[SAJU.tti(b)];
+    const BD = { trine:'Your animal is in harmony with this year (삼합) — a lucky year to push forward.', six:'Your animal pairs with this year (육합) — helpful people and smooth deals.',
+      clash:'Your animal clashes with this year (충) — expect change; stay flexible.', wonjin:'Some friction between your animal and this year (원진) — keep the peace.', same:'Your own animal’s year (본명년) — a year to protect your energy and health.', neutral:'' };
+    const now = new Date().getFullYear();
+    h = `<div class="sj-tabs" style="padding:0 4px">${[now, now + 1].map(Y => `<button class="${sjYear === Y ? 'on' : ''}" onclick="sjYear=${Y};drawSaju()">${Y}</button>`).join('')}</div>
+      <div class="sj-box"><h4>${sjYear} · ${S[0]}${B[0]}년 ${S[1]}${B[1]}</h4><div class="sj-big">Year of the ${SAJU.EL[S[2]].name} ${B[3]} ${B[5]}</div>
+      <div style="font-size:14.5px;line-height:1.45">${esc(y.text)}${BD[y.bond] ? '<br><br>' + a[5] + ' ' + esc(BD[y.bond]) : ''}${y.samjae ? `<br><br>⚠️ <b>삼재 (Samjae) year ${y.samjae} of 3</b> — a traditionally restless stretch for ${a[3]}s. Go carefully with big moves.` : ''}</div></div>
+      <div class="sj-box sj-months"><h4>Month by month (lunar)</h4>${y.months.map(m => `<div class="m"><b>${m.n}</b><i style="background:${m.tone === 'good' ? '#3FD07A' : m.tone === 'care' ? '#FF8A5C' : '#9FB4D0'}"></i><span>${esc(m.text)}</span></div>`).join('')}</div>
+      <div class="sj-note">Inspired by the New Year reading tradition of Tojeong Bigyeol (토정비결) — worked out from your chart and the year’s pillars, not the original text.</div>`;
+  }
+  else if (sjTab === 'gunghap'){
+    const pd = store.get('wx_gunghap', '');
+    h = `<div class="sj-box sj-form"><h4>Compatibility · 궁합</h4><label for="ghD">Their date of birth</label><input type="date" id="ghD" value="${esc(pd)}">
+      <button class="sj-btn" onclick="store.set('wx_gunghap', $('ghD').value, true); drawSaju()">Check</button></div>`;
+    if (/^\d{4}-\d\d-\d\d$/.test(pd)){
+      const o = SAJU.parse({ d: pd, h: '' }), g = SAJU.gunghap(b, o), A = SAJU.BRANCHES[g.ta], Bn = SAJU.BRANCHES[g.tb];
+      h += `<div class="sj-box" style="text-align:center"><div style="font-size:34px">${A[5]} 💞 ${Bn[5]}</div><div style="opacity:.8;margin:4px 0 8px">${A[4]}띠 ${A[3]} + ${Bn[4]}띠 ${Bn[3]}</div>
+        <div class="sj-score">${g.score}<small>/100</small></div></div>
+        <div class="sj-box">${g.text.map(x => `<div class="sj-row"><span>${esc(x)}</span></div>`).join('')}</div>`;
+    }
+  }
+  body.innerHTML = h + `<div class="sj-note">For fun — a light take on Korean fortune-telling traditions.</div>`;
+}
+function dreamsHTML(){
+  return `<div class="sj-box sj-form" style="padding-bottom:10px"><h4>Dream meanings · 꿈해몽</h4><input id="drQ" placeholder="Search: pig, teeth, flying…" oninput="filterDreams()" autocomplete="off"></div>
+    <div class="sj-box" id="drList">${dreamRows('')}</div>`;
+}
+function dreamRows(q){
+  q = q.trim().toLowerCase();
+  const list = SAJU.DREAMS.filter(d => !q || (d[1] + ' ' + d[2] + ' ' + d[3]).toLowerCase().includes(q));
+  return list.length ? list.map(d => `<div class="sj-dream"><div class="e">${d[0]}</div><div><b>${esc(d[1])}<small>${esc(d[2])}</small></b><p>${esc(d[3])}</p></div></div>`).join('') : '<div style="opacity:.7">No match — try another word.</div>';
+}
+function filterDreams(){ $('drList').innerHTML = dreamRows($('drQ').value); }
 function funCard(){
   const ck = cookieToday();
   const now = new Date(), key = `${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
@@ -3302,8 +3461,8 @@ function closeRadar(){ stopRadar(); $('radarPage').classList.remove('open'); }
 $('rpClose').onclick = closeRadar;
 
 /* ---------- card layout (reorderable) ---------- */
-const CARD_KEYS = ['thought','todo','puzzle','fun','tips','rain','radar','hourly','daily','climate','details'];
-const CARD_NAMES = { thought:'Thought', todo:'To-do', puzzle:'Daily puzzle', fun:'Just for fun', tips:'Best bets', rain:'Next 2 hours', radar:'Rain radar', hourly:'Next 24 hours', daily:'7-day forecast', climate:'Typical weather', details:'Wind, UV & more' };
+const CARD_KEYS = ['thought','todo','puzzle','fun','saju','tips','rain','radar','hourly','daily','climate','details'];
+const CARD_NAMES = { thought:'Thought', todo:'To-do', puzzle:'Daily puzzle', fun:'Just for fun', saju:'Korean fortune', tips:'Best bets', rain:'Next 2 hours', radar:'Rain radar', hourly:'Next 24 hours', daily:'7-day forecast', climate:'Typical weather', details:'Wind, UV & more' };
 let editLayout = false;
 function layoutOrder(){
   const o = (store.get('wx_order', []) || []).filter(k => CARD_KEYS.includes(k));
@@ -3919,7 +4078,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.15', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.16', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
