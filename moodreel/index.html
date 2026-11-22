@@ -1050,7 +1050,7 @@ function forYou(){
 ACT.foryou=()=>{FY={out:[]};newSession();forYou()};
 ACT.top3yes=v=>{store.top3yes=store.top3yes||[];uniqPush(store.top3yes,+v);setRate(+v,'love');forYou()};
 ACT.top3no=v=>{store.top3no=store.top3no||[];uniqPush(store.top3no,+v);save();forYou()};
-ACT.top3reset=()=>{store.top3yes=[];store.top3no=[];save();forYou()};
+ACT.top3reset=()=>{const cur=guessTop3().map(t=>t.id);store.top3yes=[];store.top3no=[...new Set([...(store.top3no||[]),...cur])];save();forYou();toast('New guess')};
 ACT.top3undo=v=>{store.top3yes=(store.top3yes||[]).filter(x=>x!==+v);save();forYou()};
 ACT.fyWatch=v=>{const id=+v;uniqPush(store.chosen,id);uniqPush(store.suggested,id);RV++;save();toast('Enjoy the film');FY.out.push(id);forYou()};
 ACT.fyLater=v=>{const id=+v;setRate(id,'unseen');uniqPush(store.watchlist,id);uniqPush(store.suggested,id);save();toast('Added to your watchlist');FY.out.push(id);forYou()};
@@ -1502,7 +1502,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.13';
+const APP_VERSION='3.14';
 function checkUpdate(){try{fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();if(v&&v!==APP_VERSION){try{if(sessionStorage.getItem('mr_reload')===v)return;sessionStorage.setItem('mr_reload',v)}catch(e){}location.replace(location.pathname+'?v='+v)}}).catch(()=>{})}catch(e){}}
 checkUpdate();document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
 
