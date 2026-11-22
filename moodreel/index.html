@@ -162,6 +162,15 @@ body.nohscroll .wrap{padding-bottom:0}
 .sheet{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:20;display:flex;align-items:flex-end}
 .sheetbox{background:var(--panel);border-top:1px solid var(--line);border-radius:20px 20px 0 0;padding:18px 18px calc(22px + env(safe-area-inset-bottom));width:100%;max-height:70dvh;overflow:auto;animation:rise .2s ease both}
 .sheetbox b{font-size:18px}.sheetbox p{font-size:15.5px;line-height:1.5;color:#d9d5e2}.sheetbox a{color:var(--muted);font-size:13px}
+
+.plabel{font-size:11px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--good);height:14px;margin-bottom:2px}.plabel.wild{color:var(--love)}
+.pick2 .ifliked{white-space:normal!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;height:2.9em!important;line-height:1.45;font-size:14.5px!important;color:#d9d5e2}
+.pick2 .ifliked b{color:var(--text)}
+.heads{margin:0;font-size:13.5px;color:var(--love);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spfix .pick2 .whyslot,.pick2 .whyslot{height:22px!important}
+.tonightbtn{width:100%;margin-top:14px;display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;text-align:left;padding:12px 14px;border-radius:14px;background:var(--panel);border:1px solid var(--line)}
+.tonightbtn span{font-size:11px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--accent)}.tonightbtn b{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tonightbtn i{font-style:normal;font-size:13px;color:var(--muted)}
+.bk{width:100%;min-height:90px;margin-top:10px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--text);font:12px ui-monospace,monospace;padding:10px}
 .topnav{margin-bottom:4px}.backbtn{display:inline-flex;align-items:center;gap:4px;padding:9px 14px 9px 8px;border-radius:99px;background:var(--panel);border:1px solid var(--line);font-size:14px;font-weight:600}
 .backbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .pick2{display:block;padding:14px}.pick2 .ptop{display:grid;grid-template-columns:96px 1fr;gap:14px;margin-bottom:10px}
@@ -707,7 +716,7 @@ const ICON={
 /* ===== storage ===== */
 const KEY='moodreel_v3';
 let store=(()=>{try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}})()||{};
-store=Object.assign({taste:{},seen:[],loved:[],nope:[],chosen:[],rate:{},custom:[],suggested:[],watchlist:[],aud:'adults',fmt:'both',profile:{genres:{},stories:{},sports:[],actors:[],services:[],deal:[]}},store);
+store=Object.assign({taste:{},seen:[],loved:[],nope:[],chosen:[],rate:{},custom:[],suggested:[],watchlist:[],tonight:null,svcMode:'prefer',longPen:0,whyLog:[],aud:'adults',fmt:'both',profile:{genres:{},stories:{},sports:[],actors:[],services:[],deal:[]}},store);
 /* ratings: love | like (seen it) | dislike | unseen. Apple TV films default to "like". */
 store.loved.forEach(id=>{if(!store.rate[id])store.rate[id]='love'});store.seen.forEach(id=>{if(!store.rate[id])store.rate[id]='like'});store.loved=[];store.seen=[];
 store.nope.forEach(id=>{if(!store.rate[id])store.rate[id]='pass'});store.nope=[];
@@ -798,10 +807,30 @@ async function wFetch(batch){
   RV++;wsave();
 }
 function paintPoster(t){const w=WIKI[wk(t)];if(!w||!w.img)return;document.querySelectorAll(`[data-wk="${CSS.escape(wk(t))}"]`).forEach(el=>{el.classList.add('img');el.style.backgroundImage=`linear-gradient(180deg,transparent 55%,rgba(0,0,0,.55)),url("${w.img}")`})}
+const READ={real:'true story',war:'wartime setting',mind:'makes you think',comedy:'humour',tension:'tension',action:'action',fast:'fast pace',slow:'slow burn',dark:'serious tone',emotion:'emotional',feelgood:'feel-good',inspiring:'inspiring',sport:'sport',crime:'crime',scifi:'sci-fi',family:'family-friendly',romance:'romance',music:'music',underdog:'underdog story',heist:'heist',spy:'spy story',superhero:'superheroes',horror:'scares',epic:'epic scale',survival:'survival story',fantasy:'fantasy',mystery:'mystery',grit:'gritty',boxing:'boxing',motorsport:'motorsport',space:'space',revenge:'revenge story',comingofage:'coming of age',familydrama:'family drama',glossy:'glossy',aussie:'Australian'};
+function explain(t){const LT=libState();
+  const sims=LT.liked.filter(o=>o.id!==t.id).map(o=>({o,j:jacc(o.tags,t.tags)*(rating(o)==='love'?1.15:1)+(o.actors.some(a=>t.actors.includes(a))?.25:0)})).sort((a,b)=>b.j-a.j).filter(x=>x.j>=.3).slice(0,2);
+  const traits=[];
+  if(sims.length){const a=sims.map(x=>x.o.actors.find(a=>t.actors.includes(a))).find(Boolean);if(a)traits.push('also stars '+a);
+    const common=t.tags.filter(k=>READ[k]&&sims.some(x=>x.o.tags.includes(k))).sort((a,b)=>(LT.taste[b]||0)-(LT.taste[a]||0));common.forEach(k=>{if(traits.length<3&&!traits.includes(READ[k]))traits.push(READ[k])})}
+  else t.tags.filter(k=>READ[k]).sort((a,b)=>(LT.taste[b]||0)-(LT.taste[a]||0)).slice(0,3).forEach(k=>traits.push(READ[k]));
+  const heads=[];
+  if(t.k==='M'&&t.r>=150)heads.push(`it runs ${Math.floor(t.r/60)}h ${t.r%60}m`);
+  if(t.k==='S'&&t.r>=5)heads.push(`${t.r} seasons to get through`);
+  if(t.tags.includes('subtitles'))heads.push("it's subtitled");
+  if(t.tags.includes('gore'))heads.push('graphic violence');
+  if(t.tags.includes('horror')&&(LT.taste.horror||0)<.2)heads.push("it's scary");
+  if(t.tags.includes('slow')&&(LT.taste.slow||0)<.2)heads.push("it's a slow burn");
+  if(t.tags.includes('dark')&&(LT.taste.dark||0)<.1&&!heads.length)heads.push('darker than your usual');
+  if(!heads.length&&sims.length){const diff=t.tags.find(k=>READ[k]&&!sims.some(x=>x.o.tags.includes(k)));if(diff)heads.push('adds '+READ[diff])}
+  const names=sims.map(x=>`<b>${h(x.o.t)}</b>`);
+  return {line:names.length?`Picked because you liked ${names.join(' and ')}${traits.length?': '+h(traits.join(', '))+'.':'.'}`:(traits.length?`Picked for you: ${h(traits.join(', '))}.`:'&nbsp;'),
+    heads:heads.length?'Heads-up: '+h(heads[0])+'.':''}}
 function slotHTML(r){const t=r.t,like=r.why.filter(w=>w.startsWith('Like ')).map(w=>w.slice(5)),rest=r.why.filter(w=>!w.startsWith('Like '));
   const W=WIKI[wk(t)],d=DIRECTOR[t.t]||(W&&W.dir&&W.dir.length?W.dir.join(', '):''),cast=t.actors.slice(0,3),lbl=/^(Created|Developed)/.test(d)?'':'Directed by ';
-  return `<p class="ifliked">${like.length?`If you liked <b>${h(like[0])}</b>, you might like this.`:'&nbsp;'}</p>
-    <div class="whyslot">${rest.length?`<div class="why">${rest.map(w=>`<span>${h(w)}</span>`).join('')}</div>`:''}</div>
+  const ex=explain(t);
+  return `<p class="ifliked">${ex.line}</p>
+    <div class="whyslot"><p class="heads">${ex.heads||'&nbsp;'}</p></div>
     <div class="credits"><div>${cast.length?`<span>Starring</span> ${h(cast.join(', '))}`:'&nbsp;'}</div><div>${d?`<span>${lbl}</span>${h(d.replace(/^(Created|Developed) by /,m=>m))}`:'&nbsp;'}</div></div>
     <div class="aboutslot" data-about="${h(wk(t))}">${aboutHTML(t)}</div>`}
 function aboutHTML(t){const w=WIKI[wk(t)];if(!w||!w.ex)return '';return `<button class="aboutbtn" data-act="about" data-v="${t.id}">About ${t.k==='S'?'the series':'the film'} ›</button>`}
@@ -813,7 +842,18 @@ ACT.closesheet=()=>{document.querySelectorAll('.sheet').forEach(x=>x.remove())};
 /* ===== engine ===== */
 let S=null; // session
 function newSession(){S={vec:{},shown:[],wants:[],offered:[],out:[],swipes:0,sinceSug:0,history:[],asked:[],said:{}}}
+const TMOODS=[['funny','Funny',{comedy:2,feelgood:1}],['easy','Easy watch',{feelgood:1.5,comedy:1,mind:-1,slow:-1.5,dark:-1}],['gripping','Gripping',{tension:2,fast:1,crime:.5}],['think','Makes me think',{mind:2,real:1,inspiring:1}],['feelgood','Feel-good',{feelgood:2,underdog:1,inspiring:1}],['action','Action',{action:2,fast:1}],['romance','Romantic',{romance:2.5}],['scary','Scary',{horror:2.5,tension:1}]];
+const TTIME=[['any','Any length'],['under2','Under 2 hours'],['movie','A film'],['series','A series']];
+const TWHO=[['adults','Just adults'],['teen15','Family (teens 15+)'],['teen13','Family (13+)'],['kids','With little kids']];
+const TINT=[['light','Nothing too dark'],['mid','Medium'],['intense','Bring it on']];
+function tonight(){let t=store.tonight;if(!t||Date.now()-t.ts>8*3600e3){t={mood:[],time:'any',intensity:'mid',ts:Date.now()};store.tonight=t}return t}
+function tonightVec(){const t=tonight(),v={};t.mood.forEach(m=>{const w=(TMOODS.find(x=>x[0]===m)||[])[2]||{};for(const k in w)v[k]=(v[k]||0)+w[k]*(t.mood.length>1?.75:1)});
+  if(t.intensity==='light'){v.dark=(v.dark||0)-1.5;v.gore=(v.gore||0)-3;v.horror=(v.horror||0)-2}if(t.intensity==='intense'){v.dark=(v.dark||0)+1;v.tension=(v.tension||0)+.6;v.grit=(v.grit||0)+.6}return v}
+function tonightLine(){const t=tonight(),bits=[];t.mood.forEach(m=>bits.push((TMOODS.find(x=>x[0]===m)||[0,m])[1]));if(t.time!=='any')bits.push((TTIME.find(x=>x[0]===t.time)||[0,''])[1]);
+  bits.push((AUDS.find(a=>a[0]===store.aud)||[0,'Adults'])[1]);if(t.intensity!=='mid')bits.push((TINT.find(x=>x[0]===t.intensity)||[0,''])[1]);if(store.svcMode==='only')bits.push('My services only');return bits.join(' · ')}
 function eligible(t){
+  {const tn=tonight();if(tn.time==='under2'&&(t.k!=='M'||t.r>120))return false;if(tn.intensity==='light'&&(t.tags.includes('gore')||t.tags.includes('horror')||t.c==='R18+'))return false;
+   if(store.svcMode==='only'&&P().services.length&&!(t.svc&&P().services.includes(t.svc)))return false}
   const cap=(AUDS.find(a=>a[0]===store.aud)||AUDS[0])[2];
   if(CERTS[t.c]>cap)return false;
   if(store.fmt==='movie'&&t.k!=='M')return false;
@@ -825,7 +865,8 @@ function eligible(t){
 }
 function score(t){
   const p=P(),why=[];let s=0;
-  const LT=libState();for(const k of t.tags)s+=(S?S.vec[k]||0:0)+.6*(store.taste[k]||0)+(LT.taste[k]||0);
+  const LT=libState(),TV=tonightVec();for(const k of t.tags)s+=(S?S.vec[k]||0:0)+.6*(store.taste[k]||0)+(LT.taste[k]||0)+(TV[k]||0);
+  if(t.k==='M'&&t.r>140)s-=.5*(store.longPen||0);
   s/=Math.sqrt(t.tags.length||1);
   for(const k of t.tags){
     if(p.genres[k]===1){s+=1.5;why.push([1.5,LABEL[k]])}if(p.genres[k]===-1)s-=3;
@@ -837,7 +878,7 @@ function score(t){
   let lb=null,lo=0;for(const o of LT.liked){const j=jacc(o.tags,t.tags)*(rating(o)==='love'?1.15:1)+(o.actors.some(a=>t.actors.includes(a))?.25:0);if(j>lo){lo=j;lb=o}}
   if(lo>=.4){s+=lo*2.2;why.push([3.4,'Like '+lb.t])}
   if(S)for(const id of S.wants){const o=jacc(TITLES[id].tags,t.tags);if(o>=.4){s+=o*1.5;if(id!==t.id)why.push([2,'Like '+TITLES[id].t]);break}}
-  if(p.services.length&&t.svc){if(p.services.includes(t.svc)){s+=.8;why.push([.6,'On '+t.svc])}else s-=2.5}
+  if(p.services.length&&t.svc){if(p.services.includes(t.svc)){s+=store.svcMode==='prefer'?2:.8;why.push([.6,'On '+t.svc])}else s-=2.5}
   const top=Object.entries(S?S.vec:{}).filter(([k,v])=>v>.9&&t.tags.includes(k)&&LABEL[k]).sort((a,b)=>b[1]-a[1]).slice(0,2);
   top.forEach(([k,v])=>why.push([v*.5,LABEL[k]]));
   const seenW=new Set();
@@ -869,10 +910,10 @@ function home(){
   render(`<div class="homefix">
     <div class="row"><div class="wordmark"><i></i>MoodReel</div><span class="spacer"></span><button class="textbtn" data-act="taste">Your taste</button></div>
     <div class="hhero"><h1>Swipe. Pick.<br><span class="accent">Watch.</span></h1>
-    <p class="sub">Swipe, get picks, say yes or no until one hits. Nothing you've seen gets suggested.</p></div>
+    <button class="tonightbtn" data-act="tonight"><span>Tonight</span><b>${h(tonightLine())}</b><i>Change</i></button></div>
     <div class="stats hstats"><button class="stat" data-act="lib" data-v="watch"><b>${store.watchlist.length}</b><span>Watchlist</span></button><button class="stat" data-act="lib" data-v="love"><b>${c.love}</b><span>Loved</span></button><button class="stat" data-act="lib" data-v="like"><b>${c.like+c.ok}</b><span>Liked</span></button><button class="stat" data-act="lib" data-v="dislike"><b>${c.dislike}</b><span>Disliked</span></button></div>
     <div class="cta hcta"><button class="btn" data-act="go">Start swiping</button><div class="hrow"><button class="btn ghost" data-act="surprise">Surprise me</button><button class="btn ghost" data-act="lib">My library</button></div></div>
-    <p class="note hnote"><button class="textbtn" data-act="how">How it picks</button> · <button class="textbtn" data-act="list">Picks & passes</button> · v${APP_VERSION}</p>
+    <p class="note hnote"><button class="textbtn" data-act="how">How it picks</button> · <button class="textbtn" data-act="list">History & backup</button> · v${APP_VERSION}</p>
   </div>`);
   document.body.classList.add('nohscroll');
 }
@@ -1028,7 +1069,13 @@ function suggest(empty){
   const wants=S.wants.filter(id=>!S.offered.includes(id)&&eligible(TITLES[id])).map(id=>score(TITLES[id])).sort((a,b)=>b.s-a.s);
   const rest=ranked(t=>!S.offered.includes(t.id)&&!S.wants.includes(t.id)&&!S.shown.includes(t.id));
   const picks=[];
-  for(const r of [...wants.slice(0,2),...rest]){if(picks.length>=3)break;if(picks.some(p=>jacc(p.t.tags,r.t.tags)>.75&&!S.wants.includes(r.t.id)))continue;picks.push(r)}
+  const first=wants[0]||rest[0];if(first){first.label='Best match';picks.push(first)}
+  const pool=[...wants.slice(1),...rest].filter(r=>!picks.includes(r));
+  const adj=pool.slice(0,25).find(r=>jacc(r.t.tags,first.t.tags)<.35&&primary(r.t)!==primary(first.t))||pool[0];
+  if(adj){adj.label='A bit different';picks.push(adj)}
+  const wild=pool.slice(8,60).filter(r=>!picks.includes(r)&&picks.every(p=>jacc(p.t.tags,r.t.tags)<.3));
+  const w=wild.length?wild[Math.random()*Math.min(wild.length,15)|0]:pool.find(r=>!picks.includes(r));
+  if(w){w.label='Wildcard';picks.push(w)}
   if(!picks.length){render(`<h2>You've been through the lot</h2><p class="sub">Nothing left in the sample catalogue that fits. Try changing who's watching or film/series.</p><button class="btn" data-act="home">Home</button>`);return}
   picks.forEach(r=>{S.offered.push(r.t.id);uniqPush(store.suggested,r.t.id)});save();
   S.picks=picks.map(r=>r.t.id);
@@ -1038,7 +1085,7 @@ function suggest(empty){
     <button class="btn ghost" data-act="keep">None of these, keep swiping</button>
     <button class="textbtn" data-act="how" style="display:block;margin:14px auto 0">How are these picked?</button>`);
 }
-ACT.no=v=>{const id=+v,t=TITLES[id];S.out.push(id);add(S.vec,t.tags,-.4);add(store.taste,t.tags,-.08);setRate(id,'pass');toast('Moved to Not for me');  const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{el.remove();S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length){toast('No worries, a few more swipes');ACT.keep()}},250)};
+ACT.no=v=>{const id=+v,t=TITLES[id];askWhy(id,'pass');S.out.push(id);add(S.vec,t.tags,-.4);add(store.taste,t.tags,-.08);setRate(id,'pass');toast('Moved to Not for me');  const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{el.remove();S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length){toast('No worries, a few more swipes');ACT.keep()}},250)};
 ACT.keep=()=>{S.picks.forEach(id=>S.out.push(id));S.cur=nextQuestion()||nextCard();S.nxt=null;deck()};
 ACT.yes=v=>{const t=TITLES[+v];uniqPush(store.chosen,t.id);remove(store.watchlist,t.id);add(store.taste,t.tags,.35);save();enjoy(t)};
 
@@ -1067,7 +1114,7 @@ ACT.howBack=()=>{const ids=S.picks;S.offered=S.offered.filter(id=>!ids.includes(
 /* ===== pick card (shared) ===== */
 function pickCard(r,mode){const t=r.t,su=mode==='surprise';
   return `<div class="sug pick2" id="s${t.id}"><div class="ptop">${poster(t)}<div>
-      <h4>${h(t.t)}</h4><div class="meta">${t.k==='M'?'Film':'Series'} · ${t.y} · ${t.c} · ${runtime(t)}</div>
+      <div class="plabel ${r.label==='Wildcard'?'wild':''}">${h(r.label||'')}</div><h4>${h(t.t)}</h4><div class="meta">${t.k==='M'?'Film':'Series'} · ${t.y} · ${t.c} · ${runtime(t)}</div>
       ${svcTag(t)}<p>${h(t.blurb)}</p></div></div>
     ${slotHTML(r)}
     <div class="acts">
@@ -1093,22 +1140,35 @@ let SP={stack:[],cur:null};
 function showSurprise(pick){SP.cur=pick;S.picks=[pick.t.id];
   render(`<div class="spfix"><div class="row sphead"><button class="backbtn" data-act="spBack"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Back</button><span class="sptitle">Try this</span><button class="textbtn" data-act="home">Home</button></div>
     ${pickCard(pick,'surprise')}</div>`);document.body.classList.add('nohscroll')}
-ACT.surprise=keep=>{if(!S||keep!==true){newSession();SP={stack:[],cur:null}}const pool=ranked().slice(0,10);if(!pool.length)return toast('Nothing left to suggest');
+ACT.surprise=keep=>{if(!S||keep!==true){newSession();SP={stack:[],cur:null}}const all=ranked();const pool=all.slice(0,10);if(!pool.length)return toast('Nothing left to suggest');
+  if(Math.random()<.25&&all.length>20){const w=all.slice(10,50);const pick=w[Math.random()*w.length|0];pick.label='Wildcard';S.offered.push(pick.t.id);uniqPush(store.suggested,pick.t.id);save();return showSurprise(pick)}
   const mx=pool[0].s,ws=pool.map(r=>Math.exp((r.s-mx)/1.2));let x=Math.random()*ws.reduce((a,b)=>a+b,0),pick=pool[0];
   for(let i=0;i<pool.length;i++){x-=ws[i];if(x<=0){pick=pool[i];break}}
-  S.offered.push(pick.t.id);uniqPush(store.suggested,pick.t.id);save();showSurprise(pick)};
+  pick.label=pick.label||'Top match';S.offered.push(pick.t.id);uniqPush(store.suggested,pick.t.id);save();showSurprise(pick)};
 function spPush(id){SP.stack.push({pick:SP.cur,id,wl:store.watchlist.includes(id),prev:store.rate[id],taste:{...store.taste},out:S.out.length})}
 ACT.spBack=()=>{const p=SP.stack.pop();if(!p)return home();setRate(p.id,p.prev||null);if(!p.wl)remove(store.watchlist,p.id);store.taste=p.taste;S.out.length=p.out;save();showSurprise(p.pick)};
-ACT.seenSurprise=v=>{const [i,r]=v.split(':'),id=+i;spPush(id);setRate(id,r);toast(r==='love'?'Loved. More like this':r==='like'?'Added to your library':r==='ok'?'Saved as It was OK':'Got it. Less like this');S.out.push(id);ACT.surprise(true)};
+ACT.seenSurprise=v=>{const [i,r]=v.split(':'),id=+i;if(r==='dislike')askWhy(id,'dislike');spPush(id);setRate(id,r);toast(r==='love'?'Loved. More like this':r==='like'?'Added to your library':r==='ok'?'Saved as It was OK':'Got it. Less like this');S.out.push(id);ACT.surprise(true)};
 ACT.unseenSurprise=v=>{const id=+v;spPush(id);setRate(id,'unseen');uniqPush(store.watchlist,id);save();toast('Added to your watchlist');S.out.push(id);ACT.surprise(true)};
-ACT.surpriseNo=v=>{const id=+v,t=TITLES[id];spPush(id);add(store.taste,t.tags,-.08);setRate(id,'pass');toast('Moved to Not for me');S.out.push(id);ACT.surprise(true)};
-ACT.seenAs=v=>{const [i,r]=v.split(':'),id=+i,t=TITLES[id];setRate(id,r);S.out.push(id);add(S.vec,t.tags,r==='dislike'?-.4:r==='love'?.4:r==='ok'?0:.15);
+ACT.surpriseNo=v=>{const id=+v,t=TITLES[id];spPush(id);askWhy(id,'pass');add(store.taste,t.tags,-.08);setRate(id,'pass');toast('Moved to Not for me');S.out.push(id);ACT.surprise(true)};
+ACT.seenAs=v=>{const [i,r]=v.split(':'),id=+i,t=TITLES[id];if(r==='dislike')askWhy(id,'dislike');setRate(id,r);S.out.push(id);add(S.vec,t.tags,r==='dislike'?-.4:r==='love'?.4:r==='ok'?0:.15);
   toast(r==='love'?'Loved. More like this':r==='like'?'Added to your library':r==='ok'?'Saved as It was OK':'Got it. Less like this');
   const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{el.remove();S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length)ACT.keep()},250)};
 ACT.unseenAs=v=>{const id=+v;setRate(id,'unseen');uniqPush(store.watchlist,id);save();S.out.push(id);toast('Added to your watchlist');const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{el.remove();S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length)ACT.keep()},250)};
 ACT.againSurprise=v=>{const id=+v;spPush(id);setRate(id,'love');uniqPush(store.watchlist,id);save();toast('Loved, and on your watchlist to watch again');S.out.push(id);ACT.surprise(true)};
 ACT.againAs=v=>{const id=+v,t=TITLES[id];setRate(id,'love');uniqPush(store.watchlist,id);save();S.out.push(id);add(S.vec,t.tags,.4);toast('Loved, and on your watchlist to watch again');
   const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{el.remove();S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length)ACT.keep()},250)};
+const WHY={pass:[['seen','Seen it already'],['slow','Looks too slow'],['dark','Too dark or violent'],['funny','Not my kind of funny'],['cast','Not into the cast'],['genre','Not my genre'],['long','Too long']],
+  dislike:[['slow','Too slow'],['dark','Too violent or dark'],['funny','Not funny'],['cast',"Didn't like the cast"],['story',"Story didn't grab me"],['long','Too long']]};
+function askWhy(id,kind){setTimeout(()=>{const t=TITLES[id];const o=document.createElement('div');o.className='sheet';
+  o.innerHTML=`<div class="sheetbox"><div class="row"><b>Why ${kind==='pass'?'not':'didn\'t you like'} ${h(t.t)}?</b><span class="spacer"></span><button class="textbtn" data-act="closesheet">Skip</button></div><p class="sub" style="margin:4px 0 12px">Helps it learn what to avoid.</p>
+    <div class="chips">${WHY[kind].map(([k,l])=>`<button class="chip" data-act="why" data-v="${id}:${kind}:${k}">${h(l)}</button>`).join('')}</div></div>`;
+  o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o)},280)}
+ACT.why=v=>{const [i,kind,k]=v.split(':'),id=+i,t=TITLES[id],T=store.taste,a=(x,n)=>T[x]=(T[x]||0)+n;
+  if(k==='slow'){a('slow',-.8);a('fast',.2)}if(k==='dark'){a('dark',-.6);a('gore',-.8);a('horror',-.4)}if(k==='funny')a('comedy',-.6);
+  if(k==='cast'){store.actorNo=store.actorNo||[];t.actors.slice(0,2).forEach(x=>uniqPush(store.actorNo,x))}
+  if(k==='genre'){a(primary(t),-.7)}if(k==='story'){t.tags.forEach(x=>a(x,-.1))}if(k==='long')store.longPen=(store.longPen||0)+1;
+  if(k==='seen')setRate(id,'like');
+  store.whyLog.push({id,kind,k});RV++;save();ACT.closesheet();toast(k==='seen'?'Moved to Liked':'Got it, noted')};
 ACT.sugBack=()=>{S.picks=[];deck()};
 
 /* ===== your taste ===== */
@@ -1153,10 +1213,35 @@ Object.assign(ACT,{
 function listView(){
   const sec=(k,title)=>`<div class="group"><h3>${title} · ${store[k].length}</h3>${store[k].length?store[k].slice().reverse().map(id=>`<div class="listrow"><span>${h(TITLES[id].t)}</span><button data-act="unmark" data-v="${k}:${id}">Remove</button></div>`).join(''):'<p class="sub" style="margin:0">Nothing yet.</p>'}</div>`;
   render(`<div class="row"><button class="textbtn" data-act="home">Done</button></div>
-    <h2 style="margin-top:6px">Picks & passes</h2><p class="sub">Films you picked to watch. Not for me and films you've seen live in My library.</p>
+    <h2 style="margin-top:6px">History & backup</h2><p class="sub">Films you picked to watch. Not for me and films you've seen live in My library.</p>
+    <div class="group"><h3>Backup</h3><p class="sub" style="margin:0 0 10px">Your ratings live on this phone, in this browser only. That's why the Claude preview and the website show different counts. Copy a backup to keep them safe or move them to another device.</p>
+      <div class="hrow"><button class="btn ghost" data-act="backup">Copy backup</button><button class="btn ghost" data-act="restoreshow">Restore</button></div>
+      <textarea id="bk" class="bk" placeholder="Backup code appears here, or paste one to restore" style="display:none"></textarea>
+      <button class="btn" id="bkgo" data-act="restore" style="display:none;margin-top:10px">Restore from this code</button></div>
     ${sec('chosen','Picked to watch')}<button class="btn ghost" data-act="lib" data-v="pass">See Not for me</button><div class="group" style="margin-top:22px"><h3>Already suggested · ${store.suggested.length}</h3><p class="sub" style="margin:0 0 10px">Every film it has suggested is never suggested again. Clear this only if you run out.</p><button class="btn ghost" data-act="clearSuggested">Allow past suggestions again</button></div>`);
 }
 
+
+/* ===== tonight ===== */
+function tonightView(){const t=tonight(),p=P();
+  const g=(title,list,cur,act,multi)=>`<div class="group"><h3>${title}</h3><div class="chips">${list.map(([k,l])=>`<button class="chip ${(multi?cur.includes(k):cur===k)?'on':''}" data-act="${act}" data-v="${k}">${h(l)}</button>`).join('')}</div></div>`;
+  const avail=TITLES.filter(x=>x.svc&&p.services.includes(x.svc)&&!known(x)).length;
+  render(`${topBar('home')}<h2 style="margin-top:6px">Tonight</h2><p class="sub">Resets after 8 hours.</p>
+    ${g('What do you feel like? (pick up to 2)',TMOODS,t.mood,'tmood',true)}
+    ${g('How long have you got?',TTIME,t.time,'ttime')}
+    ${g("Who's watching?",TWHO,store.aud,'twho')}
+    ${g('How intense?',TINT,t.intensity,'tint')}
+    <div class="group"><h3>Where</h3>${p.services.length?`<div class="chips">${[['any','Anything'],['prefer','Prefer my services'],['only','Only my services']].map(([k,l])=>`<button class="chip ${store.svcMode===k?'on':''}" data-act="tsvc" data-v="${k}">${l}</button>`).join('')}</div>
+      <p class="sub" style="margin:8px 0 0">Your services: ${h(p.services.join(', '))}. ${store.svcMode==='only'?`Only ${avail} unseen films have streaming info so far. TMDB will fill this in properly.`:''}</p>`:`<p class="sub" style="margin:0">Set your streaming services in <button class="textbtn" data-act="taste" style="color:var(--accent);padding:0">Your taste</button> first.</p>`}</div>
+    <button class="btn" data-act="home">Done</button>`)}
+Object.assign(ACT,{
+  tonight(){tonightView()},
+  tmood(v){const t=tonight();t.mood.includes(v)?remove(t.mood,v):(t.mood.push(v),t.mood.length>2&&t.mood.shift());t.ts=Date.now();save();tonightView()},
+  ttime(v){const t=tonight();t.time=v;store.fmt=v==='series'?'series':(v==='under2'||v==='movie')?'movie':'both';t.ts=Date.now();save();tonightView()},
+  twho(v){store.aud=v;save();tonightView()},
+  tint(v){const t=tonight();t.intensity=v;t.ts=Date.now();save();tonightView()},
+  tsvc(v){store.svcMode=v;save();tonightView()}
+});
 
 /* ===== my library ===== */
 let LIBV={f:'all',q:'',n:60};
@@ -1188,6 +1273,12 @@ function libView(keepScroll){
   if(keepScroll)try{window.scrollTo(0,y)}catch(e){}
 }
 INP_LIB=v=>{LIBV.q=v;LIBV.n=60;const el=$('#librows');if(el){el.innerHTML=libRows();queueVisible()}};
+ACT.backup=()=>{const code=btoa(unescape(encodeURIComponent(JSON.stringify({app:'moodreel',v:1,at:new Date().toISOString(),store}))));const ta=$('#bk');ta.style.display='block';ta.value=code;
+  try{navigator.clipboard.writeText(code).then(()=>toast('Backup copied. Paste it somewhere safe'),()=>{ta.select();toast('Select and copy the code')})}catch(e){ta.select();toast('Select and copy the code')}};
+ACT.restoreshow=()=>{const ta=$('#bk');ta.style.display='block';ta.value='';ta.focus();$('#bkgo').style.display='block'};
+ACT.restore=()=>{try{const d=JSON.parse(decodeURIComponent(escape(atob($('#bk').value.trim()))));if(d.app!=='moodreel'||!d.store)throw 0;
+  const r=Object.keys(d.store.rate||{}).length;$('#bkgo').textContent=`Replace this phone's data with the backup (${r} ratings)? Tap again`;
+  if($('#bkgo').dataset.ok){store=Object.assign(store,d.store);save();location.reload()}else $('#bkgo').dataset.ok=1}catch(e){toast("That code didn't work")}};
 ACT.clearSuggested=()=>{store.suggested=[];save();toast('Past suggestions can come back');listView()};
 Object.assign(ACT,{
   lib(v){LS.on=false;LIBV={f:v||'all',q:'',n:60};libView()},
@@ -1239,7 +1330,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='2.8';
+const APP_VERSION='3.0';
 function checkUpdate(){try{fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();if(v&&v!==APP_VERSION){try{if(sessionStorage.getItem('mr_reload')===v)return;sessionStorage.setItem('mr_reload',v)}catch(e){}location.replace(location.pathname+'?v='+v)}}).catch(()=>{})}catch(e){}}
 checkUpdate();document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
 
