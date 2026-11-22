@@ -1098,7 +1098,7 @@ function home(){
     <button class="tonightbtn" data-act="tonight"><span>Tonight</span><b>${h(tonightLine())}</b><i>Change</i></button></div>
     <div class="stats hstats"><button class="stat" data-act="lib" data-v="watch"><b>${store.watchlist.length}</b><span>Watchlist</span></button><button class="stat" data-act="lib" data-v="love"><b>${c.love}</b><span>Loved</span></button><button class="stat" data-act="lib" data-v="like"><b>${c.like+c.ok}</b><span>Liked</span></button><button class="stat" data-act="lib" data-v="dislike"><b>${c.dislike}</b><span>Disliked</span></button></div>
     <div class="cta hcta"><button class="btn" data-act="go">Start swiping</button><div class="hrow h3"><button class="btn ghost" data-act="foryou">Top picks</button><button class="btn ghost" data-act="surprise">Surprise me</button><button class="btn ghost" data-act="lib">My library</button></div></div>
-    <p class="note hnote"><button class="textbtn" data-act="how">How it picks</button> · <button class="textbtn" data-act="list">History & backup</button> · <span class="cnt">${TITLES.length} titles</span> · v${APP_VERSION}</p>
+    <p class="note hnote"><button class="textbtn" data-act="how">How it picks</button> · <button class="textbtn" data-act="list">History & backup</button> · <span class="cnt">${TITLES.length} titles</span> · <button class="textbtn" data-act="update">v${APP_VERSION} · Update</button></p>
   </div>`);
   document.body.classList.add('nohscroll');
   if(window._updV&&window._updV!==APP_VERSION)setTimeout(checkUpdate,300);
@@ -1546,8 +1546,11 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.16';
+const APP_VERSION='3.17';
 window._updNow=true;setTimeout(()=>{window._updNow=false},4000);setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
+ACT.update=()=>{toast('Checking for updates…');fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();
+  if(v&&v!==APP_VERSION){try{sessionStorage.removeItem('mr_reload')}catch(e){}toast('Updating to v'+v);setTimeout(()=>location.replace(location.pathname+'?v='+v+'&t='+Date.now()),400)}
+  else if(v)toast(`You're up to date (v${APP_VERSION})`);else toast("Couldn't check, try again")}).catch(()=>toast("Couldn't check, no connection"))};
 function checkUpdate(){try{fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();if(v&&v!==APP_VERSION){window._updV=v;if(!document.querySelector('.homefix')&&!window._updNow)return;try{if(sessionStorage.getItem('mr_reload')===v)return;sessionStorage.setItem('mr_reload',v)}catch(e){}location.replace(location.pathname+'?v='+v)}}).catch(()=>{})}catch(e){}}
 checkUpdate();document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
 
