@@ -786,6 +786,24 @@
   .daily-card h2.fold .chev{width:16px;height:16px;margin-left:auto;opacity:.7;transition:transform .2s}
   .daily-card.open h2.fold .chev{transform:rotate(180deg)}
   .daily-card .day-more{display:block;margin:8px auto 0;border:0;background:rgba(255,255,255,.12);color:inherit;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;border-radius:999px;cursor:pointer}
+  .daily-card.tm{cursor:pointer}
+  .tm-top{display:flex;align-items:center;gap:14px}
+  .tm-ic{width:64px;height:64px;flex-shrink:0;display:grid;place-items:center}
+  .tm-ic svg,.tm-ic img{width:64px;height:64px}
+  .tm-mid{flex:1;min-width:0}
+  .tm-mid small{display:block;font-size:12px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;opacity:.75}
+  .tm-mid b{display:block;font-size:21px;font-weight:700;margin:2px 0}
+  .tm-mid span{display:block;font-size:13px;opacity:.8}
+  .tm-t{text-align:right;flex-shrink:0}
+  .tm-t b{display:block;font-size:34px;font-weight:700;line-height:1}
+  .tm-t span{display:block;font-size:17px;opacity:.65;margin-top:4px}
+  .tm-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.14);text-align:center}
+  .tm-strip span{display:block;font-size:12px;opacity:.75;font-weight:600}
+  .tm-strip i{display:grid;place-items:center;height:30px;margin:2px 0}
+  .tm-strip i svg,.tm-strip i img{width:28px;height:28px}
+  .tm-strip b{font-size:14px;font-weight:700}
+  .tm-hint{display:flex;align-items:center;justify-content:center;gap:4px;font-size:12px;opacity:.6;margin-top:8px}
+  .tm-hint .chev{width:14px;height:14px}
   /* ===== Local news ===== */
   .news .nw{display:block;padding:9px 0;border-top:1px solid rgba(255,255,255,.12);color:inherit;text-decoration:none}
   .news .nw:first-of-type{border-top:0}
@@ -1529,12 +1547,24 @@ async function refreshNow(){
 
 /* ---------- 7-day forecast: folds down to tomorrow ---------- */
 const CHEV = `<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`;
-function dailyCardHTML(days){
-  const open = !!store.get('wx_daily_open', false);
-  return `<section class="card daily-card ${open ? 'open' : ''}" id="dailyCard">
-      <h2 class="fold" onclick="toggleDaily()">${svgCal()} ${open ? '7-day forecast' : 'Tomorrow'}${CHEV}</h2>
-      ${open ? days.join('') : (days[1] || days[0] || '')}
-      <button class="day-more" onclick="toggleDaily()">${open ? 'Show less' : 'Show 7 days'}</button>
+function dailyCardHTML(days, d){
+  const open = !!store.get('wx_daily_open', false), dy = d.daily;
+  if (open) return `<section class="card daily-card open" id="dailyCard">
+      <h2 class="fold" onclick="toggleDaily()">${svgCal()} 7-day forecast${CHEV}</h2>
+      ${days.join('')}
+      <button class="day-more" onclick="toggleDaily()">Show less</button>
+    </section>`;
+  const i = dy.time.length > 1 ? 1 : 0, code = dy.weather_code[i], p = dy.precipitation_probability_max[i];
+  const long = new Date(dy.time[i] + 'T12:00:00').toLocaleDateString('en-AU', { weekday: 'long' });
+  const strip = dy.time.slice(2, 7).map((t, k) => `<div><span>${dayName(t, k + 2)}</span><i>${icon(dy.weather_code[k + 2], 1)}</i><b>${r0(dy.temperature_2m_max[k + 2])}°</b></div>`).join('');
+  return `<section class="card daily-card tm" id="dailyCard" onclick="toggleDaily()">
+      <div class="tm-top">
+        <div class="tm-ic">${icon(code, 1)}</div>
+        <div class="tm-mid"><small>Tomorrow · ${long}</small><b>${LABELS[code] || ''}</b><span>${p >= 10 ? `💧 ${p}% chance of rain` : 'Dry'}</span></div>
+        <div class="tm-t"><b>${r0(dy.temperature_2m_max[i])}°</b><span>${r0(dy.temperature_2m_min[i])}°</span></div>
+      </div>
+      ${strip ? `<div class="tm-strip">${strip}</div>` : ''}
+      <div class="tm-hint">Tap for 7 days${CHEV}</div>
     </section>`;
 }
 function toggleDaily(){ store.set('wx_daily_open', !store.get('wx_daily_open', false), true); if (lastData) render(lastData); }
@@ -1588,7 +1618,7 @@ function render(d){
       <h2>${svgClock()} Next 24 hours</h2>
       <div class="hourly">${hours}</div>
     </section>`,
-    daily: dailyCardHTML(days),
+    daily: dailyCardHTML(days, d),
     details: `<section class="grid">
       <div class="card stat">
         <h2>Wind</h2>
@@ -4287,7 +4317,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.29', APP_BUILT = '22 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.30', APP_BUILT = '22 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
