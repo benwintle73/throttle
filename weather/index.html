@@ -802,7 +802,11 @@
   .tm-strip i{display:grid;place-items:center;height:30px;margin:2px 0}
   .tm-strip i svg,.tm-strip i img{width:28px;height:28px}
   .tm-strip b{font-size:14px;font-weight:700}
-  .tm-hint{display:flex;align-items:center;justify-content:center;gap:4px;font-size:12px;opacity:.6;margin-top:8px}
+  .tm-foot{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+  .tm-foot .day-more{margin:0}
+  .tm-radar{display:flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:7px 14px;background:rgba(255,255,255,.16);color:inherit;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer}
+  .tm-radar svg{width:16px;height:16px}
+  .tm-hint{display:flex;align-items:center;gap:4px;font-size:13px;font-weight:600;opacity:.7}
   .tm-hint .chev{width:14px;height:14px}
   /* ===== Local news ===== */
   .news .nw{display:block;padding:9px 0;border-top:1px solid rgba(255,255,255,.12);color:inherit;text-decoration:none}
@@ -1552,7 +1556,7 @@ function dailyCardHTML(days, d){
   if (open) return `<section class="card daily-card open" id="dailyCard">
       <h2 class="fold" onclick="toggleDaily()">${svgCal()} 7-day forecast${CHEV}</h2>
       ${days.join('')}
-      <button class="day-more" onclick="toggleDaily()">Show less</button>
+      <div class="tm-foot"><button class="tm-radar" onclick="event.stopPropagation();openRadar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6-6"/></svg>Rain radar</button><button class="day-more" onclick="toggleDaily()">Show less</button></div>
     </section>`;
   const i = dy.time.length > 1 ? 1 : 0, code = dy.weather_code[i], p = dy.precipitation_probability_max[i];
   const long = new Date(dy.time[i] + 'T12:00:00').toLocaleDateString('en-AU', { weekday: 'long' });
@@ -1564,7 +1568,7 @@ function dailyCardHTML(days, d){
         <div class="tm-t"><b>${r0(dy.temperature_2m_max[i])}°</b><span>${r0(dy.temperature_2m_min[i])}°</span></div>
       </div>
       ${strip ? `<div class="tm-strip">${strip}</div>` : ''}
-      <div class="tm-hint">Tap for 7 days${CHEV}</div>
+      <div class="tm-foot"><button class="tm-radar" onclick="event.stopPropagation();openRadar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6-6"/></svg>Rain radar</button><span class="tm-hint">7 days${CHEV}</span></div>
     </section>`;
 }
 function toggleDaily(){ store.set('wx_daily_open', !store.get('wx_daily_open', false), true); if (lastData) render(lastData); }
@@ -4317,7 +4321,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.33', APP_BUILT = '22 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.34', APP_BUILT = '22 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
