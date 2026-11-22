@@ -776,7 +776,7 @@ const wk=t=>t.t+'|'+t.y;
 const GENREMAP=[[/biograph|documentar|docudrama/,'real'],[/science fiction|sci-fi|cyberpunk/,'scifi'],[/thriller|suspense/,'tension'],[/comedy/,'comedy'],[/action/,'action'],[/horror|slasher/,'horror'],[/romance|romantic/,'romance'],[/sport|boxing|racing/,'sport'],[/war film|war drama|military/,'war'],[/crime|gangster|neo-noir|noir/,'crime'],[/musical|music/,'music'],[/animat|children|family/,'family'],[/fantasy/,'fantasy'],[/mystery|detective|whodunit/,'mystery'],[/superhero/,'superhero'],[/heist|caper/,'heist'],[/coming-of-age|teen/,'comingofage'],[/disaster|survival/,'survival'],[/spy|espionage/,'spy'],[/drama/,'emotion'],[/psychological|philosoph|dystopia|surreal/,'mind'],[/adventure/,'action']];
 function applyWiki(t){const w=WIKI[wk(t)];if(!w||w.miss)return;
   (w.g||[]).forEach(g=>{g=g.toLowerCase();for(const [re,tag] of GENREMAP)if(re.test(g)&&!t.tags.includes(tag))t.tags.push(tag)});
-  if(t.ext&&w.ex){const f=w.ex.split(/(?<=\.)\s/)[0];if(f&&f.length<260)t.blurb=f}
+  if(t.ext&&w.ex){const f=(w.ex.match(/^[^]*?\.(\s|$)/)||[w.ex])[0].trim();if(f&&f.length<260)t.blurb=f}
   if(w.cast&&w.cast.length)t.actors=[...new Set([...t.actors,...w.cast])].slice(0,8)}
 TITLES.forEach(applyWiki);
 const WQ=[];let wBusy=false,wFails=0;
@@ -1416,7 +1416,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.5';
+const APP_VERSION='3.6';
 function checkUpdate(){try{fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();if(v&&v!==APP_VERSION){try{if(sessionStorage.getItem('mr_reload')===v)return;sessionStorage.setItem('mr_reload',v)}catch(e){}location.replace(location.pathname+'?v='+v)}}).catch(()=>{})}catch(e){}}
 checkUpdate();document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
 
