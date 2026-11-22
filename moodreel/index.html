@@ -178,6 +178,7 @@ body{padding-top:0!important}
 .homefix{height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 40px)!important}
 .spfix{height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 44px)!important}
 .hs4 .ab{white-space:normal;line-height:1.15;font-size:12.5px;padding:0 4px}.ab.maybe{color:var(--seen)}
+#dlstat{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--panel2);border:1px solid var(--line2);color:var(--text);padding:8px 14px;border-radius:99px;font-size:13px;font-weight:600;z-index:30;display:none;white-space:nowrap}
 .topnav{margin-bottom:4px}.backbtn{display:inline-flex;align-items:center;gap:4px;padding:9px 14px 9px 8px;border-radius:99px;background:var(--panel);border:1px solid var(--line);font-size:14px;font-weight:600}
 .backbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .pick2{display:block;padding:14px}.pick2 .ptop{display:grid;grid-template-columns:96px 1fr;gap:14px;margin-bottom:10px}
@@ -857,7 +858,7 @@ function certFrom(m,tags){m=m||'';if(/NC-17/.test(m))return 'R18+';if(/PG-13/.te
   return tags.includes('horror')||tags.includes('crime')?'MA15+':tags.includes('family')?'PG':'M'}
 function tagsFrom(genres){const out=new Set();genres.forEach(g=>{g=g.toLowerCase();for(const [re,tag] of GENREMAP)if(re.test(g))out.add(tag)});if(!out.size)out.add('emotion');return [...out]}
 function sparqlFilms(a,b,lim){return `SELECT ?article (MIN(?d) AS ?date) (SAMPLE(?du) AS ?dur) (SAMPLE(?ds) AS ?desc) (GROUP_CONCAT(DISTINCT ?gl;separator="|") AS ?genres) (GROUP_CONCAT(DISTINCT ?dl;separator="|") AS ?dirs) (SAMPLE(?ml) AS ?mpaa) WHERE {
- { SELECT ?film (MAX(?l) AS ?links) WHERE { ?film wdt:P31 wd:Q11424; wdt:P577 ?d0; wikibase:sitelinks ?l. FILTER(?l >= 20 && ?d0 >= "${a}-01-01T00:00:00Z"^^xsd:dateTime && ?d0 < "${b}-01-01T00:00:00Z"^^xsd:dateTime) } GROUP BY ?film ORDER BY DESC(?links) LIMIT ${lim} }
+ { SELECT ?film (MAX(?l) AS ?links) WHERE { ?film wdt:P1258 ?rt; wdt:P577 ?d0; wikibase:sitelinks ?l. FILTER(?d0 >= "${a}-01-01T00:00:00Z"^^xsd:dateTime && ?d0 < "${b}-01-01T00:00:00Z"^^xsd:dateTime) } GROUP BY ?film ORDER BY DESC(?links) LIMIT ${lim} }
  ?article schema:about ?film; schema:isPartOf <https://en.wikipedia.org/>.
  ?film wdt:P577 ?d.
  OPTIONAL{?film wdt:P2047 ?du}
@@ -867,7 +868,7 @@ function sparqlFilms(a,b,lim){return `SELECT ?article (MIN(?d) AS ?date) (SAMPLE
  OPTIONAL{?film wdt:P1657 ?m. ?m rdfs:label ?ml FILTER(lang(?ml)="en")}
 } GROUP BY ?article`}
 function sparqlSeries(lim){return `SELECT ?article (MIN(?d) AS ?date) (MAX(?ss) AS ?seasons) (SAMPLE(?ds) AS ?desc) (GROUP_CONCAT(DISTINCT ?gl;separator="|") AS ?genres) (GROUP_CONCAT(DISTINCT ?dl;separator="|") AS ?dirs) WHERE {
- { SELECT ?film (MAX(?l) AS ?links) WHERE { ?film wdt:P31 wd:Q5398426; wikibase:sitelinks ?l. FILTER(?l >= 25) } GROUP BY ?film ORDER BY DESC(?links) LIMIT ${lim} }
+ { SELECT ?film (MAX(?l) AS ?links) WHERE { ?film wdt:P1258 ?rt; wdt:P31 wd:Q5398426; wikibase:sitelinks ?l. } GROUP BY ?film ORDER BY DESC(?links) LIMIT ${lim} }
  ?article schema:about ?film; schema:isPartOf <https://en.wikipedia.org/>.
  OPTIONAL{?film wdt:P580 ?d}
  OPTIONAL{?film wdt:P2437 ?ss}
@@ -875,31 +876,34 @@ function sparqlSeries(lim){return `SELECT ?article (MIN(?d) AS ?date) (MAX(?ss) 
  OPTIONAL{?film wdt:P136 ?g. ?g rdfs:label ?gl FILTER(lang(?gl)="en")}
  OPTIONAL{?film wdt:P170 ?dr. ?dr rdfs:label ?dl FILTER(lang(?dl)="en")}
 } GROUP BY ?article`}
-async function sparql(q){const r=await fetch('https://query.wikidata.org/sparql?format=json&query='+encodeURIComponent(q),{headers:{Accept:'application/sparql-results+json'}});if(!r.ok)throw new Error(r.status);return (await r.json()).results.bindings}
+async function sparql(q){const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),55000);try{const r=await fetch('https://query.wikidata.org/sparql?format=json&query='+encodeURIComponent(q),{headers:{Accept:'application/sparql-results+json'},signal:ctl.signal});if(!r.ok)throw new Error('HTTP '+r.status);return (await r.json()).results.bindings}finally{clearTimeout(tm)}}
 const v=(row,k)=>row[k]&&row[k].value;
 function titleFromUrl(u){let t=decodeURIComponent(u.split('/wiki/')[1]||'').replace(/_/g,' ');return t.replace(/ \((\d{4} )?(American |British |Australian |Canadian )?(film|TV series|television series|miniseries|animated film|documentary|film series)\)$/i,'')}
+function setStatus(m){let el=document.getElementById('dlstat');if(!el){el=document.createElement('div');el.id='dlstat';document.body.appendChild(el)}el.textContent=m;el.style.display=m?'block':'none'}
 async function loadMore(force){
   let meta=null;try{meta=JSON.parse(localStorage.getItem(EXTKEY))}catch(e){}
   if(window._extLoading||(meta&&meta.list&&meta.list.length&&!force&&Date.now()-meta.at<30*864e5))return;
   window._extLoading=true;toast('Downloading more films…');
   const have=new Set();TITLES.forEach(t=>{have.add(NORMT(t.t)+'|'+t.y);have.add(NORMT(t.t)+'|'+(t.y-1));have.add(NORMT(t.t)+'|'+(t.y+1))});
-  const list=(meta&&meta.list&&!force)?meta.list:[],ranges=[[1960,1980],[1980,1990],[1990,1997],[1997,2003],[2003,2008],[2008,2012],[2012,2016],[2016,2020],[2020,2027]];
+  const list=(meta&&meta.list&&!force)?meta.list:[],ranges=[[1960,1980],[1980,1990],[1990,1997],[1997,2003],[2003,2008],[2008,2012],[2012,2016],[2016,2020],[2020,2027]];const errs=[];let step=0;
   let added=0;
   const push=e=>{const key=NORMT(e[0])+'|'+e[1];if(have.has(key))return;have.add(key);list.push(e);if(!force){addExt(e);added++}};
-  for(const [a,b] of ranges){
-    try{const rows=await sparql(sparqlFilms(a,b,420));
+  for(const [a,b] of ranges){step++;setStatus(`Downloading films ${step} of ${ranges.length+1}…`);
+    try{const rows=await sparql(sparqlFilms(a,b,400));
       rows.forEach(r=>{const t=titleFromUrl(v(r,'article'));const y=+(v(r,'date')||'').slice(0,4);if(!t||!y)return;
         let dur=Math.round(+v(r,'dur')||0);if(dur>400)dur=Math.round(dur/60);if(!dur)dur=110;
         const genres=(v(r,'genres')||'').split('|').filter(Boolean),tags=tagsFrom(genres);
         push([t,y,'M',certFrom(v(r,'mpaa'),tags),dur,tags,(v(r,'dirs')||'').split('|').filter(Boolean).slice(0,2).join(', '),v(r,'desc')||'',[]])})}
-    catch(e){}
+    catch(e){errs.push(a+'s: '+(e.name==='AbortError'?'timed out':e.message))}
     await new Promise(r=>setTimeout(r,600))}
+  setStatus('Downloading series…');
   try{const rows=await sparql(sparqlSeries(500));
     rows.forEach(r=>{const t=titleFromUrl(v(r,'article'));const y=+(v(r,'date')||'').slice(0,4);if(!t||!y)return;
       const genres=(v(r,'genres')||'').split('|').filter(Boolean),tags=tagsFrom(genres);const dirs=(v(r,'dirs')||'').split('|').filter(Boolean).slice(0,2);
-      push([t,y,'S',certFrom('',tags),Math.max(1,+v(r,'seasons')||1),tags,dirs.length?'Created by '+dirs.join(', '):'',v(r,'desc')||'',[]])})}catch(e){}
+      push([t,y,'S',certFrom('',tags),Math.max(1,+v(r,'seasons')||1),tags,dirs.length?'Created by '+dirs.join(', '):'',v(r,'desc')||'',[]])})}catch(e){errs.push('series: '+(e.name==='AbortError'?'timed out':e.message))}
   window._extLoading=false;
-  if(!list.length){toast("Couldn't reach Wikidata. Try again later");return}
+  try{localStorage.setItem('mr_ext_status',JSON.stringify({at:Date.now(),n:list.length,errs}))}catch(e){}
+  if(!list.length){setStatus('');toast("Couldn't download films: "+(errs[0]||'no response'));return}setStatus('');
   try{localStorage.setItem(EXTKEY,JSON.stringify({at:Date.now(),list}))}catch(e){}
   if(force){toast(`Catalogue refreshed: ${list.length} extra titles`);setTimeout(()=>location.reload(),900);return}
   RV++;toast(`Added ${added} films and series`);
@@ -1293,7 +1297,7 @@ function listView(){
       <div class="hrow"><button class="btn ghost" data-act="backup">Copy backup</button><button class="btn ghost" data-act="restoreshow">Restore</button></div>
       <textarea id="bk" class="bk" placeholder="Backup code appears here, or paste one to restore" style="display:none"></textarea>
       <button class="btn" id="bkgo" data-act="restore" style="display:none;margin-top:10px">Restore from this code</button></div>
-    <div class="group"><h3>Film catalogue · ${TITLES.length} titles</h3><p class="sub" style="margin:0 0 10px">${TITLES.length-BASE_N} extra films and series from Wikidata, refreshed monthly.</p><button class="btn ghost" data-act="refreshCat">Refresh catalogue now</button></div>
+    <div class="group"><h3>Film catalogue · ${TITLES.length} titles</h3><p class="sub" style="margin:0 0 10px">${TITLES.length-BASE_N} extra films and series from Wikidata, refreshed monthly.${(()=>{try{const st=JSON.parse(localStorage.getItem('mr_ext_status'));return st?` Last download: ${new Date(st.at).toLocaleString()}, ${st.n} titles${st.errs&&st.errs.length?`. Problems: ${h(st.errs.join('; '))}`:''}.`:' Not downloaded yet.'}catch(e){return ''}})()}</p><button class="btn ghost" data-act="refreshCat">Refresh catalogue now</button></div>
     ${sec('chosen','Picked to watch')}<button class="btn ghost" data-act="lib" data-v="pass">See Not for me</button><div class="group" style="margin-top:22px"><h3>Already suggested · ${store.suggested.length}</h3><p class="sub" style="margin:0 0 10px">Every film it has suggested is never suggested again. Clear this only if you run out.</p><button class="btn ghost" data-act="clearSuggested">Allow past suggestions again</button></div>`);
 }
 
@@ -1416,7 +1420,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.6';
+const APP_VERSION='3.7';
 function checkUpdate(){try{fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();if(v&&v!==APP_VERSION){try{if(sessionStorage.getItem('mr_reload')===v)return;sessionStorage.setItem('mr_reload',v)}catch(e){}location.replace(location.pathname+'?v='+v)}}).catch(()=>{})}catch(e){}}
 checkUpdate();document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
 
