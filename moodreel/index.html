@@ -171,6 +171,12 @@ body.nohscroll .wrap{padding-bottom:0}
 .tonightbtn{width:100%;margin-top:14px;display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;text-align:left;padding:12px 14px;border-radius:14px;background:var(--panel);border:1px solid var(--line)}
 .tonightbtn span{font-size:11px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--accent)}.tonightbtn b{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tonightbtn i{font-style:normal;font-size:13px;color:var(--muted)}
 .bk{width:100%;min-height:90px;margin-top:10px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--text);font:12px ui-monospace,monospace;padding:10px}
+
+.wrap{padding-top:calc(30px + env(safe-area-inset-top))!important}
+body{padding-top:0!important}
+.hstats{grid-template-columns:repeat(4,1fr)!important}
+.homefix{height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 40px)!important}
+.spfix{height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 44px)!important}
 .topnav{margin-bottom:4px}.backbtn{display:inline-flex;align-items:center;gap:4px;padding:9px 14px 9px 8px;border-radius:99px;background:var(--panel);border:1px solid var(--line);font-size:14px;font-weight:600}
 .backbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .pick2{display:block;padding:14px}.pick2 .ptop{display:grid;grid-template-columns:96px 1fr;gap:14px;margin-bottom:10px}
@@ -1332,7 +1338,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.1';
+const APP_VERSION='3.2';
 function checkUpdate(){try{fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();if(v&&v!==APP_VERSION){try{if(sessionStorage.getItem('mr_reload')===v)return;sessionStorage.setItem('mr_reload',v)}catch(e){}location.replace(location.pathname+'?v='+v)}}).catch(()=>{})}catch(e){}}
 checkUpdate();document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
 
