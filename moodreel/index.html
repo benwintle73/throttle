@@ -248,6 +248,13 @@ body:has(.pick2) #dlstat{display:none!important}
 .lrn{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:14.5px}.lrn span{color:var(--muted);font-size:13px;white-space:nowrap}
 .lrn.up b{color:var(--good)}.lrn.down b{color:var(--bad)}
 .settingsh{margin:22px 0 2px;font-size:18px}
+.sheetbox.info{max-height:85dvh}.infotop{display:grid;grid-template-columns:96px 1fr;gap:14px;margin:4px 0 12px}
+.infop .poster{width:96px;height:144px;aspect-ratio:auto;border-radius:10px}.infop .poster.img>*{display:none}
+.infot{font-size:21px!important;line-height:1.2;display:block}.infom{color:var(--muted);font-size:14px;margin-top:4px}.infor{margin-top:8px;font-size:13.5px;font-weight:600;color:var(--good)}
+.infoc{margin:0 0 4px!important;font-size:14.5px!important}.infoc span{color:var(--muted)}.infoload{color:var(--muted);font-size:13px}.infow{font-size:14.5px!important;color:#d9d5e2}.infow b{color:var(--text)}
+.infolinks{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.infolinks a{font-size:14px!important;color:var(--text)!important;padding:9px 13px;border-radius:9px;background:var(--panel2);border:1px solid var(--line2);text-decoration:none}
+.infowl{margin-top:12px;text-align:center;color:var(--good);font-weight:600;font-size:14px}
+.lthumb,.fyp,.ptop>[data-act=info]{cursor:pointer}.lt b.tap{cursor:pointer}
 </style>
 </head>
 <body>
@@ -894,9 +901,22 @@ function slotHTML(r){const t=r.t,like=r.why.filter(w=>w.startsWith('Like ')).map
     <div class="credits"><div>${cast.length?`<span>Starring</span> ${h(cast.join(', '))}`:'&nbsp;'}</div><div>${d?`<span>${lbl}</span>${h(d.replace(/^(Created|Developed) by /,m=>m))}`:'&nbsp;'}</div></div>
     <div class="aboutslot" data-about="${h(wk(t))}">${aboutHTML(t)}</div>`}
 function aboutHTML(t){const w=WIKI[wk(t)];if(!w||!w.ex)return '';return `<button class="aboutbtn" data-act="about" data-v="${t.id}">About ${t.k==='S'?'the series':'the film'} ›</button>`}
-ACT.about=v=>{const t=TITLES[+v],w=WIKI[wk(t)];if(!w)return;ACT.closesheet();const o=document.createElement('div');o.className='sheet';
-  o.innerHTML=`<div class="sheetbox"><div class="row"><b>${h(t.t)}</b><span class="spacer"></span><button class="textbtn" data-act="closesheet">Close</button></div><p>${h(w.ex)}</p><a href="${h(w.url)}" target="_blank" rel="noopener">Read more on Wikipedia</a></div>`;
-  o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o)};
+/* film info sheet: tap any poster or title */
+function infoHTML(t){const w=WIKI[wk(t)],d=DIRECTOR[t.t]||t.dir||(w&&w.dir&&w.dir.length?w.dir.join(', '):''),cast=(t.actors.length?t.actors:(w&&w.cast)||[]).slice(0,5);
+  const r=rating(t),RL={love:'You loved it',like:'You liked it',ok:'You thought it was OK',dislike:'You disliked it',pass:'Marked not for me',unseen:"You haven't seen it",seen:'Seen it'};
+  const meta=[t.k==='M'?'Film':'Series',t.y,t.c,runtime(t)].join(' · ');
+  return `<div class="sheetbox info"><div class="row"><span class="spacer"></span><button class="textbtn" data-act="closesheet">Close</button></div>
+    <div class="infotop"><div class="infop">${poster(t)}</div><div><b class="infot">${h(t.t)}</b><div class="infom">${meta}</div>${r&&RL[r]?`<div class="infor">${RL[r]}</div>`:''}</div></div>
+    ${cast.length?`<p class="infoc"><span>Starring</span> ${h(cast.join(', '))}</p>`:''}${d?`<p class="infoc"><span>${/^(Created|Developed)/.test(d)?'':'Directed by '}</span>${h(d)}</p>`:''}
+    <p>${w&&w.ex?h(w.ex):w?h(t.blurb):`${h(t.blurb)} <span class="infoload">Loading more…</span>`}</p>
+    ${!known(t)&&r!=='pass'?`<p class="infow">${explain(t).line}</p>`:''}
+    <div class="infolinks">${w&&w.url?`<a href="${h(w.url)}" target="_blank" rel="noopener">Wikipedia</a>`:''}<a href="https://www.justwatch.com/au/search?q=${encodeURIComponent(t.t)}" target="_blank" rel="noopener">Where to watch</a><a href="https://www.youtube.com/results?search_query=${encodeURIComponent(t.t+' '+t.y+' trailer')}" target="_blank" rel="noopener">Trailer</a></div>
+    ${store.watchlist.includes(t.id)?'<div class="infowl">On your watchlist</div>':known(t)?'':`<button class="btn" style="width:100%;margin-top:12px" data-act="infowl" data-v="${t.id}">Add to watchlist</button>`}</div>`}
+ACT.info=v=>{const t=TITLES[+v];if(!t)return;ACT.closesheet();const o=document.createElement('div');o.className='sheet';o.dataset.info=t.id;o.innerHTML=infoHTML(t);
+  o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o);
+  if(!WIKI[wk(t)]){wikiWant([t],true);let n=0;const iv=setInterval(()=>{const el=document.querySelector(`.sheet[data-info="${t.id}"]`);if(!el||++n>20){clearInterval(iv);const l=el&&el.querySelector('.infoload');if(l)l.remove();return}if(WIKI[wk(t)]){el.innerHTML=infoHTML(t);clearInterval(iv)}},500)}};
+ACT.infowl=v=>{const id=+v;uniqPush(store.watchlist,id);if(!rating(TITLES[id]))setRate(id,'unseen');save();toast('Added to your watchlist');ACT.info(v)};
+ACT.about=v=>ACT.info(v);
 ACT.closesheet=()=>{document.querySelectorAll('.sheet').forEach(x=>x.remove())};
 
 /* ===== more films from Wikidata (free, no key, cached on device) ===== */
@@ -1067,7 +1087,7 @@ function tonight3(){if(!S)newSession();FY.out=FY.out||[];
   return out}
 let FY={out:[]};
 function fyRow(t,btns,line){const m=[t.k==='M'?'Film':'Series',t.y,t.c,t.k==='M'?`${Math.floor(t.r/60)}h ${t.r%60}m`:`${t.r} season${t.r>1?'s':''}`].join(' · ');
-  return `<div class="fyrow"><div class="fyp">${poster(t)}</div><div class="fyb"><b>${h(t.t)}</b><div class="fym">${m}</div><p class="fyl">${line}</p><div class="fybtns">${btns}</div></div></div>`}
+  return `<div class="fyrow"><div class="fyp" data-act="info" data-v="${t.id}">${poster(t)}</div><div class="fyb"><b data-act="info" data-v="${t.id}">${h(t.t)}</b><div class="fym">${m}</div><p class="fyl">${line}</p><div class="fybtns">${btns}</div></div></div>`}
 function forYou(){
   const top=guessTop3(),tn=tonight3();
   render(`${topBar('home')}
@@ -1300,7 +1320,7 @@ ACT.howBack=()=>{const ids=S.picks;S.offered=S.offered.filter(id=>!ids.includes(
 /* ===== surprise ===== */
 /* ===== pick card (shared) ===== */
 function pickCard(r,mode){const t=r.t,su=mode==='surprise';
-  return `<div class="sug pick2" id="s${t.id}"><div class="ptop">${poster(t)}<div>
+  return `<div class="sug pick2" id="s${t.id}"><div class="ptop"><div data-act="info" data-v="${t.id}">${poster(t)}</div><div>
       ${(()=>{const L=honestLabel(r);return `<div class="plabel ${L==='Wildcard'||L==='Discovery'?'wild':''}">${h(L)}</div>`})()}<h4>${h(t.t)}</h4><div class="meta">${t.k==='M'?'Film':'Series'} · ${t.y} · ${t.c} · ${runtime(t)}</div>
       ${svcTag(t)}<p>${h(t.blurb)}</p></div></div>
     ${slotHTML(r)}
@@ -1466,7 +1486,7 @@ const byTitle=(a,b)=>a.t.replace(/^The /,'').localeCompare(b.t.replace(/^The /,'
 function libFilter(t){const r=rating(t),q=LIBV.q.toLowerCase().trim();
   if(q)return t.t.toLowerCase().includes(q)||t.actors.some(a=>a.toLowerCase().includes(q));
   if(LIBV.f==='watch')return store.watchlist.includes(t.id);if(LIBV.f==='all')return r==='love'||r==='like'||r==='ok'||r==='dislike'||r==='seen';if(LIBV.f==='unseen')return toWatch(t);if(LIBV.f==='unrated')return !r&&!toWatch(t);return r===LIBV.f}
-function libRowHTML(id,title,meta,r,custom){const t=custom?null:TITLES[id];return `<div class="lrow${t?' withimg':''}">${t?`<div class="lthumb">${poster(t)}</div>`:''}<div class="lbody"><div class="lt"><b>${h(title)}</b><span>${meta}</span></div>
+function libRowHTML(id,title,meta,r,custom){const t=custom?null:TITLES[id];return `<div class="lrow${t?' withimg':''}">${t?`<div class="lthumb" data-act="info" data-v="${id}">${poster(t)}</div>`:''}<div class="lbody"><div class="lt"><b ${t?`data-act="info" data-v="${id}" class="tap"`:''}>${h(title)}</b><span>${meta}</span></div>
   <div class="seg seg5">${(custom?RATES:SEG).map(([k,l])=>`<button class="${r===k?'on '+k:''}" data-act="${custom?'crate':'rate'}" data-v="${id}:${k}">${l}</button>`).join('')}</div>${t?`<button class="wl ${store.watchlist.includes(id)?'on':''}" data-act="wltog" data-v="${id}">${store.watchlist.includes(id)?'On your watchlist ✓':'+ Add to watchlist'}</button>`:''}</div></div>`}
 function libRows(){
   const q=LIBV.q.trim(),ql=q.toLowerCase();
@@ -1547,7 +1567,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.19';
+const APP_VERSION='3.20';
 window._updNow=true;setTimeout(()=>{window._updNow=false},4000);setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
 ACT.update=()=>{toast('Checking for updates…');fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();
   if(v&&v!==APP_VERSION){try{sessionStorage.removeItem('mr_reload')}catch(e){}toast('Updating to v'+v);setTimeout(()=>location.replace(location.pathname+'?v='+v+'&t='+Date.now()),400)}
