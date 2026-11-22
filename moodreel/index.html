@@ -243,6 +243,11 @@ body:has(.pick2) #dlstat{display:none!important}
 .fybtns .fyb1{background:var(--good);color:#0b1a13;border-color:transparent}.fyok{font-size:13px;font-weight:700;color:var(--good);align-self:center;margin-right:4px}
 .fybtns:has(.fyb1[data-act=fyWatch]){display:grid;grid-template-columns:1fr 1fr}.fybtns:has(.fyb1[data-act=fyWatch]) button{padding:9px 4px}.fybtns .fyb1[data-act=fyWatch]{grid-column:1/-1}
 .fyreset{color:var(--accent);font-size:14px;padding:0}
+.learned{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.lrnh{font-size:11px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);margin:10px 0 6px}
+.lrn{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:14.5px}.lrn span{color:var(--muted);font-size:13px;white-space:nowrap}
+.lrn.up b{color:var(--good)}.lrn.down b{color:var(--bad)}
+.settingsh{margin:22px 0 2px;font-size:18px}
 </style>
 </head>
 <body>
@@ -714,15 +719,20 @@ const BASE_N=TITLES.length,EXTKEY='mr_ext_v2';
 function addExt(e){TITLES.push({id:TITLES.length,t:e[0],y:e[1],k:e[2],c:e[3],r:e[4],tags:e[5],actors:e[8]||[],svc:'',own:false,blurb:e[7]?e[7].charAt(0).toUpperCase()+e[7].slice(1)+'.':(e[2]==='S'?'Series':'Film')+' from '+e[1]+'.',ext:1,dir:e[6]||''})}
 try{const x=JSON.parse(localStorage.getItem(EXTKEY));if(x&&x.list)x.list.forEach(addExt)}catch(e){}
 const LIB=TITLES.filter(t=>t.own);
-/* taste learned from everything you've rated (Apple TV library included) */
+/* taste learned from everything you've rated (Apple TV library included).
+   Each rating teaches a different amount. Not seen / Maybe later / Seen it already teach nothing. */
+const RATE_W={love:2.5,like:1,ok:.12,dislike:-2,pass:-1.25};
 let _lt=null,_ltv=-1;
 function libState(){if(_ltv===RV&&_lt)return _lt;
-  const pos={},neg={};let P=0,N=0;const liked=[];
-  for(const t of TITLES){const r=rating(t);const w=r==='love'?1:r==='like'?.6:r==='ok'?.15:r==='dislike'?-1:0;if(!w)continue;
-    if(w>0){P+=w;t.tags.forEach(k=>pos[k]=(pos[k]||0)+w);liked.push(t)}else{N++;t.tags.forEach(k=>neg[k]=(neg[k]||0)+1)}}
-  const taste={};new Set([...Object.keys(pos),...Object.keys(neg)]).forEach(k=>{taste[k]=Math.min(1.2,(pos[k]||0)/(P||1)*2.5-.15)-Math.min(.8,(neg[k]||0)/Math.max(N,4)*1.5)});
+  const sum={},n={},pos={},neg={},liked=[];let rated=0;
+  for(const t of TITLES){const w=RATE_W[rating(t)];if(w===undefined)continue;rated++;
+    for(const k of t.tags){sum[k]=(sum[k]||0)+w;n[k]=(n[k]||0)+1;if(w>=1)pos[k]=(pos[k]||0)+1;if(w<0)neg[k]=(neg[k]||0)+1}
+    if(w>=1)liked.push(t)} // only Loved and Liked count as evidence for "similar to"
+  // smoothed per-feature score: shrinks towards neutral until there's enough evidence, then clamped
+  const alpha=Math.max(3,rated*.08),taste={};
+  for(const k in sum){const raw=Math.max(-1,Math.min(1,sum[k]/(n[k]+alpha)));taste[k]=Math.max(-1.2,Math.min(1.2,raw*1.3))}
   const tagIdx={},actIdx={};liked.forEach(o=>{o.tags.forEach(k=>(tagIdx[k]=tagIdx[k]||[]).push(o));o.actors.forEach(a=>(actIdx[a]=actIdx[a]||[]).push(o))});
-  _lt={taste,liked,tagIdx,actIdx};_ltv=RV;return _lt}
+  _lt={taste,liked,tagIdx,actIdx,n,pos,neg,rated};_ltv=RV;return _lt}
 
 /* ===== vocab ===== */
 const CERTS={'G':0,'PG':1,'M':2,'MA15+':3,'R18+':4};
@@ -754,7 +764,7 @@ if(!store.seedInspire){store.profile.stories.inspiring=1;store.profile.stories.m
 const RATES=[['love','Loved'],['like','Liked'],['ok','It was OK'],['dislike','Disliked'],['unseen','Not seen']];
 const SEG=[['love','Loved it'],['like','Liked it'],['ok','It was OK'],['dislike','Disliked'],['unseen','Not seen'],['pass','Not for me']];
 const rating=t=>store.rate[t.id]||(t.own?'like':null);
-const known=t=>{const r=rating(t);return r==='love'||r==='like'||r==='ok'||r==='dislike'};
+const known=t=>{const r=rating(t);return r==='love'||r==='like'||r==='ok'||r==='dislike'||r==='seen'};
 let RV=0;function setRate(id,r){if(r)store.rate[id]=r;else delete store.rate[id];RV++;save()}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}}
 const P=()=>store.profile;
@@ -839,12 +849,31 @@ async function wFetch(batch){
 }
 function paintPoster(t){const w=WIKI[wk(t)];if(!w||!w.img)return;document.querySelectorAll(`[data-wk="${CSS.escape(wk(t))}"]`).forEach(el=>{el.classList.add('img');el.style.backgroundImage=`linear-gradient(180deg,transparent 55%,rgba(0,0,0,.55)),url("${w.img}")`})}
 const READ={real:'true story',war:'wartime setting',mind:'makes you think',comedy:'humour',tension:'tension',action:'action',fast:'fast pace',slow:'slow burn',dark:'serious tone',emotion:'emotional',feelgood:'feel-good',inspiring:'inspiring',sport:'sport',crime:'crime',scifi:'sci-fi',family:'family-friendly',romance:'romance',music:'music',underdog:'underdog story',heist:'heist',spy:'spy story',superhero:'superheroes',horror:'scares',epic:'epic scale',survival:'survival story',fantasy:'fantasy',mystery:'mystery',grit:'gritty',boxing:'boxing',motorsport:'motorsport',space:'space',revenge:'revenge story',comingofage:'coming of age',familydrama:'family drama',glossy:'glossy',aussie:'Australian'};
-function explain(t){const LT=libState();
-  const sims=LT.liked.filter(o=>o.id!==t.id).map(o=>({o,j:jacc(o.tags,t.tags)*(rating(o)==='love'?1.15:1)+(o.actors.some(a=>t.actors.includes(a))?.25:0)})).sort((a,b)=>b.j-a.j).filter(x=>x.j>=.3).slice(0,2);
-  const traits=[];
-  if(sims.length){const a=sims.map(x=>x.o.actors.find(a=>t.actors.includes(a))).find(Boolean);if(a)traits.push('also stars '+a);
-    const common=t.tags.filter(k=>READ[k]&&sims.some(x=>x.o.tags.includes(k))).sort((a,b)=>(LT.taste[b]||0)-(LT.taste[a]||0));common.forEach(k=>{if(traits.length<3&&!traits.includes(READ[k]))traits.push(READ[k])})}
-  else t.tags.filter(k=>READ[k]).sort((a,b)=>(LT.taste[b]||0)-(LT.taste[a]||0)).slice(0,3).forEach(k=>traits.push(READ[k]));
+/* honest explanations: strongest reason + the Loved/Liked films that back it up */
+const FEAT_KIND={underdog:'storyline',heist:'storyline',revenge:'storyline',survival:'storyline',comingofage:'storyline',familydrama:'storyline',spy:'storyline',superhero:'storyline',space:'storyline',real:'storyline',war:'setting',
+  dark:'tone',feelgood:'tone',inspiring:'tone',emotion:'tone',comedy:'tone',grit:'tone',glossy:'tone',mind:'tone',tension:'tone',fast:'pace',slow:'pace',epic:'scale'};
+function evidence(t){const LT=libState();
+  const sims=LT.liked.filter(o=>o.id!==t.id).map(o=>{const ca=o.actors.find(a=>t.actors.includes(a));return {o,ca,j:jacc(o.tags,t.tags)*(rating(o)==='love'?1.15:1)+(ca?.25:0)}}).sort((a,b)=>b.j-a.j);
+  const strong=sims.filter(x=>x.j>=.35).slice(0,2);
+  return {LT,sims,strong,level:strong.length?(strong[0].j>=.5||strong.length>1?'strong':'some'):'weak'}}
+function explain(t){const ev=evidence(t),LT=ev.LT,sims=ev.strong;
+  const verb=o=>rating(o)==='love'?'loved':'liked';
+  const nm=xs=>{const v=xs.map(x=>verb(x.o));const names=xs.map(x=>`<b>${h(x.o.t)}</b>`).join(' and ');return v.every(x=>x===v[0])?`${names}, which you ${v[0]}`:xs.map(x=>`<b>${h(x.o.t)}</b> (${verb(x.o)})`).join(' and ')};
+  let line='';
+  const castSim=ev.sims.find(x=>x.ca&&x.j>=.25);
+  if(sims.length){
+    const shared=t.tags.filter(k=>READ[k]&&sims.every(x=>x.o.tags.includes(k))).sort((a,b)=>(LT.taste[b]||0)-(LT.taste[a]||0));
+    const sh=shared.length?shared:t.tags.filter(k=>READ[k]&&sims.some(x=>x.o.tags.includes(k)));
+    const top=sh[0];
+    if(castSim&&(!top||castSim.j>=sims[0].j-.05))line=`Stars ${h(castSim.ca)}, like <b>${h(castSim.o.t)}</b>, which you ${verb(castSim.o)}${top?`. Also: ${h(READ[top])}`:''}.`;
+    else if(top){const kind=FEAT_KIND[top]||'genre',more=sh.slice(1,3).map(k=>READ[k]);
+      line=`Same ${kind} as ${nm(sims)}: ${h(READ[top])}${more.length?`. Also ${h(more.join(', '))}`:''}.`}
+    else line=`Close to ${nm(sims)}.`;
+    if(ev.level==='some')line='Partial match. '+line;
+  }else{
+    const good=t.tags.filter(k=>READ[k]&&(LT.taste[k]||0)>=.3&&(LT.n[k]||0)>=3).sort((a,b)=>LT.taste[b]-LT.taste[a]);
+    line=good.length?`Discovery: nothing you've rated is very close, but you tend to rate ${h(good.slice(0,2).map(k=>READ[k]).join(' and '))} films well.`
+      :`Wildcard: outside what you usually rate${t.tags.some(k=>READ[k])?` (${h(t.tags.filter(k=>READ[k]).slice(0,2).map(k=>READ[k]).join(', '))})`:''}. Rate it to teach MoodReel.`}
   const heads=[];
   if(t.k==='M'&&t.r>=150)heads.push(`it runs ${Math.floor(t.r/60)}h ${t.r%60}m`);
   if(t.k==='S'&&t.r>=5)heads.push(`${t.r} seasons to get through`);
@@ -853,10 +882,10 @@ function explain(t){const LT=libState();
   if(t.tags.includes('horror')&&(LT.taste.horror||0)<.2)heads.push("it's scary");
   if(t.tags.includes('slow')&&(LT.taste.slow||0)<.2)heads.push("it's a slow burn");
   if(t.tags.includes('dark')&&(LT.taste.dark||0)<.1&&!heads.length)heads.push('darker than your usual');
-  if(!heads.length&&sims.length){const diff=t.tags.find(k=>READ[k]&&!sims.some(x=>x.o.tags.includes(k)));if(diff)heads.push('adds '+READ[diff])}
-  const names=sims.map(x=>`<b>${h(x.o.t)}</b>`);
-  return {line:names.length?`Picked because you liked ${names.join(' and ')}${traits.length?': '+h(traits.join(', '))+'.':'.'}`:(traits.length?`Picked for you: ${h(traits.join(', '))}.`:'&nbsp;'),
-    heads:heads.length?'Heads-up: '+h(heads[0])+'.':''}}
+  {const bad=t.tags.find(k=>READ[k]&&(LT.taste[k]||0)<-.15&&(LT.neg[k]||0)>=2);if(bad&&!heads.length)heads.push(`you've rated ${READ[bad]} films down before`)}
+  return {line,level:ev.level,heads:heads.length?'Heads-up: '+h(heads[0])+'.':''}}
+/* a label that matches the evidence: never call a weak pick a confident match */
+function honestLabel(r){const lv=evidence(r.t).level;if(r.label==='Wildcard')return 'Wildcard';if(lv==='weak')return 'Discovery';if(lv==='some'&&(r.label==='Best match'||r.label==='Top match'))return 'Good chance';return r.label||''}
 function slotHTML(r){const t=r.t,like=r.why.filter(w=>w.startsWith('Like ')).map(w=>w.slice(5)),rest=r.why.filter(w=>!w.startsWith('Like '));
   const W=WIKI[wk(t)],d=DIRECTOR[t.t]||t.dir||(W&&W.dir&&W.dir.length?W.dir.join(', '):''),cast=t.actors.slice(0,3),lbl=/^(Created|Developed)/.test(d)?'':'Directed by ';
   const ex=explain(t);
@@ -1060,7 +1089,7 @@ ACT.fyMore=()=>{tonight3().forEach(r=>{FY.out.push(r.t.id);uniqPush(store.sugges
 
 /* ===== home ===== */
 const toWatch=t=>rating(t)==='unseen'||(!rating(t)&&store.chosen.includes(t.id));
-function counts(){const c={love:0,like:0,ok:0,dislike:0,unseen:0,pass:0};TITLES.forEach(t=>{const r=rating(t);if(r&&r!=='unseen')c[r]++;if(toWatch(t))c.unseen++});store.custom.forEach(x=>{if(c[x.r]!=null)c[x.r]++});return c}
+function counts(){const c={love:0,like:0,ok:0,dislike:0,unseen:0,pass:0,seen:0};TITLES.forEach(t=>{const r=rating(t);if(r&&r!=='unseen')c[r]++;if(toWatch(t))c.unseen++});store.custom.forEach(x=>{if(c[x.r]!=null)c[x.r]++});return c}
 function home(){
   const c=counts();
   render(`<div class="homefix">
@@ -1270,7 +1299,7 @@ ACT.howBack=()=>{const ids=S.picks;S.offered=S.offered.filter(id=>!ids.includes(
 /* ===== pick card (shared) ===== */
 function pickCard(r,mode){const t=r.t,su=mode==='surprise';
   return `<div class="sug pick2" id="s${t.id}"><div class="ptop">${poster(t)}<div>
-      <div class="plabel ${r.label==='Wildcard'?'wild':''}">${h(r.label||'')}</div><h4>${h(t.t)}</h4><div class="meta">${t.k==='M'?'Film':'Series'} · ${t.y} · ${t.c} · ${runtime(t)}</div>
+      ${(()=>{const L=honestLabel(r);return `<div class="plabel ${L==='Wildcard'||L==='Discovery'?'wild':''}">${h(L)}</div>`})()}<h4>${h(t.t)}</h4><div class="meta">${t.k==='M'?'Film':'Series'} · ${t.y} · ${t.c} · ${runtime(t)}</div>
       ${svcTag(t)}<p>${h(t.blurb)}</p></div></div>
     ${slotHTML(r)}
     <div class="acts">
@@ -1324,8 +1353,8 @@ ACT.why=v=>{const [i,kind,k]=v.split(':'),id=+i,t=TITLES[id],T=store.taste,a=(x,
   if(k==='slow'){a('slow',-.8);a('fast',.2)}if(k==='dark'){a('dark',-.6);a('gore',-.8);a('horror',-.4)}if(k==='funny')a('comedy',-.6);
   if(k==='cast'){store.actorNo=store.actorNo||[];t.actors.slice(0,2).forEach(x=>uniqPush(store.actorNo,x))}
   if(k==='genre'){a(primary(t),-.7)}if(k==='story'){t.tags.forEach(x=>a(x,-.1))}if(k==='long')store.longPen=(store.longPen||0)+1;
-  if(k==='seen')setRate(id,'like');
-  store.whyLog.push({id,kind,k});RV++;save();ACT.closesheet();toast(k==='seen'?'Moved to Liked':'Got it, noted')};
+  if(k==='seen'){setRate(id,'seen');if(kind==='pass')add(store.taste,t.tags,.08)} // undo the small Not-for-me nudge
+  store.whyLog.push({id,kind,k});RV++;save();ACT.closesheet();toast(k==='seen'?'Marked as seen, no rating':'Got it, noted')};
 ACT.maybeSurprise=v=>{const id=+v;spPush(id);setRate(id,'unseen');toast("Saved to Haven't seen");S.out.push(id);ACT.surprise(true)};
 ACT.maybeAs=v=>{const id=+v;setRate(id,'unseen');S.out.push(id);toast("Saved to Haven't seen");const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{el.remove();S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length)ACT.keep()},250)};
 ACT.skipSurprise=v=>{const id=+v;spPush(id);S.out.push(id);ACT.surprise(true)};
@@ -1337,12 +1366,26 @@ const tri=(o,k)=>o[k]===1?'love':o[k]===-1?'avoid':'';
 const cyc=(o,k)=>{o[k]=o[k]===1?-1:o[k]===-1?undefined:1;if(o[k]===undefined)delete o[k]};
 const chipList=(list,cls,act)=>`<div class="chips">${list.map(([k,l])=>`<button class="chip ${cls(k)}" data-act="${act}" data-v="${h(k)}">${h(l)}</button>`).join('')}</div>`;
 let actorPool=[];
+function learnedHTML(){const LT=libState(),c={love:0,like:0,ok:0,neg:0};
+  TITLES.forEach(t=>{const r=rating(t);if(r==='love')c.love++;else if(r==='like')c.like++;else if(r==='ok')c.ok++;else if(r==='dislike'||r==='pass')c.neg++});
+  const nm=k=>READ[k]?READ[k].charAt(0).toUpperCase()+READ[k].slice(1):'';
+  const likes=Object.keys(LT.taste).filter(k=>READ[k]&&(LT.pos[k]||0)>=3&&LT.taste[k]>=.25).sort((a,b)=>LT.taste[b]-LT.taste[a]).slice(0,5);
+  const dis=Object.keys(LT.taste).filter(k=>READ[k]&&(LT.neg[k]||0)>=2&&(LT.neg[k]/(LT.n[k]||1))>=.25).sort((a,b)=>(LT.neg[b]/LT.n[b])-(LT.neg[a]/LT.n[a])).slice(0,4);
+  const row=(k,txt,cls)=>`<div class="lrn ${cls}"><b>${h(nm(k))}</b><span>${txt}</span></div>`;
+  return `<div class="group learned"><h3>What MoodReel has learned</h3>
+    <p class="sub" style="margin:0 0 10px">From ${LT.rated} rated titles: ${c.love} loved, ${c.like} liked, ${c.ok} OK, ${c.neg} disliked or not for me. Not seen and Maybe later don't count.</p>
+    ${LT.rated<5?'<p class="sub">Rate a few more films and this fills in.</p>':`
+    <div class="lrnh">Leans towards</div>${likes.length?likes.map(k=>row(k,`${LT.pos[k]} loved or liked`,'up')).join(''):'<p class="sub">No clear favourites yet.</p>'}
+    <div class="lrnh">Tends to avoid</div>${dis.length?dis.map(k=>row(k,`${LT.neg[k]} of ${LT.n[k]} rated down`,'down')).join(''):'<p class="sub">Not enough Disliked or Not for me ratings yet to spot a pattern.</p>'}`}
+  </div>`}
 function taste(){
   const p=P(),cnt={};TITLES.forEach(t=>t.actors.forEach(a=>cnt[a]=(cnt[a]||0)+1));
   actorPool=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]||a.localeCompare(b));
   const y=window.scrollY;
   render(`<div class="row"><button class="textbtn" data-act="home">Done</button></div>
-    <h2 style="margin-top:6px">Your taste</h2><p class="sub">All optional. Swiping teaches it anyway, this just gives it a head start.</p>
+    <h2 style="margin-top:6px">Your taste</h2>
+    ${learnedHTML()}
+    <h3 class="settingsh">Your settings</h3><p class="sub">What you've told it. All optional, and kept separate from what it learns.</p>
     <div class="group"><h3>Genres</h3><div class="hintline">Tap once to love, twice to avoid</div>${chipList(GENRES,k=>tri(p.genres,k),'g')}</div>
     <div class="group"><h3>Storylines</h3>${chipList(STORIES,k=>tri(p.stories,k),'st')}</div>
     <div class="group"><h3>Sport you're into</h3>${chipList(SPORTS,k=>p.sports.includes(k)?'on':'','sp')}</div>
@@ -1420,7 +1463,7 @@ let LIBV={f:'all',q:'',n:60};
 const byTitle=(a,b)=>a.t.replace(/^The /,'').localeCompare(b.t.replace(/^The /,''));
 function libFilter(t){const r=rating(t),q=LIBV.q.toLowerCase().trim();
   if(q)return t.t.toLowerCase().includes(q)||t.actors.some(a=>a.toLowerCase().includes(q));
-  if(LIBV.f==='watch')return store.watchlist.includes(t.id);if(LIBV.f==='all')return r==='love'||r==='like'||r==='ok'||r==='dislike';if(LIBV.f==='unseen')return toWatch(t);if(LIBV.f==='unrated')return !r&&!toWatch(t);return r===LIBV.f}
+  if(LIBV.f==='watch')return store.watchlist.includes(t.id);if(LIBV.f==='all')return r==='love'||r==='like'||r==='ok'||r==='dislike'||r==='seen';if(LIBV.f==='unseen')return toWatch(t);if(LIBV.f==='unrated')return !r&&!toWatch(t);return r===LIBV.f}
 function libRowHTML(id,title,meta,r,custom){const t=custom?null:TITLES[id];return `<div class="lrow${t?' withimg':''}">${t?`<div class="lthumb">${poster(t)}</div>`:''}<div class="lbody"><div class="lt"><b>${h(title)}</b><span>${meta}</span></div>
   <div class="seg seg5">${(custom?RATES:SEG).map(([k,l])=>`<button class="${r===k?'on '+k:''}" data-act="${custom?'crate':'rate'}" data-v="${id}:${k}">${l}</button>`).join('')}</div>${t?`<button class="wl ${store.watchlist.includes(id)?'on':''}" data-act="wltog" data-v="${id}">${store.watchlist.includes(id)?'On your watchlist ✓':'+ Add to watchlist'}</button>`:''}</div></div>`}
 function libRows(){
@@ -1434,7 +1477,7 @@ function libRows(){
 }
 function libView(keepScroll){
   const y=window.scrollY,c=counts();
-  const tabs=[['watch','Watchlist',store.watchlist.length],['all','All seen',c.love+c.like+c.ok+c.dislike],['love','Loved',c.love],['like','Liked',c.like],['ok','OK',c.ok],['dislike','Disliked',c.dislike],['unseen',"Haven't seen",c.unseen],['pass','Not for me',c.pass],['unrated','Not rated',TITLES.filter(t=>!rating(t)&&!toWatch(t)).length]];
+  const tabs=[['watch','Watchlist',store.watchlist.length],['all','All seen',c.love+c.like+c.ok+c.dislike+c.seen],['love','Loved',c.love],['like','Liked',c.like],['ok','OK',c.ok],['dislike','Disliked',c.dislike],['unseen',"Haven't seen",c.unseen],['pass','Not for me',c.pass],['unrated','Not rated',TITLES.filter(t=>!rating(t)&&!toWatch(t)).length]];
   render(`<div class="row"><button class="textbtn" data-act="home">Done</button><span class="spacer"></span><span class="pill">${c.love+c.like+c.ok+c.dislike} watched</span></div>
     <h2 style="margin-top:6px">My library</h2><p class="sub">Everything you've seen. Tap to change a rating, tap it again to clear it. Your Apple TV films start as Seen.</p>
     <div class="cta" style="margin:0 0 16px"><button class="btn" data-act="libswipe">Rate films by swiping</button></div>
@@ -1502,7 +1545,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.14';
+const APP_VERSION='3.15';
 function checkUpdate(){try{fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();if(v&&v!==APP_VERSION){try{if(sessionStorage.getItem('mr_reload')===v)return;sessionStorage.setItem('mr_reload',v)}catch(e){}location.replace(location.pathname+'?v='+v)}}).catch(()=>{})}catch(e){}}
 checkUpdate();document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
 
