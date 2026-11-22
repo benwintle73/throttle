@@ -179,7 +179,7 @@ body.nohscroll .wrap{padding-bottom:0}
 .arow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
 .ab{height:46px;border-radius:12px;font-size:14px;font-weight:600;white-space:nowrap;background:var(--panel2);border:1px solid var(--line);transition:transform .1s}
 .ab:active{transform:scale(.96)}
-.ab.watch{background:var(--good);border-color:var(--good);color:#06140e}.ab.later{color:var(--seen)}.ab.pass{color:var(--muted)}
+.ab.watch{background:var(--good);border-color:var(--good);color:#06140e}.ab.later{color:#cfc9da}.ab.pass{color:var(--muted)}
 .arow4{grid-template-columns:repeat(4,1fr);gap:6px}.arow4 .ab{font-size:12.5px;padding:0 2px}.ab.ok{color:#cfc9da}
 .ab.love{color:var(--love)}.ab.like{color:var(--seen)}.ab.dislike{color:var(--bad)}
 .yn3{grid-template-columns:1fr 1fr 1fr!important}.yn3 button{font-size:13px;padding:10px 2px}.yn .u{background:var(--panel2);border:1px solid var(--line);color:var(--seen)}
@@ -1120,8 +1120,8 @@ function pickCard(r,mode){const t=r.t,su=mode==='surprise';
     <div class="acts">
       <div class="albl">Haven't seen it</div>
       <div class="arow">
-        <button class="ab watch" data-act="yes" data-v="${t.id}">Watch it</button>
-        <button class="ab later" data-act="${su?'unseenSurprise':'unseenAs'}" data-v="${t.id}">Save for later</button>
+        <button class="ab watch" data-act="${su?'unseenSurprise':'unseenAs'}" data-v="${t.id}">Save for later</button>
+        <button class="ab later" data-act="${su?'skipSurprise':'skipAs'}" data-v="${t.id}">No thanks</button>
         <button class="ab pass" data-act="${su?'surpriseNo':'no'}" data-v="${t.id}">Not for me</button>
       </div>
       <div class="albl">Seen it</div>
@@ -1169,6 +1169,8 @@ ACT.why=v=>{const [i,kind,k]=v.split(':'),id=+i,t=TITLES[id],T=store.taste,a=(x,
   if(k==='genre'){a(primary(t),-.7)}if(k==='story'){t.tags.forEach(x=>a(x,-.1))}if(k==='long')store.longPen=(store.longPen||0)+1;
   if(k==='seen')setRate(id,'like');
   store.whyLog.push({id,kind,k});RV++;save();ACT.closesheet();toast(k==='seen'?'Moved to Liked':'Got it, noted')};
+ACT.skipSurprise=v=>{const id=+v;spPush(id);S.out.push(id);ACT.surprise(true)};
+ACT.skipAs=v=>{const id=+v;S.out.push(id);const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{el.remove();S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length)ACT.keep()},250)};
 ACT.sugBack=()=>{S.picks=[];deck()};
 
 /* ===== your taste ===== */
@@ -1330,7 +1332,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.0';
+const APP_VERSION='3.1';
 function checkUpdate(){try{fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();if(v&&v!==APP_VERSION){try{if(sessionStorage.getItem('mr_reload')===v)return;sessionStorage.setItem('mr_reload',v)}catch(e){}location.replace(location.pathname+'?v='+v)}}).catch(()=>{})}catch(e){}}
 checkUpdate();document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
 
