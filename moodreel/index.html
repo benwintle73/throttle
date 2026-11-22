@@ -101,6 +101,24 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;paddin
 .card .credits{margin-top:6px}
 .poster.img{background-size:cover!important;background-position:center top!important}.poster.img .pk,.poster.img .pt,.poster.img .rule,.poster.img .pg{display:none}.poster.img::before{display:none}
 .about{margin:8px 0 2px;font-size:13px;color:#cfc9da}.about summary{cursor:pointer;color:var(--accent);font-weight:600;list-style:none}.about summary::-webkit-details-marker{display:none}.about summary::after{content:" ›"}.about p{margin:8px 0}.about a{color:var(--muted);font-size:12px}
+
+/* bigger posters + text on pick cards */
+.pick2 .ptop{grid-template-columns:44% 1fr!important;gap:16px!important}
+.pick2 .poster{aspect-ratio:2/3;border-radius:12px;padding:10px}
+.pick2 .poster .pt{font-size:26px}
+.pick2 h4{font-size:22px;line-height:1.15}
+.pick2 .meta{font-size:14px}
+.pick2 p{font-size:15.5px;line-height:1.45}
+.pick2 .credits{font-size:14.5px}
+.pick2 .ifliked{font-size:15px}
+.pick2 .why span{font-size:13px;padding:5px 10px}
+.about{font-size:14.5px}
+/* library rows with thumbnails */
+.lrow.withimg{display:grid;grid-template-columns:68px 1fr;gap:12px;align-items:start}
+.lthumb .poster{aspect-ratio:2/3;border-radius:8px;padding:6px}
+.lthumb .poster .pt{font-size:13px}.lthumb .poster .pk,.lthumb .poster .pg,.lthumb .poster .rule{display:none}
+.lrow .lt b{font-size:16px}.lrow .lt{flex-wrap:wrap;row-gap:2px}
+.card .info p{font-size:15.5px}.card .info .meta{font-size:14px}.card .credits{font-size:14px}
 .topnav{margin-bottom:4px}.backbtn{display:inline-flex;align-items:center;gap:4px;padding:9px 14px 9px 8px;border-radius:99px;background:var(--panel);border:1px solid var(--line);font-size:14px;font-weight:600}
 .backbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .pick2{display:block;padding:14px}.pick2 .ptop{display:grid;grid-template-columns:96px 1fr;gap:14px;margin-bottom:10px}
@@ -1081,8 +1099,8 @@ const byTitle=(a,b)=>a.t.replace(/^The /,'').localeCompare(b.t.replace(/^The /,'
 function libFilter(t){const r=rating(t),q=LIBV.q.toLowerCase().trim();
   if(q)return t.t.toLowerCase().includes(q)||t.actors.some(a=>a.toLowerCase().includes(q));
   if(LIBV.f==='all')return r==='love'||r==='like'||r==='ok'||r==='dislike';if(LIBV.f==='unseen')return toWatch(t);if(LIBV.f==='unrated')return !r&&!toWatch(t);return r===LIBV.f}
-function libRowHTML(id,title,meta,r,custom){return `<div class="lrow"><div class="lt"><b>${h(title)}</b><span>${meta}</span></div>
-  <div class="seg seg5">${(custom?RATES:SEG).map(([k,l])=>`<button class="${r===k?'on '+k:''}" data-act="${custom?'crate':'rate'}" data-v="${id}:${k}">${l}</button>`).join('')}</div></div>`}
+function libRowHTML(id,title,meta,r,custom){const t=custom?null:TITLES[id];return `<div class="lrow${t?' withimg':''}">${t?`<div class="lthumb">${poster(t)}</div>`:''}<div class="lbody"><div class="lt"><b>${h(title)}</b><span>${meta}</span></div>
+  <div class="seg seg5">${(custom?RATES:SEG).map(([k,l])=>`<button class="${r===k?'on '+k:''}" data-act="${custom?'crate':'rate'}" data-v="${id}:${k}">${l}</button>`).join('')}</div></div></div>`}
 function libRows(){
   const q=LIBV.q.trim(),ql=q.toLowerCase();
   const list=TITLES.filter(libFilter).sort(byTitle);
@@ -1103,12 +1121,12 @@ function libView(keepScroll){
     <div id="librows">${libRows()}</div>`);
   if(keepScroll)try{window.scrollTo(0,y)}catch(e){}
 }
-INP_LIB=v=>{LIBV.q=v;LIBV.n=60;const el=$('#librows');if(el)el.innerHTML=libRows()};
+INP_LIB=v=>{LIBV.q=v;LIBV.n=60;const el=$('#librows');if(el){el.innerHTML=libRows();queueVisible()}};
 ACT.clearSuggested=()=>{store.suggested=[];save();toast('Past suggestions can come back');listView()};
 Object.assign(ACT,{
   lib(v){LS.on=false;LIBV={f:v||'all',q:'',n:60};libView()},
   libf(v){LIBV.f=v;LIBV.n=60;libView(true)},
-  libmore(){LIBV.n+=60;const el=$('#librows');if(el)el.innerHTML=libRows()},
+  libmore(){LIBV.n+=60;const el=$('#librows');if(el){el.innerHTML=libRows();queueVisible()}},
   rate(v){const [id,r]=v.split(':');const n=+id;setRate(n,store.rate[n]===r?null:r);if(r!=='unseen')remove(store.nope,n);const el=$('#librows');if(el)el.innerHTML=libRows()},
   crate(v){const [id,r]=v.split(':');const x=store.custom.find(c=>c.id===id);if(!x)return;if(x.r===r)store.custom=store.custom.filter(c=>c!==x);else x.r=r;save();const el=$('#librows');if(el)el.innerHTML=libRows()},
   addcustom(v){const t=LIBV.q.trim();if(!t)return;store.custom.push({id:'c'+Date.now(),t,r:v});save();toast('Added to your library');const el=$('#librows');if(el)el.innerHTML=libRows()},
@@ -1153,11 +1171,12 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='2.3';
+const APP_VERSION='2.4';
 function checkUpdate(){try{fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();if(v&&v!==APP_VERSION){try{if(sessionStorage.getItem('mr_reload')===v)return;sessionStorage.setItem('mr_reload',v)}catch(e){}location.replace(location.pathname+'?v='+v)}}).catch(()=>{})}catch(e){}}
 checkUpdate();document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
 
-const _render=render;render=html=>{_render(html);const vis=[];document.querySelectorAll('[data-wk]').forEach(el=>{const t=TITLES.find(x=>wk(x)===el.dataset.wk);if(t)vis.push(t)});if(vis.length)wikiWant(vis,true)};
+function queueVisible(){const vis=[];document.querySelectorAll('[data-wk]').forEach(el=>{const t=TITLES.find(x=>wk(x)===el.dataset.wk);if(t)vis.push(t)});if(vis.length)wikiWant(vis,true)}
+const _render=render;render=html=>{_render(html);queueVisible()};
 setTimeout(()=>{try{const top=ranked().slice(0,40).map(r=>r.t);wikiWant(top);wikiWant(TITLES.filter(t=>!t.own));wikiWant(TITLES.filter(t=>t.own))}catch(e){}},1500);
 home();
 </script>
