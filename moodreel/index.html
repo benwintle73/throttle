@@ -1101,6 +1101,7 @@ function home(){
     <p class="note hnote"><button class="textbtn" data-act="how">How it picks</button> · <button class="textbtn" data-act="list">History & backup</button> · <span class="cnt">${TITLES.length} titles</span> · v${APP_VERSION}</p>
   </div>`);
   document.body.classList.add('nohscroll');
+  if(window._updV&&window._updV!==APP_VERSION)setTimeout(checkUpdate,300);
 }
 
 /* ===== questions ===== */
@@ -1545,8 +1546,9 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.15';
-function checkUpdate(){try{fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();if(v&&v!==APP_VERSION){try{if(sessionStorage.getItem('mr_reload')===v)return;sessionStorage.setItem('mr_reload',v)}catch(e){}location.replace(location.pathname+'?v='+v)}}).catch(()=>{})}catch(e){}}
+const APP_VERSION='3.16';
+window._updNow=true;setTimeout(()=>{window._updNow=false},4000);setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
+function checkUpdate(){try{fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();if(v&&v!==APP_VERSION){window._updV=v;if(!document.querySelector('.homefix')&&!window._updNow)return;try{if(sessionStorage.getItem('mr_reload')===v)return;sessionStorage.setItem('mr_reload',v)}catch(e){}location.replace(location.pathname+'?v='+v)}}).catch(()=>{})}catch(e){}}
 checkUpdate();document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
 
 function queueVisible(){const vis=[];document.querySelectorAll('[data-wk]').forEach(el=>{const t=TITLES.find(x=>wk(x)===el.dataset.wk);if(t)vis.push(t)});if(vis.length)wikiWant(vis,true)}
