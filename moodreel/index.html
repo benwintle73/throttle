@@ -1073,6 +1073,7 @@ function forYou(){
   render(`${topBar('home')}
   <h2 class="fyh">Your top 3, guessed</h2><p class="sub fys">Based on everything you've rated. Tell it if it's wrong.${(store.top3yes||[]).length||(store.top3no||[]).length?' <button class="textbtn fyreset" data-act="top3reset">Guess again</button>':''}</p>
   ${top.length?top.map((t,i)=>fyRow(t,(store.top3yes||[]).includes(t.id)?`<span class="fyok">Confirmed</span><button class="fyx" data-act="top3undo" data-v="${t.id}">Undo</button>`:`<button class="fyb1" data-act="top3yes" data-v="${t.id}">Yes, a favourite</button><button class="fyx" data-act="top3no" data-v="${t.id}">Not really</button>`,`<span class="fyn">#${i+1}</span> ${h(t.blurb||'')}`)).join(''):'<p class="sub">Rate a few films as Loved or Liked first.</p>'}
+  ${top.length&&top.every(t=>(store.top3yes||[]).includes(t.id))?'<button class="btn" style="width:100%;margin-top:4px" data-act="top3reset">Nice. Guess 3 more</button>':''}
   <h2 class="fyh" style="margin-top:22px">Three for tonight</h2><p class="sub fys">${h(tonightLine())}</p>
   ${tn.length?tn.map(r=>fyRow(r.t,`<button class="fyb1" data-act="fyWatch" data-v="${r.t.id}">Watch tonight</button><button class="fyx" data-act="fyLater" data-v="${r.t.id}">Want to watch</button><button class="fyx" data-act="fyNot" data-v="${r.t.id}">Not tonight</button><button class="fyx" data-act="fySkip" data-v="${r.t.id}">Never show</button>`,explain(r.t).line)).join(''):'<p class="sub">Nothing left that fits tonight. Try changing Tonight on the home screen.</p>'}
   <button class="btn ghost" style="margin-top:14px;width:100%" data-act="fyMore">Show me 3 others</button>`)}
@@ -1546,7 +1547,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.17';
+const APP_VERSION='3.18';
 window._updNow=true;setTimeout(()=>{window._updNow=false},4000);setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
 ACT.update=()=>{toast('Checking for updates…');fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();
   if(v&&v!==APP_VERSION){try{sessionStorage.removeItem('mr_reload')}catch(e){}toast('Updating to v'+v);setTimeout(()=>location.replace(location.pathname+'?v='+v+'&t='+Date.now()),400)}
