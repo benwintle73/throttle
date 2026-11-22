@@ -782,6 +782,10 @@
   .appear .pv-retro{background:linear-gradient(180deg,#141339 0%,#C8452F 55%,#FF9B2E 70%,#0b0b0e 70%);position:relative}
   .appear .pv-retro::after{content:'12:00';position:absolute;left:0;right:0;bottom:2px;text-align:center;font:700 11px 'Orbitron',monospace;color:#FFB000;text-shadow:0 0 4px #FFB000}
 
+  .daily-card h2.fold{cursor:pointer;display:flex;align-items:center;gap:6px}
+  .daily-card h2.fold .chev{width:16px;height:16px;margin-left:auto;opacity:.7;transition:transform .2s}
+  .daily-card.open h2.fold .chev{transform:rotate(180deg)}
+  .daily-card .day-more{display:block;margin:8px auto 0;border:0;background:rgba(255,255,255,.12);color:inherit;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;border-radius:999px;cursor:pointer}
   /* ===== Local news ===== */
   .news .nw{display:block;padding:9px 0;border-top:1px solid rgba(255,255,255,.12);color:inherit;text-decoration:none}
   .news .nw:first-of-type{border-top:0}
@@ -1523,6 +1527,17 @@ async function refreshNow(){
   setTimeout(() => { refState = ''; paintRefBtn(); }, 1800);
 }
 
+/* ---------- 7-day forecast: folds down to tomorrow ---------- */
+const CHEV = `<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`;
+function dailyCardHTML(days){
+  const open = !!store.get('wx_daily_open', false);
+  return `<section class="card daily-card ${open ? 'open' : ''}" id="dailyCard">
+      <h2 class="fold" onclick="toggleDaily()">${svgCal()} ${open ? '7-day forecast' : 'Tomorrow'}${CHEV}</h2>
+      ${open ? days.join('') : (days[1] || days[0] || '')}
+      <button class="day-more" onclick="toggleDaily()">${open ? 'Show less' : 'Show 7 days'}</button>
+    </section>`;
+}
+function toggleDaily(){ store.set('wx_daily_open', !store.get('wx_daily_open', false), true); if (lastData) render(lastData); }
 /* ---------- render ---------- */
 function render(d){
   const c = d.current, h = d.hourly, dy = d.daily;
@@ -1546,13 +1561,13 @@ function render(d){
   // daily with range bars
   const wkMin = Math.min(...dy.temperature_2m_min), wkMax = Math.max(...dy.temperature_2m_max);
   const span = Math.max(1, wkMax - wkMin);
-  let days = '';
+  const days = [];
   dy.time.forEach((t,i)=>{
     const lo = dy.temperature_2m_min[i], hi = dy.temperature_2m_max[i];
     const L = (lo-wkMin)/span*100, W = (hi-lo)/span*100;
     const p = dy.precipitation_probability_max[i];
     const dot = i===0 ? `<span class="dot" style="left:calc(${Math.min(100,Math.max(0,(c.temperature_2m-wkMin)/span*100))}% - 5px)"></span>` : '';
-    days += `<div class="day">
+    days.push(`<div class="day">
       <div class="n">${dayName(t,i)}</div>
       <div class="i">${icon(dy.weather_code[i],1)}</div>
       <div class="p">${p>=20?p+'%':''}</div>
@@ -1561,7 +1576,7 @@ function render(d){
         <div class="range"><span style="left:${L}%;width:${Math.max(W,4)}%;background:linear-gradient(90deg,${tempColor(lo)},${tempColor(hi)})"></span>${dot}</div>
       </div>
       <div class="hi">${r0(hi)}°</div>
-    </div>`;
+    </div>`);
   });
 
   const uv = dy.uv_index_max[0] ?? 0;
@@ -1573,10 +1588,7 @@ function render(d){
       <h2>${svgClock()} Next 24 hours</h2>
       <div class="hourly">${hours}</div>
     </section>`,
-    daily: `<section class="card daily-card">
-      <h2>${svgCal()} 7-day forecast</h2>
-      ${days}
-    </section>`,
+    daily: dailyCardHTML(days),
     details: `<section class="grid">
       <div class="card stat">
         <h2>Wind</h2>
@@ -3655,9 +3667,11 @@ function closeRadar(){ stopRadar(); $('radarPage').classList.remove('open'); }
 $('rpClose').onclick = closeRadar;
 
 /* ---------- card layout (reorderable) ---------- */
-const CARD_KEYS = ['thought','rain','hourly','daily','radar','details','climate','todo','puzzle','fun','news','tips','saju','mind'];   // weather first; the extras below
-const CARD_NAMES = { thought:'Thought', todo:'To-do', puzzle:'Daily puzzle', fun:'Just for fun', news:'Local news', saju:'Korean fortune', mind:'Mind Reader', tips:'Best bets', rain:'Next 2 hours', radar:'Rain radar', hourly:'Next 24 hours', daily:'7-day forecast', climate:'Typical weather', details:'Wind, UV & more' };
+const CARD_KEYS = ['daily','thought','rain','hourly','radar','details','climate','todo','puzzle','fun','news','tips','saju','mind'];   // weather first; the extras below
+const CARD_NAMES = { thought:'Thought', todo:'To-do', puzzle:'Daily puzzle', fun:'Just for fun', news:'Local news', saju:'Korean fortune', mind:'Mind Reader', tips:'Best bets', rain:'Next 2 hours', radar:'Rain radar', hourly:'Next 24 hours', daily:'Forecast', climate:'Typical weather', details:'Wind, UV & more' };
 let editLayout = false;
+// one-off: the forecast moves to the top of saved card orders
+(() => { if (store.get('wx_mig_daily1', false)) return; const o = store.get('wx_order', []); if (Array.isArray(o) && o.length){ store.set('wx_order', ['daily', ...o.filter(k => k !== 'daily')]); } store.set('wx_mig_daily1', true, true); })();
 function layoutOrder(){
   const o = (store.get('wx_order', []) || []).filter(k => CARD_KEYS.includes(k));
   CARD_KEYS.forEach((k, i) => { if (!o.includes(k)){ const prev = CARD_KEYS[i-1], at = prev ? o.indexOf(prev) : -1; o.splice(at + 1, 0, k); } });
@@ -4273,7 +4287,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.28', APP_BUILT = '22 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.29', APP_BUILT = '22 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
