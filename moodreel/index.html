@@ -859,16 +859,29 @@ const READ={real:'true story',war:'wartime setting',mind:'makes you think',comed
 /* honest explanations: strongest reason + the Loved/Liked films that back it up */
 const FEAT_KIND={underdog:'storyline',heist:'storyline',revenge:'storyline',survival:'storyline',comingofage:'storyline',familydrama:'storyline',spy:'storyline',superhero:'storyline',space:'storyline',real:'storyline',war:'setting',
   dark:'tone',feelgood:'tone',inspiring:'tone',emotion:'tone',comedy:'tone',grit:'tone',glossy:'tone',mind:'tone',tension:'tone',fast:'pace',slow:'pace',epic:'scale'};
+const GENERIC={emotion:.25,comedy:.45,tension:.45,action:.55,dark:.45,fast:.4,slow:.4,feelgood:.5,glossy:.3,grit:.5};
+const TW=k=>GENERIC[k]||1;
+function tagW(t){if(t._tw===undefined)t._tw=t.tags.reduce((a,k)=>a+TW(k),0);return t._tw}
+const baseT=x=>NORMT(String(x).replace(/[:\-–].*$/,'').replace(/\b(part )?(\d+|ii|iii|iv|two|three)\b\s*$/i,''));
+function sameFranchise(a,b){const x=baseT(a.t),y=baseT(b.t);return x.length>=4&&x===y&&a.id!==b.id}
+function simW(o,t){let inter=0,spec=0;for(const k of t.tags)if(o.tags.includes(k)){inter+=TW(k);if(!GENERIC[k])spec++}
+  let j=inter/((tagW(o)+tagW(t)-inter)||1);
+  if(!spec)j*=.45;                                    // only broad overlap (e.g. "emotional, humour") is weak evidence
+  if(o.k!==t.k)j*=.8;                                 // film vs series
+  if(o.tags.includes('family')!==t.tags.includes('family'))j*=.6; // kids' film vs grown-up drama
+  return {j,spec}}
 function evidence(t){const LT=libState();
-  const sims=LT.liked.filter(o=>o.id!==t.id).map(o=>{const ca=o.actors.find(a=>t.actors.includes(a));return {o,ca,j:jacc(o.tags,t.tags)*(rating(o)==='love'?1.15:1)+(ca?.25:0)}}).sort((a,b)=>b.j-a.j);
+  const sims=LT.liked.filter(o=>o.id!==t.id).map(o=>{const ca=o.actors.find(a=>t.actors.includes(a)),fr=sameFranchise(o,t),m=simW(o,t);
+    return {o,ca,fr,spec:m.spec,j:(fr?1:m.j)*(rating(o)==='love'?1.15:1)+(ca?.25:0)}}).sort((a,b)=>b.j-a.j);
   const strong=sims.filter(x=>x.j>=.35).slice(0,2);
-  return {LT,sims,strong,level:strong.length?(strong[0].j>=.5||strong.length>1?'strong':'some'):'weak'}}
+  return {LT,sims,strong,level:strong.length?(strong[0].fr||strong[0].j>=.5||strong.length>1?'strong':'some'):'weak'}}
 function explain(t){const ev=evidence(t),LT=ev.LT,sims=ev.strong;
   const verb=o=>rating(o)==='love'?'loved':'liked';
   const nm=xs=>{const v=xs.map(x=>verb(x.o));const names=xs.map(x=>`<b>${h(x.o.t)}</b>`).join(' and ');return v.every(x=>x===v[0])?`${names}, which you ${v[0]}`:xs.map(x=>`<b>${h(x.o.t)}</b> (${verb(x.o)})`).join(' and ')};
   let line='';
-  const castSim=ev.sims.find(x=>x.ca&&x.j>=.25);
-  if(sims.length){
+  const castSim=ev.sims.find(x=>x.ca&&x.j>=.25),fr=sims.find(x=>x.fr);
+  if(fr)line=`Follows on from <b>${h(fr.o.t)}</b>, which you ${verb(fr.o)}.`;
+  else if(sims.length){
     const shared=t.tags.filter(k=>READ[k]&&sims.every(x=>x.o.tags.includes(k))).sort((a,b)=>(LT.taste[b]||0)-(LT.taste[a]||0));
     const sh=shared.length?shared:t.tags.filter(k=>READ[k]&&sims.some(x=>x.o.tags.includes(k)));
     const top=sh[0];
@@ -1042,7 +1055,7 @@ function score(t){
   if(S&&S.said)for(const k of t.tags)if(S.said[k])why.push([3.2,'You said '+S.said[k].toLowerCase()]);
   const cnt=new Map(),act=new Set();for(const k of t.tags){const L=LT.tagIdx[k];if(L)for(const o of L)cnt.set(o,(cnt.get(o)||0)+1)}
   for(const a of t.actors){const L=LT.actIdx[a];if(L)for(const o of L){act.add(o);if(!cnt.has(o))cnt.set(o,0)}}
-  let lb=null,lo=0;cnt.forEach((c,o)=>{if(o.id===t.id)return;const j=c/(t.tags.length+o.tags.length-c||1)*(rating(o)==='love'?1.15:1)+(act.has(o)?.25:0);if(j>lo){lo=j;lb=o}});
+  let lb=null,lo=0;cnt.forEach((c,o)=>{if(o.id===t.id)return;const j=(sameFranchise(o,t)?1:simW(o,t).j)*(rating(o)==='love'?1.15:1)+(act.has(o)?.25:0);if(j>lo){lo=j;lb=o}});
   if(lo>=.4){s+=lo*2.2;why.push([3.4,'Like '+lb.t])}
   if(S)for(const id of S.wants){const o=jacc(TITLES[id].tags,t.tags);if(o>=.4){s+=o*1.5;if(id!==t.id)why.push([2,'Like '+TITLES[id].t]);break}}
   if(p.services.length&&t.svc){if(p.services.includes(t.svc)){s+=store.svcMode==='prefer'?2:.8;why.push([.6,'On '+t.svc])}else s-=2.5}
@@ -1567,7 +1580,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.20';
+const APP_VERSION='3.21';
 window._updNow=true;setTimeout(()=>{window._updNow=false},4000);setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
 ACT.update=()=>{toast('Checking for updates…');fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();
   if(v&&v!==APP_VERSION){try{sessionStorage.removeItem('mr_reload')}catch(e){}toast('Updating to v'+v);setTimeout(()=>location.replace(location.pathname+'?v='+v+'&t='+Date.now()),400)}
