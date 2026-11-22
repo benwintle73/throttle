@@ -219,7 +219,7 @@ input[type=text]:focus{outline:none;border-color:var(--line2)}
 .fade{animation:fade .25s ease both}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.toast{position:fixed;left:50%;top:14px;transform:translateX(-50%);background:var(--text);color:#111;padding:9px 15px;border-radius:10px;font-weight:600;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 60px);transform:translateX(-50%);background:var(--panel2);color:var(--text);border:1px solid var(--line2);box-shadow:0 6px 20px rgba(0,0,0,.5);white-space:nowrap;padding:9px 15px;border-radius:10px;font-weight:600;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
 .toast.show{opacity:1}
 .note{font-size:12px;color:var(--dim);text-align:center;margin-top:18px}
 .listrow{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14.5px}
@@ -885,7 +885,7 @@ function sparqlSeries(lim){return `SELECT ?article (MIN(?d) AS ?date) (MAX(?ss) 
 async function sparql(q){const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),55000);try{const r=await fetch('https://query.wikidata.org/sparql?format=json&query='+encodeURIComponent(q),{headers:{Accept:'application/sparql-results+json'},signal:ctl.signal});if(!r.ok)throw new Error('HTTP '+r.status);return (await r.json()).results.bindings}finally{clearTimeout(tm)}}
 const v=(row,k)=>row[k]&&row[k].value;
 function titleFromUrl(u){let t=decodeURIComponent(u.split('/wiki/')[1]||'').replace(/_/g,' ');return t.replace(/ \((\d{4} )?(American |British |Australian |Canadian )?(film|TV series|television series|miniseries|animated film|documentary|film series)\)$/i,'')}
-function setStatus(m){let el=document.getElementById('dlstat');if(!el){el=document.createElement('div');el.id='dlstat';document.body.appendChild(el)}el.textContent=m;el.style.display=m?'block':'none'}
+function setStatus(m){return;let el=document.getElementById('dlstat');if(!el){el=document.createElement('div');el.id='dlstat';document.body.appendChild(el)}el.textContent=m;el.style.display=m?'block':'none'}
 /* ===== more films: Wikipedia box-office lists + Wikidata details (incremental, resumable) ===== */
 const EXTYEARS=(()=>{const a=[];for(let y=2026;y>=1975;y--)a.push(y);return a})();
 function extMeta(){try{return JSON.parse(localStorage.getItem(EXTKEY))||{list:[],done:[]}}catch(e){return {list:[],done:[]}}}
@@ -933,7 +933,6 @@ async function loadMore(force){
       const got=await filmsFromTitles(links,have);got.forEach(e=>{m.list.push(e);addExt(e);added++});m.done.push('tv');extSave(m);if(got.length){RV++;onNewFilms(got.length)}}catch(e){errs.push('tv: '+e.message)}}
   window._extLoading=false;setStatus('');
   try{localStorage.setItem('mr_ext_status',JSON.stringify({at:Date.now(),n:m.list.length,errs}))}catch(e){}
-  if(added)toast(`Added ${added} films and series`);else if(errs.length)toast("Couldn't download films: "+errs[0]);
 }
 let _nf=0;function onNewFilms(n){_nf+=n;
   if(document.querySelector('.outof')){home();toast(`${_nf} new films ready`)}
@@ -1450,7 +1449,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.8';
+const APP_VERSION='3.9';
 function checkUpdate(){try{fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();if(v&&v!==APP_VERSION){try{if(sessionStorage.getItem('mr_reload')===v)return;sessionStorage.setItem('mr_reload',v)}catch(e){}location.replace(location.pathname+'?v='+v)}}).catch(()=>{})}catch(e){}}
 checkUpdate();document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
 
