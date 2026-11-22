@@ -225,6 +225,12 @@ input[type=text]:focus{outline:none;border-color:var(--line2)}
 .listrow{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14.5px}
 .listrow span{flex:1}
 .listrow button{font-size:12.5px;color:var(--muted);border:1px solid var(--line);padding:5px 10px;border-radius:8px}
+
+/* v3.8: reason text never cut mid-line; blurb fits; download pill off the pick cards */
+.pick2 .ifliked,.spfix .pick2 .ifliked{display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;height:auto!important;max-height:none!important;min-height:4.3em;line-height:1.42!important;font-size:15px!important;margin:0 0 6px!important;white-space:normal!important}
+.pick2 .ptop p,.spfix .pick2 .ptop p{-webkit-line-clamp:2!important;line-height:1.35;font-size:15px!important}
+.pick2 .whyslot,.spfix .pick2 .whyslot{height:auto!important;min-height:20px;overflow:hidden}
+body:has(.pick2) #dlstat{display:none!important}
 </style>
 </head>
 <body>
@@ -692,8 +698,8 @@ const TITLES=RAW.trim().split('\n').map((l,i)=>{
   if(INSPIRE.has(t))tg.push('inspiring');if(MINDSET.has(t))tg.push('mind');
   return {id:i,t,y:+y,k,c,r:+r,tags:[...new Set(tg)],actors:actors?actors.split(',').map(s=>s.trim()):[],svc:svc==='LIB'?'':(svc||''),own:svc==='LIB',blurb};
 });
-const BASE_N=TITLES.length,EXTKEY='mr_ext_v1';
-function addExt(e){TITLES.push({id:TITLES.length,t:e[0],y:e[1],k:e[2],c:e[3],r:e[4],tags:e[5],actors:e[8]||[],svc:'',own:false,blurb:e[7]?e[7].charAt(0).toUpperCase()+e[7].slice(1)+'.':'',ext:1,dir:e[6]||''})}
+const BASE_N=TITLES.length,EXTKEY='mr_ext_v2';
+function addExt(e){TITLES.push({id:TITLES.length,t:e[0],y:e[1],k:e[2],c:e[3],r:e[4],tags:e[5],actors:e[8]||[],svc:'',own:false,blurb:e[7]?e[7].charAt(0).toUpperCase()+e[7].slice(1)+'.':(e[2]==='S'?'Series':'Film')+' from '+e[1]+'.',ext:1,dir:e[6]||''})}
 try{const x=JSON.parse(localStorage.getItem(EXTKEY));if(x&&x.list)x.list.forEach(addExt)}catch(e){}
 const LIB=TITLES.filter(t=>t.own);
 /* taste learned from everything you've rated (Apple TV library included) */
@@ -880,35 +886,59 @@ async function sparql(q){const ctl=new AbortController();const tm=setTimeout(()=
 const v=(row,k)=>row[k]&&row[k].value;
 function titleFromUrl(u){let t=decodeURIComponent(u.split('/wiki/')[1]||'').replace(/_/g,' ');return t.replace(/ \((\d{4} )?(American |British |Australian |Canadian )?(film|TV series|television series|miniseries|animated film|documentary|film series)\)$/i,'')}
 function setStatus(m){let el=document.getElementById('dlstat');if(!el){el=document.createElement('div');el.id='dlstat';document.body.appendChild(el)}el.textContent=m;el.style.display=m?'block':'none'}
-async function loadMore(force){
-  let meta=null;try{meta=JSON.parse(localStorage.getItem(EXTKEY))}catch(e){}
-  if(window._extLoading||(meta&&meta.list&&meta.list.length&&!force&&Date.now()-meta.at<30*864e5))return;
-  window._extLoading=true;toast('Downloading more films…');
-  const have=new Set();TITLES.forEach(t=>{have.add(NORMT(t.t)+'|'+t.y);have.add(NORMT(t.t)+'|'+(t.y-1));have.add(NORMT(t.t)+'|'+(t.y+1))});
-  const list=(meta&&meta.list&&!force)?meta.list:[],ranges=[[1960,1980],[1980,1990],[1990,1997],[1997,2003],[2003,2008],[2008,2012],[2012,2016],[2016,2020],[2020,2027]];const errs=[];let step=0;
-  let added=0;
-  const push=e=>{const key=NORMT(e[0])+'|'+e[1];if(have.has(key))return;have.add(key);list.push(e);if(!force){addExt(e);added++}};
-  for(const [a,b] of ranges){step++;setStatus(`Downloading films ${step} of ${ranges.length+1}…`);
-    try{const rows=await sparql(sparqlFilms(a,b,400));
-      rows.forEach(r=>{const t=titleFromUrl(v(r,'article'));const y=+(v(r,'date')||'').slice(0,4);if(!t||!y)return;
-        let dur=Math.round(+v(r,'dur')||0);if(dur>400)dur=Math.round(dur/60);if(!dur)dur=110;
-        const genres=(v(r,'genres')||'').split('|').filter(Boolean),tags=tagsFrom(genres);
-        push([t,y,'M',certFrom(v(r,'mpaa'),tags),dur,tags,(v(r,'dirs')||'').split('|').filter(Boolean).slice(0,2).join(', '),v(r,'desc')||'',[]])})}
-    catch(e){errs.push(a+'s: '+(e.name==='AbortError'?'timed out':e.message))}
-    await new Promise(r=>setTimeout(r,600))}
-  setStatus('Downloading series…');
-  try{const rows=await sparql(sparqlSeries(500));
-    rows.forEach(r=>{const t=titleFromUrl(v(r,'article'));const y=+(v(r,'date')||'').slice(0,4);if(!t||!y)return;
-      const genres=(v(r,'genres')||'').split('|').filter(Boolean),tags=tagsFrom(genres);const dirs=(v(r,'dirs')||'').split('|').filter(Boolean).slice(0,2);
-      push([t,y,'S',certFrom('',tags),Math.max(1,+v(r,'seasons')||1),tags,dirs.length?'Created by '+dirs.join(', '):'',v(r,'desc')||'',[]])})}catch(e){errs.push('series: '+(e.name==='AbortError'?'timed out':e.message))}
-  window._extLoading=false;
-  try{localStorage.setItem('mr_ext_status',JSON.stringify({at:Date.now(),n:list.length,errs}))}catch(e){}
-  if(!list.length){setStatus('');toast("Couldn't download films: "+(errs[0]||'no response'));return}setStatus('');
-  try{localStorage.setItem(EXTKEY,JSON.stringify({at:Date.now(),list}))}catch(e){}
-  if(force){toast(`Catalogue refreshed: ${list.length} extra titles`);setTimeout(()=>location.reload(),900);return}
-  RV++;toast(`Added ${added} films and series`);
-  const n=document.querySelector('.hnote');if(n)home();
+/* ===== more films: Wikipedia box-office lists + Wikidata details (incremental, resumable) ===== */
+const EXTYEARS=(()=>{const a=[];for(let y=2026;y>=1975;y--)a.push(y);return a})();
+function extMeta(){try{return JSON.parse(localStorage.getItem(EXTKEY))||{list:[],done:[]}}catch(e){return {list:[],done:[]}}}
+function extSave(m){try{localStorage.setItem(EXTKEY,JSON.stringify(m))}catch(e){}}
+async function pageLinks(title){try{const j=await wget('https://en.wikipedia.org/w/api.php?action=parse&format=json&origin=*&prop=links&redirects=1&page='+encodeURIComponent(title));
+  return ((j.parse&&j.parse.links)||[]).filter(l=>l.ns===0&&l.exists!==undefined).map(l=>l['*'])}catch(e){return []}}
+async function filmsFromTitles(titles,have){
+  const out=[];
+  for(let i=0;i<titles.length;i+=50){
+    const chunk=titles.slice(i,i+50);
+    const j=await wget('https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&redirects=1&prop=description|pageprops&ppprop=wikibase_item|disambiguation&titles='+encodeURIComponent(chunk.join('|')));
+    const pages=Object.values((j.query&&j.query.pages)||{}).filter(p=>p.missing===undefined&&p.pageprops&&p.pageprops.wikibase_item&&p.pageprops.disambiguation===undefined);
+    const films=pages.map(p=>{const d=(p.description||'');const isS=/television series|TV series|miniseries/i.test(d),isM=/\bfilm\b|\bmovie\b/i.test(d)&&!/film series|franchise|director|actor|actress|producer|studio|company|festival|award/i.test(d);
+      if(!isM&&!isS)return null;const y=+(d.match(/\b(19|20)\d{2}\b/)||[0])[0];if(!y)return null;
+      const t=p.title.replace(/ \((\d{4} )?(American |British |Australian |Canadian )?(film|TV series|television series|miniseries|animated film)\)$/i,'');
+      const key=NORMT(t)+'|'+y;if(have.has(key))return null;return {t,y,k:isS?'S':'M',q:p.pageprops.wikibase_item,desc:d}}).filter(Boolean);
+    if(!films.length)continue;
+    const ents=(await wget('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&origin=*&props=claims&ids='+films.map(f=>f.q).join('|'))).entities||{};
+    const idsOf=(e,p,n)=>((e&&e.claims&&e.claims[p])||[]).map(c=>c.mainsnak&&c.mainsnak.datavalue&&c.mainsnak.datavalue.value&&c.mainsnak.datavalue.value.id).filter(Boolean).slice(0,n);
+    const num=(e,p)=>{const c=e&&e.claims&&e.claims[p]&&e.claims[p][0];const a=c&&c.mainsnak&&c.mainsnak.datavalue&&c.mainsnak.datavalue.value&&c.mainsnak.datavalue.value.amount;return a?Math.round(+a):0};
+    const want=new Set();films.forEach(f=>{const e=ents[f.q];f.g=idsOf(e,'P136',6);f.d=idsOf(e,'P57',2).length?idsOf(e,'P57',2):idsOf(e,'P170',2);f.c=idsOf(e,'P161',4);f.m=idsOf(e,'P1657',1);f.dur=num(e,'P2047');f.ss=num(e,'P2437');[...f.g,...f.d,...f.c,...f.m].forEach(x=>want.add(x))});
+    const lab={},L=[...want];
+    for(let k=0;k<L.length;k+=50){const l=(await wget('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&origin=*&props=labels&languages=en&ids='+L.slice(k,k+50).join('|'))).entities||{};for(const x in l)lab[x]=l[x].labels&&l[x].labels.en&&l[x].labels.en.value}
+    films.forEach(f=>{const nm=a=>a.map(x=>lab[x]).filter(Boolean);const tags=tagsFrom(nm(f.g));let dur=f.dur;if(dur>400)dur=Math.round(dur/60);
+      const e=[f.t,f.y,f.k,certFrom(nm(f.m).join(' '),tags),f.k==='S'?Math.max(1,f.ss||1):(dur||110),tags,(f.k==='S'&&nm(f.d).length?'Created by ':'')+nm(f.d).join(', '),'',nm(f.c)];
+      have.add(NORMT(f.t)+'|'+f.y);out.push(e)});
+  }
+  return out;
 }
+async function loadMore(force){
+  if(window._extLoading)return;window._extLoading=true;
+  const m=extMeta();if(force){m.done=[]}
+  const have=new Set();TITLES.forEach(t=>{[0,-1,1].forEach(d=>have.add(NORMT(t.t)+'|'+(t.y+d)))});
+  const todo=EXTYEARS.filter(y=>!m.done.includes(y));let added=0,errs=[];
+  for(const y of todo){
+    setStatus(`Adding films from ${y}…`);
+    try{const links=[...new Set([...(await pageLinks(`List of ${y} box office number-one films in the United States`)),...(await pageLinks(`List of ${y} box office number-one films in Australia`)),...(await pageLinks(`List of ${y} box office number-one films in the United Kingdom`))])];
+      const got=await filmsFromTitles(links,have);
+      got.forEach(e=>{m.list.push(e);addExt(e);added++});m.done.push(y);extSave(m);
+      if(got.length){RV++;onNewFilms(got.length)}}
+    catch(e){errs.push(y+': '+e.message);if(errs.length>3)break}
+  }
+  if(!m.done.includes('tv')&&errs.length<=3){setStatus('Adding TV series…');
+    try{const links=[...new Set([...(await pageLinks('List of most watched television broadcasts')),...(await pageLinks('List of Netflix original programming')),...(await pageLinks('List of Apple TV+ original programming')),...(await pageLinks('List of HBO original programming'))])].slice(0,600);
+      const got=await filmsFromTitles(links,have);got.forEach(e=>{m.list.push(e);addExt(e);added++});m.done.push('tv');extSave(m);if(got.length){RV++;onNewFilms(got.length)}}catch(e){errs.push('tv: '+e.message)}}
+  window._extLoading=false;setStatus('');
+  try{localStorage.setItem('mr_ext_status',JSON.stringify({at:Date.now(),n:m.list.length,errs}))}catch(e){}
+  if(added)toast(`Added ${added} films and series`);else if(errs.length)toast("Couldn't download films: "+errs[0]);
+}
+let _nf=0;function onNewFilms(n){_nf+=n;
+  if(document.querySelector('.outof')){home();toast(`${_nf} new films ready`)}
+  const hn=document.querySelector('.hnote .cnt');if(hn)hn.textContent=TITLES.length+' titles'}
+
 ACT.refreshCat=()=>loadMore(true);
 
 /* ===== engine ===== */
@@ -987,7 +1017,7 @@ function home(){
     <button class="tonightbtn" data-act="tonight"><span>Tonight</span><b>${h(tonightLine())}</b><i>Change</i></button></div>
     <div class="stats hstats"><button class="stat" data-act="lib" data-v="watch"><b>${store.watchlist.length}</b><span>Watchlist</span></button><button class="stat" data-act="lib" data-v="love"><b>${c.love}</b><span>Loved</span></button><button class="stat" data-act="lib" data-v="like"><b>${c.like+c.ok}</b><span>Liked</span></button><button class="stat" data-act="lib" data-v="dislike"><b>${c.dislike}</b><span>Disliked</span></button></div>
     <div class="cta hcta"><button class="btn" data-act="go">Start swiping</button><div class="hrow"><button class="btn ghost" data-act="surprise">Surprise me</button><button class="btn ghost" data-act="lib">My library</button></div></div>
-    <p class="note hnote"><button class="textbtn" data-act="how">How it picks</button> · <button class="textbtn" data-act="list">History & backup</button> · v${APP_VERSION}</p>
+    <p class="note hnote"><button class="textbtn" data-act="how">How it picks</button> · <button class="textbtn" data-act="list">History & backup</button> · <span class="cnt">${TITLES.length} titles</span> · v${APP_VERSION}</p>
   </div>`);
   document.body.classList.add('nohscroll');
 }
@@ -1297,14 +1327,14 @@ function listView(){
       <div class="hrow"><button class="btn ghost" data-act="backup">Copy backup</button><button class="btn ghost" data-act="restoreshow">Restore</button></div>
       <textarea id="bk" class="bk" placeholder="Backup code appears here, or paste one to restore" style="display:none"></textarea>
       <button class="btn" id="bkgo" data-act="restore" style="display:none;margin-top:10px">Restore from this code</button></div>
-    <div class="group"><h3>Film catalogue · ${TITLES.length} titles</h3><p class="sub" style="margin:0 0 10px">${TITLES.length-BASE_N} extra films and series from Wikidata, refreshed monthly.${(()=>{try{const st=JSON.parse(localStorage.getItem('mr_ext_status'));return st?` Last download: ${new Date(st.at).toLocaleString()}, ${st.n} titles${st.errs&&st.errs.length?`. Problems: ${h(st.errs.join('; '))}`:''}.`:' Not downloaded yet.'}catch(e){return ''}})()}</p><button class="btn ghost" data-act="refreshCat">Refresh catalogue now</button></div>
+    <div class="group"><h3>Film catalogue · ${TITLES.length} titles</h3><p class="sub" style="margin:0 0 10px">${TITLES.length-BASE_N} extra films and series from Wikipedia box-office lists, added year by year.${(()=>{try{const st=JSON.parse(localStorage.getItem('mr_ext_status'));return st?` Last download: ${new Date(st.at).toLocaleString()}, ${st.n} titles${st.errs&&st.errs.length?`. Problems: ${h(st.errs.join('; '))}`:''}.`:' Not downloaded yet.'}catch(e){return ''}})()}</p><button class="btn ghost" data-act="refreshCat">Refresh catalogue now</button></div>
     ${sec('chosen','Picked to watch')}<button class="btn ghost" data-act="lib" data-v="pass">See Not for me</button><div class="group" style="margin-top:22px"><h3>Already suggested · ${store.suggested.length}</h3><p class="sub" style="margin:0 0 10px">Every film it has suggested is never suggested again. Clear this only if you run out.</p><button class="btn ghost" data-act="clearSuggested">Allow past suggestions again</button></div>`);
 }
 
 
 function outOfFilms(){const tn=tonight(),filt=tn.mood.length||tn.time!=='any'||tn.intensity!=='mid'||store.svcMode==='only'||store.aud!=='adults';
-  render(`${topBar('home')}<h2 style="margin-top:8px">That's every match</h2>
-    <p class="sub">You've been through every film that fits${filt?' tonight\'s settings':''}. Nothing is suggested twice. The app has ${TITLES.length} titles${TITLES.length<600?' (more are downloading in the background, check back in a minute)':''}.</p>
+  render(`<div class="outof"></div>${topBar('home')}<h2 style="margin-top:8px">That's every match</h2>
+    <p class="sub">You've been through every film that fits${filt?' tonight\'s settings':''}. Nothing is suggested twice. The app has ${TITLES.length} titles${TITLES.length<600?' (more are downloading now and this screen will refresh when they arrive)':''}.</p>
     <div class="cta">${filt?`<button class="btn" data-act="resetTonight">Clear tonight's settings</button>`:''}
     <button class="btn ${filt?'ghost':''}" data-act="clearSuggested2">Allow past suggestions again (${store.suggested.length})</button>
     <button class="btn ghost" data-act="lib" data-v="unseen">Open Haven't seen</button>
@@ -1420,13 +1450,13 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.7';
+const APP_VERSION='3.8';
 function checkUpdate(){try{fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();if(v&&v!==APP_VERSION){try{if(sessionStorage.getItem('mr_reload')===v)return;sessionStorage.setItem('mr_reload',v)}catch(e){}location.replace(location.pathname+'?v='+v)}}).catch(()=>{})}catch(e){}}
 checkUpdate();document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
 
 function queueVisible(){const vis=[];document.querySelectorAll('[data-wk]').forEach(el=>{const t=TITLES.find(x=>wk(x)===el.dataset.wk);if(t)vis.push(t)});if(vis.length)wikiWant(vis,true)}
 const _render=render;render=html=>{document.querySelectorAll('.sheet').forEach(x=>x.remove());window._busy=false;document.body.classList.remove('nohscroll');_render(html);queueVisible()};
-setTimeout(()=>loadMore(false),2500);
+setTimeout(()=>loadMore(false),1500);
 setTimeout(()=>{try{const top=ranked().slice(0,40).map(r=>r.t);wikiWant(top);wikiWant(TITLES.slice(0,BASE_N).filter(t=>!t.own));wikiWant(TITLES.slice(0,BASE_N).filter(t=>t.own))}catch(e){}},1500);
 home();
 </script>
