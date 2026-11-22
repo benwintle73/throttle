@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0c0b10">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MoodReel">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>MoodReel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c0b10;--panel:#15141b;--panel2:#1d1b25;--line:#2a2733;--line2:#3a3645;--text:#f3f1f7;--muted:#9d97ab;--dim:#6e6880;
+  --accent:#ff4d5e;--good:#43d39e;--bad:#ff6b6b;--love:#ffb547;--seen:#7aa2ff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.wrap{max-width:480px;margin:0 auto;padding:14px 18px 26px}
+h1,h2{font-family:'Bebas Neue',Impact,sans-serif;font-weight:400;letter-spacing:.4px;margin:0}
+h1{font-size:54px;line-height:.92}h2{font-size:34px;line-height:1}
+.sub{color:var(--muted);margin:6px 0 18px;font-size:15px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.wordmark{font-family:'Bebas Neue';font-size:26px;letter-spacing:1.5px;display:flex;align-items:center;gap:8px}
+.wordmark i{width:9px;height:9px;border-radius:50%;background:var(--accent);display:inline-block}
+.accent{color:var(--accent)}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
+.btn{display:block;width:100%;padding:16px;border-radius:14px;font-weight:600;font-size:16px;background:var(--accent);color:#fff;transition:transform .1s}
+.btn:active{transform:scale(.985)}
+.btn.ghost{background:var(--panel2);border:1px solid var(--line)}
+.row{display:flex;gap:10px;align-items:center}.spacer{flex:1}
+.textbtn{color:var(--muted);font-size:14px;font-weight:500;padding:8px 0}
+.pill{padding:7px 12px;border-radius:99px;background:var(--panel);border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--muted)}
+.pill b{color:var(--text);font-weight:600}
+/* poster */
+.poster{position:relative;overflow:hidden;display:flex;flex-direction:column;padding:18px;color:#fff;isolation:isolate}
+.poster::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 80% at 20% 0%,rgba(255,255,255,.16),transparent 55%);z-index:-1}
+.poster .pk{font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;opacity:.75}
+.poster .pt{font-family:'Bebas Neue';font-size:46px;line-height:.9;margin-top:auto;letter-spacing:.3px;word-break:break-word}
+.poster .rule{height:2px;width:34px;background:rgba(255,255,255,.7);margin:10px 0 8px}
+.poster .pg{font-size:12.5px;opacity:.85;font-weight:500}
+/* deck */
+.deck{position:relative;height:470px;margin:14px 0 18px;touch-action:none;user-select:none;-webkit-user-select:none}
+.card{position:absolute;inset:0;border-radius:22px;overflow:hidden;background:var(--panel);border:1px solid var(--line);display:flex;flex-direction:column;box-shadow:0 20px 50px -25px #000;will-change:transform;touch-action:none}
+.card.back{transform:scale(.95) translateY(14px);opacity:.6;pointer-events:none}
+.card .poster{flex:1}
+.card .info{padding:14px 16px 16px}
+.card .info .meta{color:var(--muted);font-size:13px;margin-bottom:4px}
+.card .info p{margin:0;font-size:14.5px;color:#ddd8e6}
+.stamp{position:absolute;top:22px;padding:6px 12px;border:3px solid;border-radius:10px;font-family:'Bebas Neue';font-size:34px;letter-spacing:1px;opacity:0;z-index:5;pointer-events:none;background:rgba(12,11,16,.35)}
+.stamp.nope{right:20px;color:var(--bad);border-color:var(--bad);transform:rotate(12deg)}
+.stamp.into{left:20px;color:var(--good);border-color:var(--good);transform:rotate(-12deg)}
+.stamp.loved{left:50%;top:40%;transform:translateX(-50%);color:var(--love);border-color:var(--love)}
+.stamp.seen{left:50%;top:40%;transform:translateX(-50%);color:var(--seen);border-color:var(--seen)}
+.qcard{background:linear-gradient(165deg,#2a2236 0%,#1a1622 60%,#121018 100%)}
+.qbody{flex:1;display:flex;flex-direction:column;padding:26px 22px}
+.qbody .pk{font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent)}
+.qt{font-family:'Bebas Neue';font-size:52px;line-height:.95;margin:auto 0;letter-spacing:.3px}
+.qsides{display:flex;justify-content:space-between;font-weight:700;font-size:16px;margin-bottom:10px}
+.qsides span:first-child{color:var(--bad)}.qsides span:last-child{color:var(--good)}
+.qhint{font-size:13px;color:var(--muted);text-align:center;white-space:pre}
+.how p{color:#d9d5e2;font-size:15px;margin:0 0 14px}.how b{color:var(--text)}
+.controls{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.ctl{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);font-weight:600}
+.ctl .c{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:var(--panel);border:1px solid var(--line);transition:transform .1s}
+.ctl:active .c{transform:scale(.9)}
+.ctl svg{width:24px;height:24px;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.ctl.nope svg{stroke:var(--bad)}.ctl.seen svg{stroke:var(--seen)}.ctl.loved svg{stroke:var(--love)}.ctl.into svg{stroke:var(--good)}
+.ctl.into .c{background:#12261f;border-color:#235c46}
+.dots{display:flex;gap:5px;align-items:center}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--line2)}.dots i.on{background:var(--accent)}
+.hint{font-size:12.5px;color:var(--dim);text-align:center;margin-top:14px}
+/* suggestions */
+.sug{display:grid;grid-template-columns:96px 1fr;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px;margin-bottom:12px;animation:rise .3s ease both;transition:opacity .25s,transform .25s}
+.sug.gone{opacity:0;transform:translateX(-30px);pointer-events:none}
+.sug .poster{border-radius:10px;padding:8px;aspect-ratio:2/3}
+.sug .poster .pt{font-size:18px}.sug .poster .pk,.sug .poster .pg,.sug .poster .rule{display:none}
+.sug h4{margin:0;font-size:17px;line-height:1.2}
+.sug .meta{color:var(--muted);font-size:12.5px;margin:3px 0 6px}
+.sug p{margin:0 0 8px;font-size:13.5px;color:#d9d5e2}
+.why{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.why span{font-size:11.5px;padding:3px 8px;border-radius:6px;background:var(--panel2);border:1px solid var(--line);color:#d6d0e4}
+.yn{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.yn button{padding:10px;border-radius:10px;font-weight:600;font-size:14px}
+.yn .y{background:var(--good);color:#06140e}.yn .n{background:var(--panel2);border:1px solid var(--line)}
+.svc{font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:6px;background:#fff;color:#111;display:inline-block;margin-bottom:8px}
+.svc.unknown{background:transparent;color:var(--dim);font-weight:500;border:1px solid var(--line)}
+/* chips / settings */
+.group{margin:0 0 22px}
+.group h3{font-size:12.5px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--dim);margin:0 0 10px}
+.group .hintline{font-size:12.5px;color:var(--dim);margin:-6px 0 10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:9px 13px;border-radius:999px;background:var(--panel);border:1px solid var(--line);font-size:14px;font-weight:500;line-height:1.2}
+.chip.on{background:var(--text);color:#111;border-color:var(--text)}
+.chip.love{background:var(--accent);border-color:var(--accent);color:#fff}
+.chip.avoid,.chip.neg.on{border-color:var(--bad);color:var(--bad);background:transparent}
+.chip.avoid{text-decoration:line-through}
+input[type=text]{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--text);font:inherit;font-size:16px}
+input[type=text]:focus{outline:none;border-color:var(--line2)}
+.inputrow{display:flex;gap:8px;margin-bottom:12px}.inputrow .btn{width:auto;padding:0 18px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:22px 0}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:left}
+.stat b{display:block;font-family:'Bebas Neue';font-size:30px;font-weight:400;line-height:1}
+.stat span{font-size:12px;color:var(--muted)}
+.cta{display:grid;gap:10px}
+.enjoy .poster{border-radius:20px;aspect-ratio:3/4;margin:10px 0 18px}
+.fade{animation:fade .25s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.toast{position:fixed;left:50%;top:14px;transform:translateX(-50%);background:var(--text);color:#111;padding:9px 15px;border-radius:10px;font-weight:600;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
+.toast.show{opacity:1}
+.note{font-size:12px;color:var(--dim);text-align:center;margin-top:18px}
+.listrow{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.listrow span{flex:1}
+.listrow button{font-size:12.5px;color:var(--muted);border:1px solid var(--line);padding:5px 10px;border-radius:8px}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div class="toast" id="toast"></div>
+<script>
+const RAW=`Top Gun: Maverick|2022|M|M|131|action fast glossy feelgood epic|Tom Cruise,Miles Teller,Glen Powell||Elite pilots, an impossible mission, maximum throttle.
+Rocky|1976|M|M|120|sport underdog feelgood grit emotion fitness|Sylvester Stallone||A nobody boxer gets one shot at the title.
+Creed|2015|M|M|133|sport underdog emotion grit fitness|Michael B. Jordan,Sylvester Stallone||Apollo's son steps into the ring with Rocky in his corner.
+The Fighter|2010|M|MA15+|116|sport real underdog emotion grit|Mark Wahlberg,Christian Bale,Amy Adams||A struggling boxer, his troubled brother and one last shot.
+Warrior|2011|M|MA15+|140|sport underdog emotion grit fitness|Tom Hardy,Joel Edgerton||Two estranged brothers collide in an MMA tournament.
+Ford v Ferrari|2019|M|M|152|sport real fast emotion|Matt Damon,Christian Bale||Two rebels take on Ferrari at Le Mans.
+Rush|2013|M|MA15+|123|sport real fast tension|Chris Hemsworth,Daniel Brühl||Hunt vs Lauda, F1's most dangerous rivalry.
+F1|2025|M|M|155|sport fast action glossy|Brad Pitt,Damson Idris|Apple TV+|A veteran driver returns to mentor a hotshot rookie.
+Moneyball|2011|M|M|133|sport real mind underdog|Brad Pitt,Jonah Hill||A broke baseball team rewrites the rules with numbers.
+The Blind Side|2009|M|M|129|sport real feelgood emotion family|Sandra Bullock||A family takes in a teen who becomes an NFL star.
+Remember the Titans|2000|M|PG|113|sport real feelgood underdog family|Denzel Washington||A newly integrated football team learns to win together.
+Hustle|2022|M|M|117|sport underdog feelgood emotion|Adam Sandler|Netflix|A burnt-out scout bets his career on an unknown baller.
+Air|2023|M|M|112|sport real feelgood|Matt Damon,Ben Affleck|Prime Video|How Nike landed Michael Jordan and changed sneakers forever.
+Point Break|1991|M|M|122|action heist sport fast|Keanu Reeves,Patrick Swayze||An undercover cop infiltrates a gang of surfing bank robbers.
+Inception|2010|M|M|148|mind scifi tension action|Leonardo DiCaprio,Tom Hardy||A heist thriller set inside people's dreams.
+Interstellar|2014|M|M|169|mind scifi emotion epic slow|Matthew McConaughey,Anne Hathaway||A father crosses the galaxy to save humanity.
+The Martian|2015|M|M|144|scifi feelgood comedy mind|Matt Damon||Stranded on Mars, he sciences his way home.
+Knives Out|2019|M|M|130|comedy mystery crime mind|Daniel Craig,Ana de Armas,Chris Evans||A rich family, a dead patriarch, and everyone's a suspect.
+Glass Onion|2022|M|M|139|comedy mystery crime glossy|Daniel Craig,Edward Norton|Netflix|Detective Benoit Blanc on a billionaire's private island.
+Gone Girl|2014|M|MA15+|149|dark tension mind crime|Ben Affleck,Rosamund Pike||A wife vanishes and the husband looks guilty.
+Prisoners|2013|M|MA15+|153|dark tension crime grit slow|Hugh Jackman,Jake Gyllenhaal||A desperate father takes the law into his own hands.
+Se7en|1995|M|R18+|127|dark crime tension gore|Brad Pitt,Morgan Freeman||Two detectives hunt a killer built around the seven sins.
+Heat|1995|M|MA15+|170|crime action tension grit heist|Al Pacino,Robert De Niro||A master thief and an obsessive cop circle each other in LA.
+The Dark Knight|2008|M|M|152|action crime dark tension epic|Christian Bale,Heath Ledger||Batman meets his match in the Joker.
+Mad Max: Fury Road|2015|M|MA15+|120|action fast grit epic aussie|Tom Hardy,Charlize Theron||Two hours of non-stop desert war-rig chaos.
+John Wick|2014|M|MA15+|101|action fast crime gore glossy|Keanu Reeves||Never touch the retired hitman's dog.
+Extraction|2020|M|MA15+|116|action fast grit|Chris Hemsworth|Netflix|A mercenary fights through a city to rescue a kid.
+Gladiator|2000|M|MA15+|155|action epic emotion grit|Russell Crowe,Joaquin Phoenix||A betrayed general seeks revenge in the arena.
+Edge of Tomorrow|2014|M|M|113|action scifi fast comedy|Tom Cruise,Emily Blunt||Live, die, repeat against an alien invasion.
+Mission: Impossible – Fallout|2018|M|M|147|action fast glossy tension|Tom Cruise,Henry Cavill||Ethan Hunt's most insane stunts yet.
+Bullet Train|2022|M|MA15+|127|action comedy fast gore|Brad Pitt||Five assassins, one bullet train, total chaos.
+The Notebook|2004|M|M|123|romance emotion|Ryan Gosling,Rachel McAdams||A summer romance that lasts a lifetime.
+Crazy, Stupid, Love|2011|M|M|118|romance comedy feelgood|Ryan Gosling,Steve Carell,Emma Stone||A newly single dad gets dating lessons from a smooth operator.
+La La Land|2016|M|M|128|romance music emotion glossy|Ryan Gosling,Emma Stone||Two dreamers fall in love chasing their dreams in LA.
+About Time|2013|M|M|123|romance emotion feelgood comedy fantasy|Domhnall Gleeson,Rachel McAdams||He can time travel, and he uses it for love.
+Anyone But You|2023|M|MA15+|103|romance comedy glossy aussie|Sydney Sweeney,Glen Powell||A fake couple with very real chemistry, shot in Sydney.
+The Proposal|2009|M|M|108|romance comedy feelgood|Sandra Bullock,Ryan Reynolds||A boss forces her assistant into a fake engagement.
+Step Brothers|2008|M|MA15+|98|comedy|Will Ferrell,John C. Reilly||Two 40-year-old man-children become brothers.
+Superbad|2007|M|MA15+|113|comedy|Jonah Hill,Michael Cera||Two teens, one party, everything goes wrong.
+The Nice Guys|2016|M|MA15+|116|comedy crime action|Ryan Gosling,Russell Crowe||Mismatched private eyes stumble through 70s LA.
+Game Night|2018|M|MA15+|100|comedy tension|Jason Bateman,Rachel McAdams||Game night turns into a very real kidnapping.
+Free Guy|2021|M|M|115|comedy action feelgood scifi|Ryan Reynolds|Disney+|A video game background character becomes the hero.
+Paddington 2|2017|M|G|103|family comedy feelgood|Hugh Grant,Ben Whishaw||The politest bear in London gets framed for theft.
+Up|2009|M|PG|96|family emotion feelgood comedy|Ed Asner|Disney+|An old man ties balloons to his house and flies away.
+Coco|2017|M|PG|105|family music emotion fantasy|Anthony Gonzalez|Disney+|A boy who loves music visits the Land of the Dead.
+Toy Story|1995|M|G|81|family comedy feelgood|Tom Hanks,Tim Allen|Disney+|Toys come alive when you're not looking.
+Apollo 13|1995|M|M|140|real tension emotion|Tom Hanks,Kevin Bacon||A crippled spacecraft, three astronauts, no easy way home.
+Cast Away|2000|M|M|143|emotion slow|Tom Hanks||Stranded alone on an island for years.
+The Shawshank Redemption|1994|M|MA15+|142|emotion crime slow feelgood|Tim Robbins,Morgan Freeman||Hope and friendship inside a brutal prison.
+Forrest Gump|1994|M|M|142|emotion feelgood comedy epic|Tom Hanks||A simple man stumbles through decades of history.
+Oppenheimer|2023|M|MA15+|180|real slow mind epic|Cillian Murphy,Robert Downey Jr.,Matt Damon||The man who built the atomic bomb.
+Dune: Part Two|2024|M|M|166|scifi epic action fantasy|Timothée Chalamet,Zendaya,Austin Butler||A desert war for the fate of the universe.
+Arrival|2016|M|M|116|scifi mind slow emotion|Amy Adams||A linguist has to learn to talk to aliens.
+Everything Everywhere All at Once|2022|M|MA15+|139|mind comedy action emotion fantasy|Michelle Yeoh||A laundromat owner fights across the multiverse.
+Parasite|2019|M|MA15+|132|dark tension mind subtitles|Song Kang-ho||A poor family cons their way into a rich household.
+Get Out|2017|M|MA15+|104|horror tension mind|Daniel Kaluuya||Meeting the girlfriend's parents goes very wrong.
+A Quiet Place|2018|M|M|90|horror tension scifi|Emily Blunt,John Krasinski||Make a sound and they hunt you.
+Jaws|1975|M|M|124|tension horror|Roy Scheider||A shark terrorises a summer beach town.
+Jurassic Park|1993|M|M|127|action scifi tension family|Sam Neill,Jeff Goldblum,Laura Dern||Dinosaurs are back, and they're loose.
+The Lord of the Rings: The Fellowship of the Ring|2001|M|M|178|fantasy epic action|Elijah Wood,Viggo Mortensen||Nine companions set out to destroy one ring.
+Back to the Future|1985|M|PG|116|comedy scifi feelgood family|Michael J. Fox||A teen accidentally time travels to 1955.
+The Greatest Showman|2017|M|PG|105|music feelgood family glossy|Hugh Jackman,Zendaya||A dreamer builds a circus of misfits.
+Bohemian Rhapsody|2018|M|M|134|music real emotion|Rami Malek||Freddie Mercury and the rise of Queen.
+Elvis|2022|M|M|159|music real glossy aussie|Austin Butler,Tom Hanks||Baz Luhrmann's dazzling take on the King.
+The Wolf of Wall Street|2013|M|R18+|180|comedy real crime fast|Leonardo DiCaprio,Margot Robbie||Excess, fraud and chaos on Wall Street.
+Mamma Mia!|2008|M|PG|108|music comedy feelgood romance|Meryl Streep,Amanda Seyfried||ABBA hits at a Greek island wedding.
+The Devil Wears Prada|2006|M|PG|109|comedy glossy|Meryl Streep,Anne Hathaway||Surviving the world's toughest fashion boss.
+Barbie|2023|M|PG|114|comedy glossy feelgood fantasy|Margot Robbie,Ryan Gosling||Barbie leaves Barbieland for the real world.
+Crocodile Dundee|1986|M|M|97|comedy feelgood romance aussie|Paul Hogan||An outback bushman takes on New York.
+The Dish|2000|M|PG|101|comedy feelgood real aussie|Sam Neill||A dish in a sheep paddock helps beam the Moon landing.
+Hacksaw Ridge|2016|M|MA15+|139|real war emotion gore aussie|Andrew Garfield||A medic who refuses to carry a gun saves dozens of men.
+1917|2019|M|MA15+|119|war tension epic|George MacKay||Two soldiers race across no-man's-land.
+Ocean's Eleven|2001|M|M|116|heist crime comedy glossy|George Clooney,Brad Pitt,Matt Damon||Eleven crooks, three casinos, one night.
+Baby Driver|2017|M|MA15+|113|heist action fast music|Ansel Elgort||A getaway driver who lives by his playlist.
+The Social Network|2010|M|M|120|real mind fast|Jesse Eisenberg,Andrew Garfield||The messy birth of Facebook.
+Whiplash|2014|M|MA15+|106|music tension emotion|Miles Teller,J.K. Simmons||A young drummer and the teacher who'll break him.
+Ted Lasso|2020|S|M|3|comedy feelgood sport emotion underdog|Jason Sudeikis|Apple TV+|An American coach takes over an English football club.
+Severance|2022|S|M|2|mind scifi tension slow|Adam Scott|Apple TV+|Workers split their memories between work and home.
+Slow Horses|2022|S|MA15+|5|crime tension comedy grit|Gary Oldman|Apple TV+|Disgraced spies who somehow still get the job done.
+Shrinking|2023|S|MA15+|2|comedy emotion feelgood|Jason Segel,Harrison Ford|Apple TV+|A grieving therapist starts telling clients the blunt truth.
+Hijack|2023|S|M|1|tension fast|Idris Elba|Apple TV+|A plane hijacking unfolds in real time.
+The Bear|2022|S|MA15+|4|tension emotion fast|Jeremy Allen White|Disney+|A top chef takes over his family's chaotic sandwich shop.
+Shōgun|2024|S|MA15+|1|epic grit gore subtitles slow|Hiroyuki Sanada,Cosmo Jarvis|Disney+|An English sailor is caught in feudal Japan's power war.
+Andor|2022|S|M|2|scifi tension slow|Diego Luna|Disney+|The gritty spy story of how the Rebellion began.
+Only Murders in the Building|2021|S|M|4|comedy mystery crime|Steve Martin,Martin Short,Selena Gomez|Disney+|Three true-crime podcast fans solve murders in their building.
+Welcome to Wrexham|2022|S|MA15+|3|sport real feelgood underdog|Ryan Reynolds,Rob McElhenney|Disney+|Two actors buy a struggling Welsh football club.
+Bluey|2018|S|G|3|family comedy feelgood aussie|Dave McCormack|ABC iview|A Brisbane family of dogs and their endless games.
+Stranger Things|2016|S|M|5|scifi horror tension family|Millie Bobby Brown,Winona Ryder|Netflix|Kids, a missing friend and a monster from another dimension.
+Squid Game|2021|S|MA15+|3|tension dark gore subtitles|Lee Jung-jae|Netflix|Deadly kids' games for a life-changing cash prize.
+Wednesday|2022|S|M|2|comedy mystery dark fantasy|Jenna Ortega|Netflix|Wednesday Addams solves murders at boarding school.
+Formula 1: Drive to Survive|2019|S|M|7|sport real fast||Netflix|Behind the scenes of F1's wildest seasons.
+The Last Dance|2020|S|M|1|sport real emotion|Michael Jordan|Netflix|Michael Jordan and the Bulls' final championship run.
+Sunderland 'Til I Die|2018|S|MA15+|3|sport real emotion underdog||Netflix|A football town lives and dies with its club.
+Beef|2023|S|MA15+|1|dark comedy tension|Ali Wong,Steven Yeun|Netflix|A road-rage incident spirals out of control.
+The Crown|2016|S|M|6|real slow emotion glossy|Claire Foy,Olivia Colman|Netflix|The reign of Queen Elizabeth II.
+Breaking Bad|2008|S|MA15+|5|crime dark tension grit|Bryan Cranston,Aaron Paul|Netflix|A chemistry teacher turns drug kingpin.
+Ozark|2017|S|MA15+|4|crime dark tension|Jason Bateman,Laura Linney|Netflix|A family launders cartel money in the Ozarks.
+Peaky Blinders|2013|S|MA15+|6|crime grit dark|Cillian Murphy,Tom Hardy|Netflix|A Birmingham gang rises after WWI.
+Black Mirror|2011|S|MA15+|7|mind scifi dark||Netflix|Twisted standalone stories about tech gone wrong.
+Money Heist|2017|S|MA15+|5|heist crime tension subtitles|Úrsula Corberó|Netflix|Robbers in masks take over the Royal Mint.
+Bridgerton|2020|S|MA15+|3|romance glossy|Phoebe Dynevor,Regé-Jean Page|Netflix|Scandal and romance in Regency London.
+The Boys|2019|S|R18+|5|action dark comedy gore|Karl Urban,Antony Starr|Prime Video|What if superheroes were the bad guys?
+Reacher|2022|S|MA15+|3|action crime fast fitness|Alan Ritchson|Prime Video|A giant ex-military cop cleans up small towns.
+Jack Ryan|2018|S|MA15+|4|action tension|John Krasinski|Prime Video|A CIA analyst gets pulled into the field.
+Yellowstone|2018|S|MA15+|5|grit dark emotion|Kevin Costner||A ranching family fights to keep their land.
+The Last of Us|2023|S|MA15+|2|scifi horror emotion|Pedro Pascal,Bella Ramsey||A smuggler escorts a girl across a ruined America.
+Succession|2018|S|MA15+|4|dark comedy glossy|Brian Cox,Jeremy Strong||A media dynasty's kids fight for the throne.
+Friends|1994|S|M|10|comedy romance feelgood|Jennifer Aniston,Matthew Perry||Six friends, one coffee shop, ten seasons.
+Brooklyn Nine-Nine|2013|S|M|8|comedy crime feelgood|Andy Samberg||A goofy detective and his by-the-book captain.
+The Office|2005|S|M|9|comedy|Steve Carell,John Krasinski||The world's most awkward paper company.
+Mr Inbetween|2018|S|MA15+|3|crime dark comedy grit aussie|Scott Ryan||A Sydney hitman juggling family life and work.
+Fisk|2021|S|M|3|comedy aussie|Kitty Flanagan||A deadpan lawyer lands at a dodgy suburban firm.`;
+
+/* storyline + sport tags layered on top */
+const EXTRA={'Rocky':'boxing','Creed':'boxing','The Fighter':'boxing','Warrior':'boxing',
+'Ford v Ferrari':'motorsport','Rush':'motorsport','F1':'motorsport','Formula 1: Drive to Survive':'motorsport',
+'Moneyball':'baseball','The Blind Side':'nfl','Remember the Titans':'nfl','Ted Lasso':'soccer','Welcome to Wrexham':'soccer',"Sunderland 'Til I Die":'soccer',
+'Hustle':'basketball','Air':'basketball','The Last Dance':'basketball','Point Break':'surfing',
+'Gladiator':'revenge','John Wick':'revenge','Prisoners':'revenge','Bullet Train':'revenge','Mad Max: Fury Road':'survival',
+'Cast Away':'survival','The Martian':'survival space','A Quiet Place':'survival','Apollo 13':'survival space','The Last of Us':'survival','1917':'survival','Hijack':'survival','Squid Game':'survival',
+'Interstellar':'space timetravel','Dune: Part Two':'space','Arrival':'space','About Time':'timetravel','Back to the Future':'timetravel','Edge of Tomorrow':'timetravel',
+'Mission: Impossible – Fallout':'spy','Slow Horses':'spy','Jack Ryan':'spy','Andor':'spy space','Inception':'heist',
+'Superbad':'comingofage','Stranger Things':'comingofage','Coco':'comingofage','Wednesday':'comingofage',
+'The Crown':'familydrama','Succession':'familydrama','Yellowstone':'familydrama','The Bear':'familydrama','Ozark':'familydrama','Breaking Bad':'familydrama',
+'Severance':'conspiracy','Get Out':'conspiracy','Gone Girl':'conspiracy','Black Mirror':'conspiracy','The Dark Knight':'superhero','The Boys':'superhero',
+'The Shawshank Redemption':'prison','Knives Out':'familydrama','Rocky ':'',
+'Reacher':'revenge','Peaky Blinders':'familydrama'};
+
+
+const TITLES=RAW.trim().split('\n').map((l,i)=>{
+  const [t,y,k,c,r,tags,actors,svc,blurb]=l.split('|');
+  const tg=tags.split(' ').filter(Boolean).concat((EXTRA[t]||'').split(' ').filter(Boolean));
+  return {id:i,t,y:+y,k,c,r:+r,tags:[...new Set(tg)],actors:actors?actors.split(',').map(s=>s.trim()):[],svc:svc||'',blurb};
+});
+
+/* ===== vocab ===== */
+const CERTS={'G':0,'PG':1,'M':2,'MA15+':3,'R18+':4};
+const SERVICES=['Netflix','Disney+','Prime Video','Apple TV+','Stan','Binge','Paramount+','ABC iview'];
+const GENRES=[['action','Action'],['comedy','Comedy'],['emotion','Drama'],['tension','Thriller'],['crime','Crime'],['scifi','Sci-fi'],['fantasy','Fantasy'],['horror','Horror'],['romance','Romance'],['real','True stories'],['family','Family'],['music','Music'],['war','War'],['mystery','Mystery']];
+const STORIES=[['underdog','Underdog'],['revenge','Revenge'],['heist','Heists'],['survival','Survival'],['timetravel','Time travel'],['spy','Spies'],['mind','Twists'],['comingofage','Coming of age'],['familydrama','Family drama'],['superhero','Superheroes'],['space','Space'],['conspiracy','Dark secrets']];
+const SPORTS=[['boxing','Boxing & MMA'],['motorsport','Motorsport'],['soccer','Football'],['nfl','American football'],['basketball','Basketball'],['baseball','Baseball'],['surfing','Surfing'],['fitness','Fitness']];
+const DEALS=[['gore','Gore'],['horror','Horror'],['subtitles','Subtitles'],['slow','Slow burns'],['war','War']];
+const AUDS=[['adults','Adults',4],['teen15','Teens 15+',3],['teen13','Teens 13+',2],['kids','Kids',1]];
+const FMTS=[['both','Film or series'],['movie','Films'],['series','Series']];
+const LABEL={};[GENRES,STORIES,SPORTS].forEach(L=>L.forEach(([k,v])=>LABEL[k]=v));
+Object.assign(LABEL,{fast:'Fast-paced',slow:'Slow burn',grit:'Gritty',glossy:'Slick',feelgood:'Feel-good',dark:'Dark',epic:'Epic',sport:'Sport',aussie:'Australian'});
+const PAL={action:'#b23a2e',comedy:'#c98417',romance:'#b8325f',tension:'#2f5a80',crime:'#45405e',scifi:'#1c6e86',fantasy:'#5a3e8f',horror:'#5c1527',family:'#2a8a65',music:'#8a3aa3',sport:'#c1561a',real:'#6e6250',emotion:'#7c4a38',mind:'#2d4c8f',war:'#4f5d36',mystery:'#3d4a6b',dark:'#2d2a38'};
+const PRIMARY=['sport','horror','family','scifi','fantasy','romance','music','war','crime','mystery','action','comedy','mind','tension','real','emotion'];
+const ICON={
+  nope:'<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  seen:'<svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  loved:'<svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>',
+  into:'<svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-9-9a4.8 4.8 0 0 1 9-3 4.8 4.8 0 0 1 9 3c-2 4.6-9 9-9 9z"/></svg>'};
+
+/* ===== storage ===== */
+const KEY='moodreel_v3';
+let store=(()=>{try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}})()||{};
+store=Object.assign({taste:{},seen:[],loved:[],nope:[],chosen:[],aud:'adults',fmt:'both',profile:{genres:{},stories:{},sports:[],actors:[],services:[],deal:[]}},store);
+function save(){try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}}
+const P=()=>store.profile;
+
+/* ===== util ===== */
+const $=s=>document.querySelector(s),app=$('#app');
+const h=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const add=(v,tags,f)=>tags.forEach(k=>v[k]=(v[k]||0)+f);
+const jacc=(a,b)=>{const A=new Set(a),i=b.filter(x=>A.has(x)).length;return i/(new Set([...a,...b]).size||1)};
+const uniqPush=(a,v)=>{if(!a.includes(v))a.push(v)};
+const remove=(a,v)=>{const i=a.indexOf(v);if(i>=0)a.splice(i,1)};
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1400)}
+function render(html){app.innerHTML=`<div class="fade">${html}</div>`;try{window.scrollTo(0,0)}catch(e){}}
+function primary(t){for(const p of PRIMARY)if(t.tags.includes(p))return p;return 'dark'}
+function genreLine(t){return t.tags.filter(x=>['action','comedy','emotion','tension','crime','scifi','fantasy','horror','romance','real','family','music','war','mystery','sport'].includes(x)).slice(0,3).map(x=>LABEL[x]||({emotion:'Drama',tension:'Thriller',real:'True story'})[x]).join(' · ')}
+Object.assign(LABEL,{emotion:'Drama',tension:'Thriller',real:'True story'});
+function runtime(t){return t.k==='M'?`${Math.floor(t.r/60)}h ${t.r%60}m`:`${t.r} season${t.r>1?'s':''}`}
+function poster(t){const c=PAL[primary(t)];return `<div class="poster" style="background:linear-gradient(165deg,${c} 0%,${c}cc 35%,#0d0c12 95%)"><div class="pk">${t.k==='M'?'Film':'Series'} · ${t.y}</div><div class="pt">${h(t.t)}</div><div class="rule"></div><div class="pg">${h(genreLine(t))}</div></div>`}
+const svcTag=t=>t.svc?`<span class="svc">${h(t.svc)}</span>`:`<span class="svc unknown">Check where to watch</span>`;
+
+const ACT={};
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(el&&ACT[el.dataset.act])ACT[el.dataset.act](el.dataset.v,el)});
+document.addEventListener('input',e=>{if(e.target.dataset.inp==='actorq')drawActors(e.target.value)});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.dataset.inp==='actorq'){e.preventDefault();ACT.addActor()}});
+
+/* ===== engine ===== */
+let S=null; // session
+function newSession(){S={vec:{},shown:[],wants:[],offered:[],out:[],swipes:0,sinceSug:0,history:[],asked:[],said:{}}}
+function eligible(t){
+  const cap=(AUDS.find(a=>a[0]===store.aud)||AUDS[0])[2];
+  if(CERTS[t.c]>cap)return false;
+  if(store.fmt==='movie'&&t.k!=='M')return false;
+  if(store.fmt==='series'&&t.k!=='S')return false;
+  if(P().deal.some(d=>t.tags.includes(d)))return false;
+  if(store.seen.includes(t.id)||store.loved.includes(t.id)||store.nope.includes(t.id)||store.chosen.includes(t.id))return false;
+  if(S&&S.out.includes(t.id))return false;
+  return true;
+}
+function score(t){
+  const p=P(),why=[];let s=0;
+  for(const k of t.tags)s+=(S?S.vec[k]||0:0)+.6*(store.taste[k]||0);
+  s/=Math.sqrt(t.tags.length||1);
+  for(const k of t.tags){
+    if(p.genres[k]===1){s+=1.5;why.push([1.5,LABEL[k]])}if(p.genres[k]===-1)s-=3;
+    if(p.stories[k]===1){s+=1.4;why.push([1.4,LABEL[k]])}if(p.stories[k]===-1)s-=2.5;
+  }
+  for(const sp of p.sports)if(t.tags.includes(sp)){s+=2.5;why.push([3,LABEL[sp]])}
+  for(const a of t.actors){if(p.actors.includes(a)){s+=3;why.push([4,a])}if((store.actorNo||[]).includes(a))s-=1.2}
+  if(S&&S.said)for(const k of t.tags)if(S.said[k])why.push([3.2,'You said '+S.said[k].toLowerCase()]);
+  let best=null,bo=0;for(const id of store.loved){const o=jacc(TITLES[id].tags,t.tags);if(o>bo){bo=o;best=TITLES[id]}}
+  if(bo>=.34){s+=bo*3.5;why.push([3.5,'Like '+best.t])}
+  if(S)for(const id of S.wants){const o=jacc(TITLES[id].tags,t.tags);if(o>=.4){s+=o*1.5;if(id!==t.id)why.push([2,'Like '+TITLES[id].t]);break}}
+  if(p.services.length&&t.svc){if(p.services.includes(t.svc)){s+=.8;why.push([.6,'On '+t.svc])}else s-=2.5}
+  const top=Object.entries(S?S.vec:{}).filter(([k,v])=>v>.9&&t.tags.includes(k)&&LABEL[k]).sort((a,b)=>b[1]-a[1]).slice(0,2);
+  top.forEach(([k,v])=>why.push([v*.5,LABEL[k]]));
+  const seenW=new Set();
+  const said=new Set(why.filter(w=>w[1].startsWith('You said ')).map(w=>w[1].slice(9)));
+  return {t,s,why:why.sort((a,b)=>b[0]-a[0]).filter(w=>!said.has(w[1].toLowerCase())&&!seenW.has(w[1])&&seenW.add(w[1])).slice(0,3).map(w=>w[1])};
+}
+const ranked=filter=>TITLES.filter(t=>eligible(t)&&(!filter||filter(t))).map(score).sort((a,b)=>b.s-a.s);
+
+function nextCard(){
+  const pool=ranked(t=>!S.shown.includes(t.id)&&!S.wants.includes(t.id));
+  if(!pool.length)return null;
+  const recent=S.shown.slice(-4).map(id=>TITLES[id]);
+  const explore=S.swipes<3||Math.random()<.35;
+  if(explore){ // something different from what you've just seen, but not a dud
+    const cand=pool.slice(0,40);let best=cand[0],bv=-1e9;
+    cand.forEach((r,i)=>{const sim=recent.reduce((m,o)=>Math.max(m,jacc(o.tags,r.t.tags)),0);const v=-sim*2-i*.03+Math.random()*.6;if(v>bv){bv=v;best=r}});
+    return best.t;
+  }
+  const top=pool.slice(0,6),mx=top[0].s,ws=top.map(r=>Math.exp((r.s-mx)/1.2));
+  let x=Math.random()*ws.reduce((a,b)=>a+b,0);for(let i=0;i<top.length;i++){x-=ws[i];if(x<=0)return top[i].t}
+  return top[0].t;
+}
+
+/* ===== home ===== */
+function home(){
+  const has=store.seen.length+store.loved.length+store.nope.length>0;
+  render(`<div class="row" style="margin:4px 0 26px"><div class="wordmark"><i></i>MoodReel</div><span class="spacer"></span><button class="textbtn" data-act="taste">Your taste</button></div>
+    <h1>Swipe.<br>Pick.<br><span class="accent">Watch.</span></h1>
+    <p class="sub" style="margin-top:14px">Swipe a few titles, get three picks, say yes or no. Keep going until one hits.</p>
+    ${has?`<div class="stats"><button class="stat" data-act="list"><b>${store.loved.length}</b><span>Loved</span></button><button class="stat" data-act="list"><b>${store.seen.length}</b><span>Seen</span></button><button class="stat" data-act="list"><b>${store.chosen.length}</b><span>Picked</span></button></div>`:'<div style="height:22px"></div>'}
+    <div class="cta"><button class="btn" data-act="go">Start swiping</button>${has?`<button class="btn ghost" data-act="surprise">Surprise me</button>`:''}</div>
+    <p class="note"><button class="textbtn" data-act="how">How it picks</button><br>Prototype · ${TITLES.length} sample titles</p>`);
+}
+
+/* ===== questions ===== */
+const ROUND=8; // swipes (titles + questions) before picks
+const MOODQ=[
+  {id:'m1',text:'Tonight you want to…',l:['Laugh',{comedy:2,feelgood:1}],r:['Be on edge',{tension:2,crime:1,mystery:.5}]},
+  {id:'m2',text:'Light or heavy?',l:['Light & easy',{feelgood:1.5,comedy:1,dark:-1.2}],r:['Dark & intense',{dark:1.5,grit:1,tension:1}]},
+  {id:'m3',text:'What pace?',l:['Slow burn',{slow:1.5,mind:.5,fast:-.8}],r:['Fast & loud',{fast:1.5,action:1.2,slow:-1}]},
+  {id:'m4',text:'Real or made up?',l:['True story',{real:2}],r:['Pure escapism',{fantasy:1.5,scifi:1.2,real:-.5}]},
+  {id:'m5',text:'Use your brain?',l:['Switch off',{mind:-1.5,comedy:.6,action:.6}],r:['Make me think',{mind:2,mystery:.8}]},
+  {id:'m6',text:'Want to feel something?',l:['Keep it fun',{comedy:1,emotion:-.6}],r:['Hit me in the feels',{emotion:2,real:.5}]},
+  {id:'m7',text:'Who\'s it for?',l:['Just grown-ups',{family:-1.5}],r:['Whole family',{family:2.5,gore:-3}]}
+];
+const QTEXT={genre:k=>`Up for some ${LABEL[k].toLowerCase()}?`,story:k=>`In the mood for ${({underdog:'an underdog story',revenge:'a revenge story',heist:'a heist',survival:'a survival story',timetravel:'time travel',spy:'spies',mind:'twists',comingofage:'a coming-of-age story',familydrama:'family drama',superhero:'superheroes',space:'something set in space',conspiracy:'dark secrets'})[k]||LABEL[k]}?`,
+  sport:k=>`Into ${LABEL[k].toLowerCase()}?`,actor:k=>`Like watching ${k}?`};
+function makeQ(type,key){
+  const tagW=type==='actor'?null:{[key]:1.6};
+  return {q:true,id:type+':'+key,type,key,text:QTEXT[type](key),
+    l:['No',tagW?{[key]:-1.6}:null],r:['Yes',tagW],u:[type==='actor'?'Love them':'Love it',tagW?{[key]:2.4}:null],d:['Skip',null]};
+}
+function nextQuestion(){
+  S.asked=S.asked||[];
+  const nq=S.asked.length;
+  // open with two mood questions, then mix in one every few cards
+  const moodLeft=MOODQ.filter(m=>!S.asked.includes(m.id)&&!(m.id==='m7'&&store.aud!=='adults'&&store.aud!=='kids'));
+  if((nq<2||nq%3===2)&&moodLeft.length){const m=moodLeft[Math.random()*Math.min(3,moodLeft.length)|0];return {q:true,mood:true,...m,u:['Either',null],d:['Skip',null]}}
+  // otherwise ask whatever best splits your current shortlist
+  const top=ranked(t=>!S.shown.includes(t.id)).slice(0,24).map(r=>r.t);if(top.length<4)return null;
+  const p=P(),cands=[];
+  const consider=(type,key,has)=>{if(S.asked.includes(type+':'+key))return;const f=top.filter(has).length/top.length;if(f<.12||f>.88)return;cands.push({type,key,v:1-Math.abs(f-.5)*2+Math.random()*.25})};
+  GENRES.forEach(([k])=>p.genres[k]===undefined&&consider('genre',k,t=>t.tags.includes(k)));
+  STORIES.forEach(([k])=>p.stories[k]===undefined&&consider('story',k,t=>t.tags.includes(k)));
+  SPORTS.forEach(([k])=>!p.sports.includes(k)&&consider('sport',k,t=>t.tags.includes(k)));
+  const acts=[...new Set(top.flatMap(t=>t.actors))].filter(a=>!p.actors.includes(a)&&!(store.actorNo||[]).includes(a));
+  acts.forEach(a=>{if(S.asked.includes('actor:'+a))return;const f=top.filter(t=>t.actors.includes(a)).length/top.length;if(f>=.08)cands.push({type:'actor',key:a,v:.55+f+Math.random()*.35})});
+  if(!cands.length)return null;
+  cands.sort((x,y)=>y.v-x.v);return makeQ(cands[0].type,cands[0].key);
+}
+function nextItem(){
+  const wantQ=S.swipes===0||(S.swipes%3===0);
+  if(wantQ){const q=nextQuestion();if(q)return q}
+  return nextCard();
+}
+
+/* ===== deck ===== */
+const ARROW={l:'<svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>',r:'<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',u:'<svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg>',d:'<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>'};
+function deck(){
+  if(!S)newSession();
+  if(!S.cur)S.cur=nextItem();
+  if(!S.cur)return suggest(true);
+  if(!S.nxt||S.nxt===S.cur)S.nxt=S.cur.q?nextCard():null; // preview card behind (titles only)
+  const left=ROUND-S.sinceSug,c=S.cur,q=c.q;
+  const lab=q?{nope:c.l[0],seen:c.d[0],loved:c.u[0],into:c.r[0]}:{nope:'Nope',seen:'Seen it',loved:'Loved it',into:'Into it'};
+  const ic=q?{nope:ARROW.l,seen:ARROW.d,loved:ARROW.u,into:ARROW.r}:ICON;
+  render(`<div class="row"><button class="textbtn" data-act="home">Home</button><span class="spacer"></span>
+      <button class="pill" data-act="aud">${h(AUDS.find(a=>a[0]===store.aud)[1])}</button><button class="pill" data-act="fmt">${h(FMTS.find(f=>f[0]===store.fmt)[1])}</button></div>
+    <div class="deck" id="deck">${S.nxt&&!q?cardHTML(S.nxt,'back'):''}${q?qHTML(c):cardHTML(c,'front')}</div>
+    <div class="controls">
+      <button class="ctl nope" data-act="sw" data-v="nope"><span class="c">${ic.nope}</span>${h(lab.nope)}</button>
+      <button class="ctl seen" data-act="sw" data-v="seen"><span class="c">${ic.seen}</span>${h(lab.seen)}</button>
+      <button class="ctl loved" data-act="sw" data-v="loved"><span class="c">${ic.loved}</span>${h(lab.loved)}</button>
+      <button class="ctl into" data-act="sw" data-v="into"><span class="c">${ic.into}</span>${h(lab.into)}</button>
+    </div>
+    <div class="row" style="margin-top:16px"><button class="textbtn" data-act="undo" ${S.history.length?'':'style="visibility:hidden"'}>Undo</button><span class="spacer"></span>
+      <div class="dots">${Array.from({length:ROUND},(_,i)=>`<i class="${i<S.sinceSug?'on':''}"></i>`).join('')}</div><span class="spacer"></span>
+      <button class="textbtn" data-act="sugnow">Picks now</button></div>
+    <p class="hint">${left} more until your picks</p>`);
+  bindDrag();
+}
+function cardHTML(t,cls){return `<div class="card ${cls}" ${cls==='front'?'id="front"':''}>
+  <div class="stamp nope">Nope</div><div class="stamp into">Into it</div><div class="stamp loved">Loved it</div><div class="stamp seen">Seen it</div>
+  ${poster(t)}<div class="info"><div class="meta">${t.c} · ${runtime(t)}${t.svc?' · '+h(t.svc):''}</div><p>${h(t.blurb)}</p></div></div>`}
+function qHTML(q){
+  const kind=q.mood?'Tonight':q.type==='actor'?'Actors':q.type==='sport'?'Sport':q.type==='story'?'Storylines':'Genres';
+  return `<div class="card qcard" id="front">
+    <div class="stamp nope">${h(q.l[0])}</div><div class="stamp into">${h(q.r[0])}</div><div class="stamp loved">${h(q.u[0])}</div><div class="stamp seen">${h(q.d[0])}</div>
+    <div class="qbody"><div class="pk">Quick question · ${kind}</div><div class="qt">${h(q.text)}</div>
+      ${q.mood?`<div class="qsides"><span>← ${h(q.l[0])}</span><span>${h(q.r[0])} →</span></div>`:`<div class="qsides"><span>← No</span><span>Yes →</span></div>`}
+      <div class="qhint">↑ ${h(q.u[0])}   ·   ↓ ${h(q.d[0])}</div></div></div>`}
+
+function bindDrag(){
+  const el=$('#front');if(!el)return;
+  let sx=0,sy=0,dx=0,dy=0,drag=false;
+  const stamps={nope:el.querySelector('.stamp.nope'),into:el.querySelector('.stamp.into'),loved:el.querySelector('.stamp.loved'),seen:el.querySelector('.stamp.seen')};
+  const dir=()=>Math.abs(dx)>Math.abs(dy)?(dx>0?'into':'nope'):(dy<0?'loved':'seen');
+  el.addEventListener('pointerdown',e=>{drag=true;sx=e.clientX;sy=e.clientY;dx=dy=0;el.style.transition='none';try{el.setPointerCapture(e.pointerId)}catch(_){}});
+  el.addEventListener('pointermove',e=>{if(!drag)return;dx=e.clientX-sx;dy=e.clientY-sy;
+    el.style.transform=`translate(${dx}px,${dy}px) rotate(${dx*.05}deg)`;
+    const d=dir(),amt=Math.min(1,Math.max(Math.abs(dx),Math.abs(dy))/110);
+    for(const k in stamps)stamps[k].style.opacity=k===d?amt:0});
+  const end=()=>{if(!drag)return;drag=false;
+    if(Math.max(Math.abs(dx),Math.abs(dy))>95)fling(dir());
+    else{el.style.transition='transform .25s';el.style.transform='';for(const k in stamps)stamps[k].style.opacity=0}};
+  el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);
+}
+function fling(kind){
+  const el=$('#front');if(!el||S.busy)return;S.busy=true;
+  const v={nope:[-600,0],into:[600,0],loved:[0,-700],seen:[0,700]}[kind];
+  el.querySelector('.stamp.'+kind).style.opacity=1;
+  el.style.transition='transform .28s ease-in';el.style.transform=`translate(${v[0]}px,${v[1]}px) rotate(${v[0]*.04}deg)`;
+  setTimeout(()=>{S.busy=false;swipe(kind)},230);
+}
+ACT.sw=v=>fling(v);
+function addW(v,w,f=1){if(w)for(const k in w)v[k]=(v[k]||0)+w[k]*f}
+function swipe(kind){
+  const c=S.cur;S.swipes++;S.sinceSug++;
+  S.history.push({item:c,kind,vec:{...S.vec},taste:{...store.taste},profile:JSON.parse(JSON.stringify(P())),said:{...S.said},actorNo:(store.actorNo||[]).slice()});
+  if(c.q){
+    S.asked.push(c.id);
+    const side={nope:c.l,into:c.r,loved:c.u,seen:c.d}[kind];
+    if(c.mood){addW(S.vec,side[1]);if(kind==='nope'||kind==='into')S.said[c.id]=side[0]}
+    else if(c.type==='actor'){
+      if(kind==='into'||kind==='loved'){uniqPush(P().actors,c.key);S.said['a:'+c.key]=c.key}
+      if(kind==='nope'){store.actorNo=store.actorNo||[];uniqPush(store.actorNo,c.key)}
+    } else {
+      addW(S.vec,side[1]);
+      if(kind==='into'||kind==='loved')S.said[c.key]=LABEL[c.key];
+      if(kind==='loved'){if(c.type==='genre')P().genres[c.key]=1;if(c.type==='story')P().stories[c.key]=1;if(c.type==='sport')uniqPush(P().sports,c.key)}
+      if(kind==='nope'&&c.type==='sport')S.vec.sport=(S.vec.sport||0)-.5;
+    }
+  } else {
+    const t=c;S.shown.push(t.id);
+    if(kind==='into'){add(S.vec,t.tags,1);add(store.taste,t.tags,.2);S.wants.push(t.id)}
+    if(kind==='nope'){add(S.vec,t.tags,-.6);add(store.taste,t.tags,-.15);uniqPush(store.nope,t.id)}
+    if(kind==='loved'){add(S.vec,t.tags,.8);add(store.taste,t.tags,.45);uniqPush(store.loved,t.id)}
+    if(kind==='seen'){add(S.vec,t.tags,-.15);add(store.taste,t.tags,-.05);uniqPush(store.seen,t.id)}
+  }
+  save();
+  const nxt=S.nxt;S.nxt=null;
+  S.cur=null;
+  if(S.sinceSug>=ROUND)return suggest();
+  const wantQ=S.swipes%3===0;
+  S.cur=wantQ?nextQuestion():null;
+  if(!S.cur)S.cur=nxt&&!nxt.q&&eligible(nxt)&&!S.shown.includes(nxt.id)&&!S.wants.includes(nxt.id)?nxt:nextCard();
+  if(!S.cur)return suggest();
+  deck();
+}
+ACT.undo=()=>{const last=S.history.pop();if(!last)return;
+  const c=last.item;S.vec=last.vec;store.taste=last.taste;store.profile=last.profile;S.said=last.said;store.actorNo=last.actorNo;
+  if(c.q)remove(S.asked,c.id);else{remove(S.shown,c.id);remove(S.wants,c.id);remove(store.nope,c.id);remove(store.loved,c.id);remove(store.seen,c.id)}
+  S.swipes--;S.sinceSug=Math.max(0,S.sinceSug-1);save();S.nxt=null;S.cur=c;deck()};
+ACT.sugnow=()=>suggest();
+ACT.aud=()=>{const i=AUDS.findIndex(a=>a[0]===store.aud);store.aud=AUDS[(i+1)%AUDS.length][0];save();if(!S.cur.q&&!eligible(S.cur))S.cur=nextCard();S.nxt=null;deck()};
+ACT.fmt=()=>{const i=FMTS.findIndex(a=>a[0]===store.fmt);store.fmt=FMTS[(i+1)%FMTS.length][0];save();if(!S.cur.q&&!eligible(S.cur))S.cur=nextCard();S.nxt=null;deck()};
+
+/* ===== suggestions ===== */
+function suggest(empty){
+  S.sinceSug=0;
+  // titles you swiped "into it" come first, then the best unseen matches
+  const wants=S.wants.filter(id=>!S.offered.includes(id)&&eligible(TITLES[id])).map(id=>score(TITLES[id])).sort((a,b)=>b.s-a.s);
+  const rest=ranked(t=>!S.offered.includes(t.id)&&!S.wants.includes(t.id)&&!S.shown.includes(t.id));
+  const picks=[];
+  for(const r of [...wants.slice(0,2),...rest]){if(picks.length>=3)break;if(picks.some(p=>jacc(p.t.tags,r.t.tags)>.75&&!S.wants.includes(r.t.id)))continue;picks.push(r)}
+  if(!picks.length){render(`<h2>You've been through the lot</h2><p class="sub">Nothing left in the sample catalogue that fits. Try changing who's watching or film/series.</p><button class="btn" data-act="home">Home</button>`);return}
+  picks.forEach(r=>S.offered.push(r.t.id));
+  S.picks=picks.map(r=>r.t.id);
+  render(`<div class="row"><button class="textbtn" data-act="home">Home</button><span class="spacer"></span><span class="pill">Round ${S.offered.length/3|0}</span></div>
+    <h2 style="margin-top:8px">How about one of these?</h2><p class="sub">Yes to watch it. No and it's gone.</p>
+    ${picks.map(r=>`<div class="sug" id="s${r.t.id}">${poster(r.t)}<div>
+      <h4>${h(r.t.t)}</h4><div class="meta">${r.t.k==='M'?'Film':'Series'} · ${r.t.y} · ${r.t.c} · ${runtime(r.t)}</div>
+      ${svcTag(r.t)}<p>${h(r.t.blurb)}</p>
+      ${r.why.length?`<div class="why">${r.why.map(w=>`<span>${h(w)}</span>`).join('')}</div>`:''}
+      <div class="yn"><button class="n" data-act="no" data-v="${r.t.id}">No</button><button class="y" data-act="yes" data-v="${r.t.id}">Yes</button></div>
+    </div></div>`).join('')}
+    <button class="btn ghost" data-act="keep">None of these, keep swiping</button>
+    <button class="textbtn" data-act="how" style="display:block;margin:14px auto 0">How are these picked?</button>`);
+}
+ACT.no=v=>{const id=+v,t=TITLES[id];S.out.push(id);add(S.vec,t.tags,-.4);add(store.taste,t.tags,-.08);save();
+  const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{el.remove();S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length){toast('No worries, a few more swipes');ACT.keep()}},250)};
+ACT.keep=()=>{S.picks.forEach(id=>S.out.push(id));S.cur=nextQuestion()||nextCard();S.nxt=null;deck()};
+ACT.yes=v=>{const t=TITLES[+v];uniqPush(store.chosen,t.id);add(store.taste,t.tags,.35);save();enjoy(t)};
+
+function enjoy(t){
+  render(`<div class="enjoy"><div class="eyebrow" style="margin-top:6px">Tonight you're watching</div>${poster(t)}
+    <h2>${h(t.t)}</h2><div class="sub" style="margin:6px 0 10px">${t.k==='M'?'Film':'Series'} · ${t.y} · ${t.c} · ${runtime(t)}</div>${svcTag(t)}
+    <p style="color:#d9d5e2;margin:6px 0 24px">${h(t.blurb)}</p>
+    <div class="cta"><button class="btn" data-act="home">Done</button><button class="btn ghost" data-act="go">Pick something else</button></div>
+    <p class="note">It's saved to your picks, so it won't be suggested again.</p></div>`);
+  S=null;
+}
+
+/* ===== how it picks ===== */
+ACT.how=()=>{const back=S&&S.picks?'back':'home';
+  render(`<div class="row"><button class="textbtn" data-act="${back==='back'?'howBack':'home'}">Back</button></div>
+  <div class="how"><h2 style="margin:6px 0 16px">How it picks</h2>
+  <p>Every title is tagged: genres, vibe, storyline, sport, cast, rating and where it streams. Every swipe and answer adds or takes points from those tags. The highest-scoring titles you haven't seen become your picks.</p>
+  <p><b>Tonight's swipes count most.</b> Into it on a title or Yes to a question pushes similar titles up for this session. Nope pushes them down.</p>
+  <p><b>Questions are chosen to split your shortlist.</b> If half your top matches star Tom Hardy, it asks about Tom Hardy. If half are thrillers, it asks about thrillers. One answer cuts the list roughly in half.</p>
+  <p><b>Your long-term taste builds up slowly.</b> Loved it, Nope and every yes or no nudge it, so next time starts smarter. Loving an actor, genre or storyline saves it to Your taste.</p>
+  <p><b>Things that always apply:</b> who's watching sets the age rating, the never-show-me list is filtered out, your services get a small boost, and anything you've seen, loved, picked or noped is never suggested again.</p>
+  <p><b>Titles you swipe Into it on</b> go straight to the front of your next picks.</p></div>`)};
+ACT.howBack=()=>{const ids=S.picks;S.offered=S.offered.filter(id=>!ids.includes(id));suggest()};
+
+/* ===== surprise ===== */
+ACT.surprise=keep=>{if(!S||keep!==true)newSession();const pool=ranked().slice(0,10);if(!pool.length)return toast('Nothing left to suggest');
+  const mx=pool[0].s,ws=pool.map(r=>Math.exp((r.s-mx)/1.2));let x=Math.random()*ws.reduce((a,b)=>a+b,0),pick=pool[0];
+  for(let i=0;i<pool.length;i++){x-=ws[i];if(x<=0){pick=pool[i];break}}
+  S.offered.push(pick.t.id);S.picks=[pick.t.id];
+  render(`<div class="row"><button class="textbtn" data-act="home">Home</button></div>
+    <h2 style="margin-top:8px">Try this</h2><p class="sub">Picked at random from your best matches.</p>
+    <div class="sug" id="s${pick.t.id}">${poster(pick.t)}<div><h4>${h(pick.t.t)}</h4><div class="meta">${pick.t.k==='M'?'Film':'Series'} · ${pick.t.y} · ${pick.t.c} · ${runtime(pick.t)}</div>${svcTag(pick.t)}<p>${h(pick.t.blurb)}</p>
+    ${pick.why.length?`<div class="why">${pick.why.map(w=>`<span>${h(w)}</span>`).join('')}</div>`:''}
+    <div class="yn"><button class="n" data-act="surpriseNo" data-v="${pick.t.id}">No</button><button class="y" data-act="yes" data-v="${pick.t.id}">Yes</button></div></div></div>
+    <button class="btn ghost" data-act="go">Swipe instead</button>`)};
+ACT.surpriseNo=v=>{const t=TITLES[+v];add(store.taste,t.tags,-.08);save();S.out.push(+v);ACT.surprise(true)};
+
+/* ===== your taste ===== */
+const tri=(o,k)=>o[k]===1?'love':o[k]===-1?'avoid':'';
+const cyc=(o,k)=>{o[k]=o[k]===1?-1:o[k]===-1?undefined:1;if(o[k]===undefined)delete o[k]};
+const chipList=(list,cls,act)=>`<div class="chips">${list.map(([k,l])=>`<button class="chip ${cls(k)}" data-act="${act}" data-v="${h(k)}">${h(l)}</button>`).join('')}</div>`;
+let actorPool=[];
+function taste(){
+  const p=P(),cnt={};TITLES.forEach(t=>t.actors.forEach(a=>cnt[a]=(cnt[a]||0)+1));
+  actorPool=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]||a.localeCompare(b));
+  const y=window.scrollY;
+  render(`<div class="row"><button class="textbtn" data-act="home">Done</button></div>
+    <h2 style="margin-top:6px">Your taste</h2><p class="sub">All optional. Swiping teaches it anyway, this just gives it a head start.</p>
+    <div class="group"><h3>Genres</h3><div class="hintline">Tap once to love, twice to avoid</div>${chipList(GENRES,k=>tri(p.genres,k),'g')}</div>
+    <div class="group"><h3>Storylines</h3>${chipList(STORIES,k=>tri(p.stories,k),'st')}</div>
+    <div class="group"><h3>Sport you're into</h3>${chipList(SPORTS,k=>p.sports.includes(k)?'on':'','sp')}</div>
+    <div class="group"><h3>Actors you love</h3><div class="inputrow"><input type="text" data-inp="actorq" placeholder="Search or add a name"><button class="btn" data-act="addActor">Add</button></div><div id="acts"></div></div>
+    <div class="group"><h3>Your services</h3>${chipList(SERVICES.map(s=>[s,s]),k=>p.services.includes(k)?'on':'','sv')}</div>
+    <div class="group"><h3>Never show me</h3>${chipList(DEALS,k=>p.deal.includes(k)?'neg on':'neg','dl')}</div>`);
+  drawActors('');try{window.scrollTo(0,y)}catch(e){}
+}
+function drawActors(q){
+  const p=P(),ql=q.toLowerCase().trim();
+  const list=actorPool.filter(a=>!p.actors.includes(a)&&(!ql||a.toLowerCase().includes(ql))).slice(0,ql?30:18);
+  $('#acts').innerHTML=`${p.actors.length?`<div class="chips" style="margin-bottom:10px">${p.actors.map(a=>`<button class="chip on" data-act="ac" data-v="${h(a)}">${h(a)} ✕</button>`).join('')}</div>`:''}
+    <div class="chips">${list.map(a=>`<button class="chip" data-act="ac" data-v="${h(a)}">${h(a)}</button>`).join('')}</div>`;
+}
+const togA=(a,v)=>a.includes(v)?remove(a,v):a.push(v);
+Object.assign(ACT,{
+  taste,home,list:()=>listView(),
+  go(){newSession();S.cur=nextItem();deck()},
+  g(v){cyc(P().genres,v);save();taste()},st(v){cyc(P().stories,v);save();taste()},
+  sp(v){togA(P().sports,v);save();taste()},sv(v){togA(P().services,v);save();taste()},dl(v){togA(P().deal,v);save();taste()},
+  ac(v){togA(P().actors,v);save();drawActors(($('[data-inp=actorq]')||{}).value||'')},
+  addActor(){const el=$('[data-inp=actorq]'),v=el.value.trim();if(!v)return;
+    const m=actorPool.find(a=>a.toLowerCase()===v.toLowerCase())||v.replace(/\b\w/g,c=>c.toUpperCase());
+    uniqPush(P().actors,m);save();el.value='';drawActors('')},
+  unmark(v){const [k,id]=v.split(':');remove(store[k],+id);save();listView()}
+});
+
+/* ===== list ===== */
+function listView(){
+  const sec=(k,title)=>`<div class="group"><h3>${title} · ${store[k].length}</h3>${store[k].length?store[k].slice().reverse().map(id=>`<div class="listrow"><span>${h(TITLES[id].t)}</span><button data-act="unmark" data-v="${k}:${id}">Remove</button></div>`).join(''):'<p class="sub" style="margin:0">Nothing yet.</p>'}</div>`;
+  render(`<div class="row"><button class="textbtn" data-act="home">Done</button></div>
+    <h2 style="margin-top:6px">Your history</h2><p class="sub">None of these get suggested. Remove one to let it come back.</p>
+    ${sec('chosen','Picked to watch')}${sec('loved','Loved')}${sec('seen','Seen')}${sec('nope','Not for me')}`);
+}
+
+home();
+</script>
+</body>
+</html>
