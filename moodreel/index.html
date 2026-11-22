@@ -122,14 +122,14 @@ input[type=text]:focus{outline:none;border-color:var(--line2)}
 <div class="wrap" id="app"></div>
 <div class="toast" id="toast"></div>
 <script>
-const RAW=`Top Gun: Maverick|2022|M|M|131|action fast glossy feelgood epic|Tom Cruise,Miles Teller,Glen Powell||Elite pilots, an impossible mission, maximum throttle.
+const RAW=`Top Gun: Maverick|2022|M|M|131|action fast glossy feelgood epic|Tom Cruise,Miles Teller,Glen Powell|LIB|Elite pilots, an impossible mission, maximum throttle.
 Rocky|1976|M|M|120|sport underdog feelgood grit emotion fitness|Sylvester Stallone||A nobody boxer gets one shot at the title.
 Creed|2015|M|M|133|sport underdog emotion grit fitness|Michael B. Jordan,Sylvester Stallone||Apollo's son steps into the ring with Rocky in his corner.
 The Fighter|2010|M|MA15+|116|sport real underdog emotion grit|Mark Wahlberg,Christian Bale,Amy Adams||A struggling boxer, his troubled brother and one last shot.
 Warrior|2011|M|MA15+|140|sport underdog emotion grit fitness|Tom Hardy,Joel Edgerton||Two estranged brothers collide in an MMA tournament.
-Ford v Ferrari|2019|M|M|152|sport real fast emotion|Matt Damon,Christian Bale||Two rebels take on Ferrari at Le Mans.
+Ford v Ferrari|2019|M|M|152|sport real fast emotion|Matt Damon,Christian Bale|LIB|Two rebels take on Ferrari at Le Mans.
 Rush|2013|M|MA15+|123|sport real fast tension|Chris Hemsworth,Daniel Brühl||Hunt vs Lauda, F1's most dangerous rivalry.
-F1|2025|M|M|155|sport fast action glossy|Brad Pitt,Damson Idris|Apple TV+|A veteran driver returns to mentor a hotshot rookie.
+F1|2025|M|M|155|sport fast action glossy|Brad Pitt,Damson Idris|LIB|A veteran driver returns to mentor a hotshot rookie.
 Moneyball|2011|M|M|133|sport real mind underdog|Brad Pitt,Jonah Hill||A broke baseball team rewrites the rules with numbers.
 The Blind Side|2009|M|M|129|sport real feelgood emotion family|Sandra Bullock||A family takes in a teen who becomes an NFL star.
 Remember the Titans|2000|M|PG|113|sport real feelgood underdog family|Denzel Washington||A newly integrated football team learns to win together.
@@ -138,63 +138,63 @@ Air|2023|M|M|112|sport real feelgood|Matt Damon,Ben Affleck|Prime Video|How Nike
 Point Break|1991|M|M|122|action heist sport fast|Keanu Reeves,Patrick Swayze||An undercover cop infiltrates a gang of surfing bank robbers.
 Inception|2010|M|M|148|mind scifi tension action|Leonardo DiCaprio,Tom Hardy||A heist thriller set inside people's dreams.
 Interstellar|2014|M|M|169|mind scifi emotion epic slow|Matthew McConaughey,Anne Hathaway||A father crosses the galaxy to save humanity.
-The Martian|2015|M|M|144|scifi feelgood comedy mind|Matt Damon||Stranded on Mars, he sciences his way home.
+The Martian|2015|M|M|144|scifi feelgood comedy mind|Matt Damon|LIB|Stranded on Mars, he sciences his way home.
 Knives Out|2019|M|M|130|comedy mystery crime mind|Daniel Craig,Ana de Armas,Chris Evans||A rich family, a dead patriarch, and everyone's a suspect.
 Glass Onion|2022|M|M|139|comedy mystery crime glossy|Daniel Craig,Edward Norton|Netflix|Detective Benoit Blanc on a billionaire's private island.
 Gone Girl|2014|M|MA15+|149|dark tension mind crime|Ben Affleck,Rosamund Pike||A wife vanishes and the husband looks guilty.
 Prisoners|2013|M|MA15+|153|dark tension crime grit slow|Hugh Jackman,Jake Gyllenhaal||A desperate father takes the law into his own hands.
 Se7en|1995|M|R18+|127|dark crime tension gore|Brad Pitt,Morgan Freeman||Two detectives hunt a killer built around the seven sins.
 Heat|1995|M|MA15+|170|crime action tension grit heist|Al Pacino,Robert De Niro||A master thief and an obsessive cop circle each other in LA.
-The Dark Knight|2008|M|M|152|action crime dark tension epic|Christian Bale,Heath Ledger||Batman meets his match in the Joker.
-Mad Max: Fury Road|2015|M|MA15+|120|action fast grit epic aussie|Tom Hardy,Charlize Theron||Two hours of non-stop desert war-rig chaos.
+The Dark Knight|2008|M|M|152|action crime dark tension epic|Christian Bale,Heath Ledger|LIB|Batman meets his match in the Joker.
+Mad Max: Fury Road|2015|M|MA15+|120|action fast grit epic aussie|Tom Hardy,Charlize Theron|LIB|Two hours of non-stop desert war-rig chaos.
 John Wick|2014|M|MA15+|101|action fast crime gore glossy|Keanu Reeves||Never touch the retired hitman's dog.
 Extraction|2020|M|MA15+|116|action fast grit|Chris Hemsworth|Netflix|A mercenary fights through a city to rescue a kid.
-Gladiator|2000|M|MA15+|155|action epic emotion grit|Russell Crowe,Joaquin Phoenix||A betrayed general seeks revenge in the arena.
-Edge of Tomorrow|2014|M|M|113|action scifi fast comedy|Tom Cruise,Emily Blunt||Live, die, repeat against an alien invasion.
-Mission: Impossible – Fallout|2018|M|M|147|action fast glossy tension|Tom Cruise,Henry Cavill||Ethan Hunt's most insane stunts yet.
-Bullet Train|2022|M|MA15+|127|action comedy fast gore|Brad Pitt||Five assassins, one bullet train, total chaos.
-The Notebook|2004|M|M|123|romance emotion|Ryan Gosling,Rachel McAdams||A summer romance that lasts a lifetime.
+Gladiator|2000|M|MA15+|155|action epic emotion grit|Russell Crowe,Joaquin Phoenix|LIB|A betrayed general seeks revenge in the arena.
+Edge of Tomorrow|2014|M|M|113|action scifi fast comedy|Tom Cruise,Emily Blunt|LIB|Live, die, repeat against an alien invasion.
+Mission: Impossible – Fallout|2018|M|M|147|action fast glossy tension|Tom Cruise,Henry Cavill|LIB|Ethan Hunt's most insane stunts yet.
+Bullet Train|2022|M|MA15+|127|action comedy fast gore|Brad Pitt|LIB|Five assassins, one bullet train, total chaos.
+The Notebook|2004|M|M|123|romance emotion|Ryan Gosling,Rachel McAdams|LIB|A summer romance that lasts a lifetime.
 Crazy, Stupid, Love|2011|M|M|118|romance comedy feelgood|Ryan Gosling,Steve Carell,Emma Stone||A newly single dad gets dating lessons from a smooth operator.
 La La Land|2016|M|M|128|romance music emotion glossy|Ryan Gosling,Emma Stone||Two dreamers fall in love chasing their dreams in LA.
-About Time|2013|M|M|123|romance emotion feelgood comedy fantasy|Domhnall Gleeson,Rachel McAdams||He can time travel, and he uses it for love.
+About Time|2013|M|M|123|romance emotion feelgood comedy fantasy|Domhnall Gleeson,Rachel McAdams|LIB|He can time travel, and he uses it for love.
 Anyone But You|2023|M|MA15+|103|romance comedy glossy aussie|Sydney Sweeney,Glen Powell||A fake couple with very real chemistry, shot in Sydney.
 The Proposal|2009|M|M|108|romance comedy feelgood|Sandra Bullock,Ryan Reynolds||A boss forces her assistant into a fake engagement.
 Step Brothers|2008|M|MA15+|98|comedy|Will Ferrell,John C. Reilly||Two 40-year-old man-children become brothers.
-Superbad|2007|M|MA15+|113|comedy|Jonah Hill,Michael Cera||Two teens, one party, everything goes wrong.
+Superbad|2007|M|MA15+|113|comedy|Jonah Hill,Michael Cera|LIB|Two teens, one party, everything goes wrong.
 The Nice Guys|2016|M|MA15+|116|comedy crime action|Ryan Gosling,Russell Crowe||Mismatched private eyes stumble through 70s LA.
 Game Night|2018|M|MA15+|100|comedy tension|Jason Bateman,Rachel McAdams||Game night turns into a very real kidnapping.
-Free Guy|2021|M|M|115|comedy action feelgood scifi|Ryan Reynolds|Disney+|A video game background character becomes the hero.
+Free Guy|2021|M|M|115|comedy action feelgood scifi|Ryan Reynolds|LIB|A video game background character becomes the hero.
 Paddington 2|2017|M|G|103|family comedy feelgood|Hugh Grant,Ben Whishaw||The politest bear in London gets framed for theft.
-Up|2009|M|PG|96|family emotion feelgood comedy|Ed Asner|Disney+|An old man ties balloons to his house and flies away.
+Up|2009|M|PG|96|family emotion feelgood comedy|Ed Asner|LIB|An old man ties balloons to his house and flies away.
 Coco|2017|M|PG|105|family music emotion fantasy|Anthony Gonzalez|Disney+|A boy who loves music visits the Land of the Dead.
 Toy Story|1995|M|G|81|family comedy feelgood|Tom Hanks,Tim Allen|Disney+|Toys come alive when you're not looking.
 Apollo 13|1995|M|M|140|real tension emotion|Tom Hanks,Kevin Bacon||A crippled spacecraft, three astronauts, no easy way home.
 Cast Away|2000|M|M|143|emotion slow|Tom Hanks||Stranded alone on an island for years.
 The Shawshank Redemption|1994|M|MA15+|142|emotion crime slow feelgood|Tim Robbins,Morgan Freeman||Hope and friendship inside a brutal prison.
-Forrest Gump|1994|M|M|142|emotion feelgood comedy epic|Tom Hanks||A simple man stumbles through decades of history.
+Forrest Gump|1994|M|M|142|emotion feelgood comedy epic|Tom Hanks|LIB|A simple man stumbles through decades of history.
 Oppenheimer|2023|M|MA15+|180|real slow mind epic|Cillian Murphy,Robert Downey Jr.,Matt Damon||The man who built the atomic bomb.
 Dune: Part Two|2024|M|M|166|scifi epic action fantasy|Timothée Chalamet,Zendaya,Austin Butler||A desert war for the fate of the universe.
 Arrival|2016|M|M|116|scifi mind slow emotion|Amy Adams||A linguist has to learn to talk to aliens.
 Everything Everywhere All at Once|2022|M|MA15+|139|mind comedy action emotion fantasy|Michelle Yeoh||A laundromat owner fights across the multiverse.
-Parasite|2019|M|MA15+|132|dark tension mind subtitles|Song Kang-ho||A poor family cons their way into a rich household.
+Parasite|2019|M|MA15+|132|dark tension mind subtitles|Song Kang-ho|LIB|A poor family cons their way into a rich household.
 Get Out|2017|M|MA15+|104|horror tension mind|Daniel Kaluuya||Meeting the girlfriend's parents goes very wrong.
-A Quiet Place|2018|M|M|90|horror tension scifi|Emily Blunt,John Krasinski||Make a sound and they hunt you.
+A Quiet Place|2018|M|M|90|horror tension scifi|Emily Blunt,John Krasinski|LIB|Make a sound and they hunt you.
 Jaws|1975|M|M|124|tension horror|Roy Scheider||A shark terrorises a summer beach town.
-Jurassic Park|1993|M|M|127|action scifi tension family|Sam Neill,Jeff Goldblum,Laura Dern||Dinosaurs are back, and they're loose.
+Jurassic Park|1993|M|M|127|action scifi tension family|Sam Neill,Jeff Goldblum,Laura Dern|LIB|Dinosaurs are back, and they're loose.
 The Lord of the Rings: The Fellowship of the Ring|2001|M|M|178|fantasy epic action|Elijah Wood,Viggo Mortensen||Nine companions set out to destroy one ring.
-Back to the Future|1985|M|PG|116|comedy scifi feelgood family|Michael J. Fox||A teen accidentally time travels to 1955.
-The Greatest Showman|2017|M|PG|105|music feelgood family glossy|Hugh Jackman,Zendaya||A dreamer builds a circus of misfits.
-Bohemian Rhapsody|2018|M|M|134|music real emotion|Rami Malek||Freddie Mercury and the rise of Queen.
-Elvis|2022|M|M|159|music real glossy aussie|Austin Butler,Tom Hanks||Baz Luhrmann's dazzling take on the King.
+Back to the Future|1985|M|PG|116|comedy scifi feelgood family|Michael J. Fox|LIB|A teen accidentally time travels to 1955.
+The Greatest Showman|2017|M|PG|105|music feelgood family glossy|Hugh Jackman,Zendaya|LIB|A dreamer builds a circus of misfits.
+Bohemian Rhapsody|2018|M|M|134|music real emotion|Rami Malek|LIB|Freddie Mercury and the rise of Queen.
+Elvis|2022|M|M|159|music real glossy aussie|Austin Butler,Tom Hanks|LIB|Baz Luhrmann's dazzling take on the King.
 The Wolf of Wall Street|2013|M|R18+|180|comedy real crime fast|Leonardo DiCaprio,Margot Robbie||Excess, fraud and chaos on Wall Street.
-Mamma Mia!|2008|M|PG|108|music comedy feelgood romance|Meryl Streep,Amanda Seyfried||ABBA hits at a Greek island wedding.
+Mamma Mia!|2008|M|PG|108|music comedy feelgood romance|Meryl Streep,Amanda Seyfried|LIB|ABBA hits at a Greek island wedding.
 The Devil Wears Prada|2006|M|PG|109|comedy glossy|Meryl Streep,Anne Hathaway||Surviving the world's toughest fashion boss.
 Barbie|2023|M|PG|114|comedy glossy feelgood fantasy|Margot Robbie,Ryan Gosling||Barbie leaves Barbieland for the real world.
 Crocodile Dundee|1986|M|M|97|comedy feelgood romance aussie|Paul Hogan||An outback bushman takes on New York.
 The Dish|2000|M|PG|101|comedy feelgood real aussie|Sam Neill||A dish in a sheep paddock helps beam the Moon landing.
 Hacksaw Ridge|2016|M|MA15+|139|real war emotion gore aussie|Andrew Garfield||A medic who refuses to carry a gun saves dozens of men.
-1917|2019|M|MA15+|119|war tension epic|George MacKay||Two soldiers race across no-man's-land.
-Ocean's Eleven|2001|M|M|116|heist crime comedy glossy|George Clooney,Brad Pitt,Matt Damon||Eleven crooks, three casinos, one night.
+1917|2019|M|MA15+|119|war tension epic|George MacKay|LIB|Two soldiers race across no-man's-land.
+Ocean's Eleven|2001|M|M|116|heist crime comedy glossy|George Clooney,Brad Pitt,Matt Damon|LIB|Eleven crooks, three casinos, one night.
 Baby Driver|2017|M|MA15+|113|heist action fast music|Ansel Elgort||A getaway driver who lives by his playlist.
 The Social Network|2010|M|M|120|real mind fast|Jesse Eisenberg,Andrew Garfield||The messy birth of Facebook.
 Whiplash|2014|M|MA15+|106|music tension emotion|Miles Teller,J.K. Simmons||A young drummer and the teacher who'll break him.
@@ -233,7 +233,289 @@ Friends|1994|S|M|10|comedy romance feelgood|Jennifer Aniston,Matthew Perry||Six 
 Brooklyn Nine-Nine|2013|S|M|8|comedy crime feelgood|Andy Samberg||A goofy detective and his by-the-book captain.
 The Office|2005|S|M|9|comedy|Steve Carell,John Krasinski||The world's most awkward paper company.
 Mr Inbetween|2018|S|MA15+|3|crime dark comedy grit aussie|Scott Ryan||A Sydney hitman juggling family life and work.
-Fisk|2021|S|M|3|comedy aussie|Kitty Flanagan||A deadpan lawyer lands at a dodgy suburban firm.`;
+Fisk|2021|S|M|3|comedy aussie|Kitty Flanagan||A deadpan lawyer lands at a dodgy suburban firm.
+Heart of the Beast|2026|M|M|101|action survival emotion tension|Brad Pitt|LIB|A man and his dog fight to survive in the wild.
+The Dog Stars|2026|M|MA15+|118|scifi survival emotion slow|Jacob Elordi,Josh Brolin,Margaret Qualley|LIB|A pilot and his dog hold out in a world emptied by a pandemic.
+Tuner|2026|M|M|107|crime tension heist|Leo Woodall,Dustin Hoffman,Havana Rose Liu|LIB|A piano tuner's perfect hearing pulls him into safecracking.
+Fall 2: Deadpoint|2026|M|M|97|tension survival||LIB|Climbers stranded on a sheer cliff face with no way down.
+One Night Only|2026|M|MA15+|103|comedy romance|Monica Barbaro,Callum Turner|LIB|Two strangers, one wild night in the city.
+The End of Oak Street|2026|M|M|99|scifi family tension survival||LIB|A whole suburban street wakes up somewhere very strange.
+Backrooms|2026|M|MA15+|110|horror tension mind|Chiwetel Ejiofor,Renate Reinsve|LIB|An endless maze of empty yellow rooms hides something.
+Disclosure Day|2026|M|M|145|scifi mind tension space|Emily Blunt,Josh O'Connor,Colin Firth|LIB|Spielberg on the day the world learns we're not alone.
+Obsession|2026|M|MA15+|108|horror tension dark||LIB|A lovesick wish goes horribly wrong.
+Michael|2026|M|M|127|music real emotion|Jaafar Jackson|LIB|The life and music of Michael Jackson.
+THX 1138|1971|M|M|88|scifi slow mind|Robert Duvall|LIB|George Lucas's bleak vision of a controlled future.
+EPiC: Elvis Presley in Concert|2025|M|PG|96|music real|Elvis Presley|LIB|Restored concert footage of Elvis live on stage.
+Enter the Void|2009|M|R18+|137|mind dark slow|Nathaniel Brown|LIB|A hallucinatory trip through Tokyo's neon underworld.
+Send Help|2026|M|MA15+|113|comedy horror tension survival|Rachel McAdams,Dylan O'Brien|LIB|Stranded on an island, an employee and her awful boss swap power.
+Marty Supreme|2025|M|MA15+|149|sport comedy tension underdog|Timothée Chalamet|LIB|A hustler chases table tennis glory in 1950s New York.
+Zootopia 2|2025|M|PG|107|family comedy mystery|Ginnifer Goodwin,Jason Bateman|LIB|Judy and Nick go undercover on a brand-new case.
+Springsteen: Deliver Me from Nowhere|2025|M|M|119|music real emotion slow|Jeremy Allen White|LIB|Bruce Springsteen at a turning point, making Nebraska.
+Eternity|2025|M|M|114|romance comedy fantasy feelgood|Elizabeth Olsen,Miles Teller,Callum Turner|LIB|In the afterlife she has to choose which husband gets forever.
+One Battle After Another|2025|M|MA15+|161|action comedy tension crime|Leonardo DiCaprio,Sean Penn,Benicio del Toro|LIB|An ex-revolutionary goes after the people who took his daughter.
+The Smashing Machine|2025|M|MA15+|123|sport real emotion grit fitness|Dwayne Johnson,Emily Blunt|LIB|MMA pioneer Mark Kerr's brutal rise.
+Saturday Night Fever|1977|M|MA15+|119|music emotion|John Travolta|LIB|A Brooklyn kid lives for Saturday nights on the disco floor.
+Staying Alive|1983|M|M|96|music|John Travolta|LIB|Tony Manero chases his shot on Broadway.
+Freakier Friday|2025|M|PG|110|comedy family fantasy feelgood|Lindsay Lohan,Jamie Lee Curtis|LIB|Mum and daughter swap bodies again, with double the chaos.
+The Black Phone|2021|M|MA15+|103|horror tension|Ethan Hawke,Mason Thames|LIB|A kidnapped boy gets calls from the killer's past victims.
+Blink Twice|2024|M|MA15+|102|tension dark mind|Naomi Ackie,Channing Tatum|LIB|A billionaire's island getaway turns sinister.
+Casino Royale|2006|M|M|144|action spy tension glossy|Daniel Craig,Eva Green|LIB|Bond's first mission with a licence to kill.
+The Call of the Wild|2020|M|PG|100|family emotion feelgood|Harrison Ford|LIB|A big-hearted dog finds his place in the Yukon.
+Burnt|2015|M|MA15+|101|emotion|Bradley Cooper,Sienna Miller|LIB|A fallen chef chases a third Michelin star.
+Challengers|2024|M|MA15+|131|sport romance tension|Zendaya,Josh O'Connor,Mike Faist|LIB|A tennis love triangle plays out on court.
+Chuck|2016|M|MA15+|98|sport real grit|Liev Schreiber|LIB|The journeyman boxer who inspired Rocky.
+Civil War|2024|M|MA15+|109|war tension dark|Kirsten Dunst,Wagner Moura|LIB|Journalists race across a war-torn America.
+Batman Begins|2005|M|M|140|action crime dark|Christian Bale,Michael Caine|LIB|Bruce Wayne becomes Batman.
+The Beatles: Eight Days a Week|2016|M|PG|106|music real|The Beatles|LIB|The Beatles' wild touring years.
+The Big Lebowski|1998|M|MA15+|117|comedy crime|Jeff Bridges,John Goodman|LIB|The Dude just wants his rug back.
+The Bikeriders|2023|M|MA15+|116|crime grit real|Austin Butler,Tom Hardy,Jodie Comer|LIB|A Midwest motorcycle club slowly turns dangerous.
+The Castle|1997|M|PG|85|comedy feelgood aussie underdog|Michael Caton,Eric Bana|LIB|A Melbourne family fights to save their home from the airport.
+Unbroken: Calum Von Moger|2023|M|M|135|sport real fitness|Calum Von Moger|LIB|A bodybuilder's comeback after a near-fatal fall.
+Butch Cassidy and the Sundance Kid|1969|M|M|110|action comedy crime|Paul Newman,Robert Redford|LIB|Two charming outlaws on the run.
+McKenna Shoots for the Stars|2012|M|G|93|family sport feelgood|Jade Pettyjohn|LIB|A young gymnast juggles school and her big dream.
+Annie|2014|M|PG|118|family music feelgood|Quvenzhané Wallis,Jamie Foxx|LIB|A foster kid wins over a New York billionaire.
+Avatar|2009|M|M|162|scifi action epic|Sam Worthington,Zoe Saldaña|LIB|A marine joins the Na'vi on Pandora.
+Back to the Future Part II|1989|M|PG|108|comedy scifi feelgood family|Michael J. Fox|LIB|Marty and Doc jump to 2015.
+Back to the Future Part III|1990|M|PG|118|comedy scifi feelgood family|Michael J. Fox|LIB|Marty heads to the Wild West to rescue Doc.
+Barbie & Her Sisters in A Pony Tale|2013|M|G|74|family||LIB|Barbie and her sisters' adventure in the Swiss Alps.
+Dogtown and Z-Boys|2001|M|M|90|sport real|Sean Penn|LIB|The surf-skaters who changed skateboarding.
+The Doors|1991|M|MA15+|138|music real dark|Val Kilmer|LIB|Jim Morrison's rise and fall.
+Dumbo|2019|M|PG|112|family fantasy emotion|Colin Farrell,Eva Green|LIB|A baby elephant who can fly.
+Dunkirk|2017|M|M|106|war tension epic real|Fionn Whitehead,Tom Hardy|LIB|The desperate evacuation of Dunkirk.
+Ed Sheeran: Jumpers for Goalposts|2015|M|G|131|music|Ed Sheeran|LIB|Ed Sheeran live at Wembley Stadium.
+El Mariachi|1992|M|MA15+|81|action crime|Carlos Gallardo|LIB|A musician is mistaken for a hitman.
+Elf|2003|M|PG|96|comedy family feelgood|Will Ferrell|LIB|A human raised by elves goes looking for his dad in New York.
+Days of Thunder|1990|M|M|107|sport action fast|Tom Cruise,Nicole Kidman|LIB|A hotshot rookie takes on NASCAR.
+Deadpool|2016|M|MA15+|108|action comedy gore|Ryan Reynolds|LIB|A foul-mouthed mercenary who can't die.
+Definitely, Maybe|2008|M|M|111|romance comedy feelgood|Ryan Reynolds,Isla Fisher|LIB|A dad tells his daughter which ex became her mum.
+Despicable Me|2010|M|PG|94|family comedy|Steve Carell|LIB|A supervillain adopts three little girls.
+Despicable Me 2|2013|M|PG|98|family comedy|Steve Carell|LIB|Gru is recruited to catch a new villain.
+Die Hard|1988|M|MA15+|132|action tension crime|Bruce Willis|LIB|A cop takes on terrorists in a skyscraper.
+Dirty Dancing|1987|M|M|100|romance music|Patrick Swayze,Jennifer Grey|LIB|A summer romance on the dance floor.
+Dog|2022|M|M|100|comedy emotion feelgood|Channing Tatum|LIB|An ex-Army Ranger road-trips with a military dog.
+Clifford the Big Red Dog|2021|M|PG|97|family comedy|Darby Camp,Jack Whitehall|LIB|A little red puppy grows ten feet tall.
+Cobain: Montage of Heck|2015|M|MA15+|132|music real dark|Kurt Cobain|LIB|Kurt Cobain's life in his own words and art.
+Cocaine Bear|2023|M|MA15+|95|comedy horror gore|Keri Russell,Alden Ehrenreich|LIB|A bear finds a stash of cocaine. Chaos follows.
+Contagion|2011|M|M|106|tension mind|Matt Damon,Kate Winslet|LIB|A deadly virus spreads around the world.
+Country: Portraits of an American Sound|2015|M|PG|88|music real||LIB|The story of country music in pictures and songs.
+The Creator|2023|M|M|133|scifi action emotion|John David Washington|LIB|A soldier discovers the AI super-weapon is a child.
+Cruella|2021|M|M|134|comedy crime glossy|Emma Stone|LIB|The rise of a fashion villain.
+The Dark Knight Rises|2012|M|M|164|action dark epic crime|Christian Bale,Tom Hardy|LIB|Batman returns to face Bane.
+The Fast and the Furious|2001|M|M|106|action fast crime|Vin Diesel,Paul Walker|LIB|An undercover cop joins a street racing crew.
+The Fast and the Furious: Tokyo Drift|2006|M|M|104|action fast|Lucas Black|LIB|A teen takes on Tokyo's drift scene.
+Fast & Furious|2009|M|M|106|action fast crime|Vin Diesel,Paul Walker|LIB|Dom and Brian reunite to take down a cartel.
+Fast Five|2011|M|M|130|action fast heist|Vin Diesel,Paul Walker,Dwayne Johnson|LIB|The crew pulls a massive heist in Rio.
+Fast & Furious 6|2013|M|M|130|action fast crime|Vin Diesel,Paul Walker,Dwayne Johnson|LIB|The crew takes on a rival team in Europe.
+Furious 7|2015|M|M|137|action fast revenge|Vin Diesel,Paul Walker,Jason Statham|LIB|A vengeful brother hunts the crew.
+The Fate of the Furious|2017|M|M|136|action fast|Vin Diesel,Dwayne Johnson,Charlize Theron|LIB|Dom turns against his own family.
+Hobbs & Shaw|2019|M|M|136|action fast comedy|Dwayne Johnson,Jason Statham|LIB|Two enemies team up to save the world.
+F9|2021|M|M|143|action fast|Vin Diesel,John Cena|LIB|Dom faces his estranged brother.
+Fast X|2023|M|M|141|action fast revenge|Vin Diesel,Jason Momoa|LIB|A villain from the past comes for Dom's family.
+Fifty Shades of Grey|2015|M|MA15+|125|romance glossy|Dakota Johnson,Jamie Dornan|LIB|A student falls for a mysterious billionaire.
+Fifty Shades Darker|2017|M|MA15+|117|romance glossy|Dakota Johnson,Jamie Dornan|LIB|Ana and Christian try again.
+Fifty Shades Freed|2018|M|MA15+|105|romance glossy|Dakota Johnson,Jamie Dornan|LIB|Newlyweds face a threat from the past.
+Fly Me to the Moon|2024|M|M|132|romance comedy real|Scarlett Johansson,Channing Tatum|LIB|A marketing whiz is told to fake the Moon landing.
+Footloose|1984|M|M|107|music romance feelgood|Kevin Bacon|LIB|A city kid brings dancing to a town that banned it.
+Eternal Sunshine of the Spotless Mind|2004|M|M|108|romance mind emotion|Jim Carrey,Kate Winslet|LIB|A man has his ex erased from his memory.
+The Fabelmans|2022|M|M|151|emotion real familydrama comingofage|Michelle Williams,Paul Dano|LIB|Spielberg's own story of falling for film.
+Fall|2022|M|M|107|tension survival|Grace Caroline Currey|LIB|Two climbers stranded on top of a 600m tower.
+The Incredibles|2004|M|PG|115|family action comedy superhero|Craig T. Nelson,Holly Hunter|LIB|A family of superheroes comes out of retirement.
+Raiders of the Lost Ark|1981|M|M|115|action fantasy|Harrison Ford|LIB|Indiana Jones races the Nazis to the Ark.
+Indiana Jones and the Temple of Doom|1984|M|M|118|action fantasy|Harrison Ford|LIB|Indy takes on a deadly cult in India.
+Indiana Jones and the Last Crusade|1989|M|M|127|action fantasy comedy|Harrison Ford,Sean Connery|LIB|Indy and his dad hunt the Holy Grail.
+Indiana Jones and the Kingdom of the Crystal Skull|2008|M|M|122|action fantasy|Harrison Ford,Shia LaBeouf|LIB|Indy hunts a mysterious crystal skull.
+Inside Out|2015|M|PG|94|family emotion comedy|Amy Poehler|LIB|The emotions inside an 11-year-old's head.
+The Iron Claw|2023|M|MA15+|132|sport real emotion familydrama fitness|Zac Efron,Jeremy Allen White|LIB|The Von Erich wrestling brothers and their family curse.
+It Ends with Us|2024|M|MA15+|130|romance emotion|Blake Lively,Justin Baldoni|LIB|A florist falls for a charming surgeon.
+Jackie Brown|1997|M|MA15+|154|crime tension heist|Pam Grier,Samuel L. Jackson|LIB|A flight attendant plays cops and crooks against each other.
+Grease|1978|M|PG|110|music romance feelgood|John Travolta,Olivia Newton-John|LIB|Danny and Sandy's summer romance hits Rydell High.
+The Grinch|2018|M|G|86|family comedy|Benedict Cumberbatch|LIB|The Grinch plans to steal Christmas.
+Guardians of the Galaxy|2014|M|M|121|scifi action comedy space superhero|Chris Pratt,Zoe Saldaña|LIB|A band of misfits saves the galaxy.
+The Hateful Eight|2015|M|R18+|167|crime tension gore slow|Samuel L. Jackson,Kurt Russell|LIB|Eight strangers snowed in, one of them a killer.
+Here|2024|M|M|104|emotion slow|Tom Hanks,Robin Wright|LIB|One room, many lifetimes.
+Home|2015|M|PG|94|family comedy scifi|Jim Parsons,Rihanna|LIB|A runaway alien and a girl on a road trip.
+Honey Boy|2019|M|MA15+|94|emotion real|Shia LaBeouf,Lucas Hedges|LIB|A child actor and his difficult dad.
+From Dusk Till Dawn|1996|M|R18+|108|horror crime action gore|George Clooney,Quentin Tarantino|LIB|Outlaws hide out in a bar full of vampires.
+Furiosa: A Mad Max Saga|2024|M|MA15+|148|action grit epic aussie revenge|Anya Taylor-Joy,Chris Hemsworth|LIB|Young Furiosa's revenge across the Wasteland.
+G-Force|2009|M|PG|89|family comedy action|Zach Galifianakis|LIB|Secret-agent guinea pigs save the world.
+Generation Iron 2|2017|M|M|106|sport real fitness|Calum Von Moger,Kai Greene|LIB|Inside the modern world of bodybuilding.
+The Good, the Bad and the Ugly|1966|M|M|178|action slow epic|Clint Eastwood|LIB|Three gunslingers race for buried gold.
+Gran Turismo|2023|M|M|134|sport real fast underdog|David Harbour,Archie Madekwe,Orlando Bloom|LIB|A gamer becomes a real racing driver.
+The Maze Runner|2014|M|M|113|scifi action survival|Dylan O'Brien|LIB|Teens trapped inside a giant maze.
+Maze Runner: The Scorch Trials|2015|M|M|132|scifi action survival|Dylan O'Brien|LIB|The Gladers cross a scorched wasteland.
+Maze Runner: The Death Cure|2018|M|M|144|scifi action survival|Dylan O'Brien|LIB|One last mission to save their friend.
+Me Before You|2016|M|M|110|romance emotion|Emilia Clarke,Sam Claflin|LIB|A carer falls for the man she looks after.
+Mickey 17|2025|M|MA15+|137|scifi comedy|Robert Pattinson|LIB|An expendable clone keeps dying for the job.
+Minions|2015|M|PG|91|family comedy|Sandra Bullock|LIB|The Minions go looking for a new evil boss.
+King Creole|1958|M|PG|116|music crime|Elvis Presley|LIB|Elvis as a singer caught up with gangsters.
+Layer Cake|2004|M|MA15+|105|crime tension|Daniel Craig|LIB|A cocaine dealer wants out after one last job.
+The Lion King|2019|M|PG|118|family music emotion|Donald Glover,Beyoncé|LIB|Simba's journey to become king.
+Logan|2017|M|MA15+|137|action emotion gore|Hugh Jackman|LIB|An ageing Wolverine protects a young mutant.
+The Longest Ride|2015|M|M|128|romance emotion|Scott Eastwood,Britt Robertson|LIB|A bull rider and an art student fall in love.
+Lords of Dogtown|2005|M|M|106|sport real comingofage|Heath Ledger,Emile Hirsch|LIB|The Venice Beach kids who reinvented skateboarding.
+The Lost City|2022|M|M|112|comedy romance action|Sandra Bullock,Channing Tatum|LIB|A romance novelist and her cover model lost in the jungle.
+Jumanji: Welcome to the Jungle|2017|M|M|119|comedy action family|Dwayne Johnson,Kevin Hart,Jack Black|LIB|Teens get sucked into a video game.
+Just Married|2003|M|M|95|comedy romance|Ashton Kutcher,Brittany Murphy|LIB|A honeymoon from hell.
+Kangaroo Jack|2003|M|PG|89|comedy family aussie|Jerry O'Connell|LIB|A kangaroo hops off with $50,000 of mob money.
+The Karate Kid|1984|M|PG|126|sport underdog feelgood family|Ralph Macchio,Pat Morita|LIB|A bullied teen learns karate from Mr Miyagi.
+The Karate Kid Part II|1986|M|PG|113|sport feelgood family|Ralph Macchio,Pat Morita|LIB|Daniel and Mr Miyagi head to Okinawa.
+Kill Bill: Vol. 1|2003|M|R18+|111|action revenge gore|Uma Thurman|LIB|The Bride starts her revenge list.
+Kill Bill: Vol. 2|2004|M|R18+|137|action revenge|Uma Thurman,David Carradine|LIB|The Bride finishes what she started.
+Mission: Impossible|1996|M|M|110|action spy tension|Tom Cruise|LIB|Ethan Hunt is framed and goes rogue to clear his name.
+Mission: Impossible 2|2000|M|M|123|action spy fast|Tom Cruise,Thandiwe Newton|LIB|Ethan Hunt races to stop a deadly virus.
+Mission: Impossible III|2006|M|M|125|action spy tension|Tom Cruise,Philip Seymour Hoffman|LIB|Ethan faces a ruthless arms dealer.
+Mission: Impossible – Ghost Protocol|2011|M|M|134|action spy fast|Tom Cruise,Jeremy Renner|LIB|The IMF is shut down and the team goes it alone.
+Mission: Impossible – Rogue Nation|2015|M|M|131|action spy fast|Tom Cruise,Rebecca Ferguson|LIB|Ethan takes on a shadow syndicate.
+Mission: Impossible – Dead Reckoning|2023|M|M|164|action spy fast|Tom Cruise,Hayley Atwell|LIB|Ethan chases a rogue AI.
+Moonfall|2022|M|M|130|scifi action space|Halle Berry,Patrick Wilson|LIB|The Moon is knocked out of orbit and heading for Earth.
+Moulin Rouge!|2001|M|M|128|romance music glossy aussie|Nicole Kidman,Ewan McGregor|LIB|A poet falls for a Paris cabaret star.
+My Best Friend's Wedding|1997|M|M|104|romance comedy|Julia Roberts,Cameron Diaz|LIB|She has four days to stop her best friend's wedding.
+No Hard Feelings|2023|M|MA15+|103|comedy romance|Jennifer Lawrence|LIB|A broke woman is hired to date a shy teen.
+No Time to Die|2021|M|M|163|action spy emotion|Daniel Craig,Rami Malek|LIB|Bond is pulled out of retirement one last time.
+Old|2021|M|M|108|mind tension horror|Gael García Bernal,Vicky Krieps|LIB|A beach that makes you age a lifetime in a day.
+Once Upon a Time in Hollywood|2019|M|MA15+|161|comedy crime slow|Leonardo DiCaprio,Brad Pitt,Margot Robbie|LIB|A fading actor and his stuntman in 1969 LA.
+One Life|2023|M|M|109|real emotion|Anthony Hopkins,Helena Bonham Carter|LIB|The man who rescued 669 children before WWII.
+Onward|2020|M|PG|102|family fantasy emotion comedy|Tom Holland,Chris Pratt|LIB|Two elf brothers try to bring their dad back for a day.
+Outbreak|1995|M|M|128|tension survival|Dustin Hoffman,Morgan Freeman|LIB|Army doctors race to contain a deadly virus.
+The Outsiders|1983|M|M|115|emotion grit comingofage|C. Thomas Howell,Matt Dillon,Patrick Swayze|LIB|Greasers and Socs clash in 1960s Oklahoma.
+Paper Planes|2015|M|G|96|family feelgood underdog aussie|Sam Worthington,Ed Oxenbould|LIB|A WA boy chases the world paper plane championships.
+Shall We Dance|2004|M|PG|106|romance comedy music|Richard Gere,Jennifer Lopez|LIB|A bored lawyer secretly takes ballroom lessons.
+Shaun the Sheep Movie|2015|M|G|85|family comedy|Justin Fletcher|LIB|Shaun's flock heads to the big city.
+Shrek|2001|M|PG|90|family comedy fantasy|Mike Myers,Eddie Murphy|LIB|An ogre rescues a princess to get his swamp back.
+Shrek 2|2004|M|PG|93|family comedy fantasy|Mike Myers,Eddie Murphy|LIB|Shrek meets the in-laws.
+Shrek the Third|2007|M|PG|93|family comedy fantasy|Mike Myers,Eddie Murphy|LIB|Shrek hunts for the next king.
+Shrek Forever After|2010|M|PG|94|family comedy fantasy|Mike Myers,Eddie Murphy|LIB|Shrek gets a taste of a world without him.
+Sing|2016|M|G|108|family music comedy feelgood|Matthew McConaughey,Reese Witherspoon|LIB|A koala stages a singing contest to save his theatre.
+Sing 2|2021|M|PG|110|family music comedy feelgood|Matthew McConaughey,Scarlett Johansson|LIB|The gang aims for the big time.
+Skyfall|2012|M|M|143|action spy tension|Daniel Craig,Javier Bardem|LIB|Bond's loyalty to M is tested.
+Spectre|2015|M|M|148|action spy|Daniel Craig,Christoph Waltz|LIB|Bond uncovers a sinister organisation.
+Quantum of Solace|2008|M|M|106|action spy revenge|Daniel Craig|LIB|Bond goes after the people behind Vesper's death.
+Ed Sheeran: Songwriter|2018|M|M|84|music real|Ed Sheeran|LIB|Ed Sheeran writing his album Divide.
+Spider-Man: Homecoming|2017|M|M|133|action comedy superhero comingofage|Tom Holland,Zendaya|LIB|Peter Parker balances high school and heroics.
+Spider-Man: Far From Home|2019|M|M|129|action comedy superhero|Tom Holland,Zendaya,Jake Gyllenhaal|LIB|A school trip turns into a fight across Europe.
+A Star Is Born|2018|M|MA15+|135|music romance emotion|Bradley Cooper,Lady Gaga|LIB|A fading star helps a singer find fame.
+Rambo: First Blood|1982|M|MA15+|93|action survival grit|Sylvester Stallone|LIB|A veteran is hunted by small-town cops.
+The Revenant|2015|M|MA15+|156|survival revenge grit slow|Leonardo DiCaprio,Tom Hardy|LIB|Left for dead, a frontiersman crawls back for revenge.
+The Road Within|2014|M|MA15+|100|comedy emotion|Robert Sheehan,Zoë Kravitz|LIB|Three patients break out for a road trip.
+Romeo + Juliet|1996|M|M|120|romance glossy aussie|Leonardo DiCaprio,Claire Danes|LIB|Baz Luhrmann's modern Shakespeare.
+Rumble Fish|1983|M|M|94|grit comingofage slow|Matt Dillon,Mickey Rourke|LIB|A teen lives in his legendary brother's shadow.
+Saving Private Ryan|1998|M|MA15+|169|war emotion epic real|Tom Hanks,Matt Damon|LIB|A squad goes behind enemy lines to find one man.
+The Secret Life of Walter Mitty|2013|M|PG|114|comedy feelgood romance|Ben Stiller,Kristen Wiig|LIB|A daydreamer finally goes on a real adventure.
+Platoon|1986|M|MA15+|120|war grit|Charlie Sheen,Willem Dafoe|LIB|A young soldier in Vietnam.
+Prefontaine|1997|M|M|106|sport real emotion|Jared Leto|LIB|The rise of runner Steve Prefontaine.
+Pulp Fiction|1994|M|R18+|154|crime comedy dark|John Travolta,Samuel L. Jackson,Uma Thurman|LIB|Hitmen, a boxer and a briefcase in LA.
+Purple Rain|1984|M|M|111|music romance|Prince|LIB|A Minneapolis musician fights for the spotlight.
+A Quiet Place Part II|2020|M|M|97|horror tension survival|Emily Blunt,Cillian Murphy|LIB|The Abbotts head into the silent world.
+Trap|2024|M|M|105|tension crime mind|Josh Hartnett|LIB|A dad takes his daughter to a concert that's a police trap.
+Twister|1996|M|M|113|action tension|Helen Hunt,Bill Paxton|LIB|Storm chasers go after the biggest tornado.
+Twisters|2024|M|M|122|action tension|Glen Powell,Daisy Edgar-Jones|LIB|A new crew chases monster tornadoes in Oklahoma.
+Viva Las Vegas|1964|M|G|85|music romance|Elvis Presley,Ann-Margret|LIB|A racer and a swim teacher in Vegas.
+Walk the Line|2005|M|M|153|music real romance|Joaquin Phoenix,Reese Witherspoon|LIB|Johnny Cash and June Carter.
+Weapons|2025|M|MA15+|128|horror mind tension|Josh Brolin,Julia Garner|LIB|A class of kids vanish in the same night.
+The Tailor of Panama|2001|M|MA15+|109|spy comedy|Pierce Brosnan,Geoffrey Rush|LIB|A rogue spy recruits a tailor with big stories.
+Team America: World Police|2004|M|MA15+|98|comedy action|Trey Parker|LIB|Marionette commandos take on terrorists.
+Ted|2012|M|MA15+|106|comedy|Mark Wahlberg,Mila Kunis|LIB|A man and his foul-mouthed teddy bear.
+Ted 2|2015|M|MA15+|115|comedy|Mark Wahlberg,Amanda Seyfried|LIB|Ted fights to be legally a person.
+The Terminator|1984|M|MA15+|107|action scifi tension|Arnold Schwarzenegger,Linda Hamilton|LIB|A cyborg is sent back to kill Sarah Connor.
+Titanic|1997|M|M|195|romance emotion epic|Leonardo DiCaprio,Kate Winslet|LIB|Love aboard the doomed ship.
+Top Gun|1986|M|PG|109|action romance fast|Tom Cruise,Val Kilmer|LIB|Maverick at the Navy's elite flying school.
+X2: X-Men United|2003|M|M|134|action superhero scifi|Hugh Jackman,Patrick Stewart|LIB|The X-Men face a military crackdown.
+Yesterday|2019|M|M|116|music comedy romance feelgood|Himesh Patel,Lily James|LIB|A musician wakes up in a world without the Beatles.
+Zombieland|2009|M|MA15+|88|comedy horror action|Woody Harrelson,Jesse Eisenberg,Emma Stone|LIB|Survivors road-trip through a zombie apocalypse.
+Zombieland: Double Tap|2019|M|MA15+|99|comedy horror action|Woody Harrelson,Jesse Eisenberg,Emma Stone|LIB|The gang is back for round two.
+Zootopia|2016|M|PG|108|family comedy mystery|Ginnifer Goodwin,Jason Bateman|LIB|A rabbit cop and a fox con artist crack a case.
+2 Fast 2 Furious|2003|M|M|107|action fast crime|Paul Walker,Tyrese Gibson|LIB|Brian goes undercover in Miami.
+The 5th Wave|2016|M|M|112|scifi survival|Chloë Grace Moretz|LIB|A teen survives waves of alien attacks.
+28 Days Later|2002|M|MA15+|113|horror survival tension|Cillian Murphy|LIB|A man wakes up to an empty, infected London.
+Western Stars|2019|M|PG|83|music real|Bruce Springsteen|LIB|Springsteen performs his album in an old barn.
+The Whale|2022|M|MA15+|117|emotion slow|Brendan Fraser|LIB|A reclusive teacher tries to reconnect with his daughter.
+Wicked|2024|M|PG|160|music fantasy family|Cynthia Erivo,Ariana Grande|LIB|The untold story of the witches of Oz.
+Wild Rose|2018|M|MA15+|100|music emotion|Jessie Buckley|LIB|A Glasgow singer dreams of Nashville.
+Without Limits|1998|M|M|117|sport real|Billy Crudup,Donald Sutherland|LIB|Runner Steve Prefontaine and his coach.
+The Wizard of Oz|1939|M|G|101|family music fantasy|Judy Garland|LIB|Dorothy follows the yellow brick road.
+Wonder Woman|2017|M|M|141|action superhero fantasy|Gal Gadot,Chris Pine|LIB|An Amazon warrior enters World War I.
+Wonder Woman (Animated)|2009|M|M|74|action superhero fantasy|Keri Russell|LIB|Diana leaves Themyscira to stop Ares.
+Wonka|2023|M|PG|116|family music fantasy feelgood|Timothée Chalamet|LIB|Young Willy Wonka's first chocolate shop.
+Jack Reacher|2012|M|M|130|action crime tension|Tom Cruise,Rosamund Pike||An ex-military investigator digs into a sniper case.
+Collateral|2004|M|MA15+|120|crime tension|Tom Cruise,Jamie Foxx||A cab driver is taken hostage by a hitman for a night.
+Minority Report|2002|M|M|145|scifi action mind|Tom Cruise||A cop who stops crimes before they happen is accused of one.
+Oblivion|2013|M|M|124|scifi action mind|Tom Cruise,Morgan Freeman||A drone repairman on an abandoned Earth uncovers the truth.
+Knight and Day|2010|M|M|109|action comedy romance spy|Tom Cruise,Cameron Diaz||A woman gets swept up in a spy's chaotic mission.
+GoldenEye|1995|M|M|130|action spy|Pierce Brosnan,Sean Bean||Bond faces a former 00 agent.
+Tenet|2020|M|M|150|action mind scifi spy|John David Washington,Robert Pattinson||An agent manipulates the flow of time to stop World War III.
+The Prestige|2006|M|M|130|mind tension mystery|Hugh Jackman,Christian Bale||Two rival magicians go to deadly lengths.
+Django Unchained|2012|M|R18+|165|action revenge gore|Jamie Foxx,Leonardo DiCaprio,Christoph Waltz||A freed slave and a bounty hunter set out on a rescue.
+Inglourious Basterds|2009|M|MA15+|153|war action revenge|Brad Pitt,Christoph Waltz||A squad of soldiers hunts Nazis in occupied France.
+Reservoir Dogs|1992|M|R18+|99|crime heist tension gore|Harvey Keitel,Tim Roth||A diamond heist goes wrong and someone's a rat.
+Snatch|2000|M|MA15+|104|comedy crime heist|Jason Statham,Brad Pitt||A stolen diamond, a fixed fight and a lot of chaos.
+Lock, Stock and Two Smoking Barrels|1998|M|MA15+|107|comedy crime heist|Jason Statham,Vinnie Jones||Four mates owe half a million in a week.
+The Gentlemen|2019|M|MA15+|113|comedy crime|Matthew McConaughey,Charlie Hunnam,Hugh Grant||A weed baron tries to sell his empire.
+Sicario|2015|M|MA15+|121|crime tension dark|Emily Blunt,Josh Brolin,Benicio del Toro||An FBI agent joins a shadowy cartel task force.
+Drive|2011|M|R18+|100|crime tension slow|Ryan Gosling,Carey Mulligan||A quiet stunt driver moonlights as a getaway man.
+Ronin|1998|M|MA15+|122|action crime fast|Robert De Niro,Jean Reno||Mercenaries chase a mysterious case across France.
+Speed|1994|M|M|116|action tension fast|Keanu Reeves,Sandra Bullock||A bus that blows up if it drops below 50.
+The Rock|1996|M|MA15+|136|action tension|Sean Connery,Nicolas Cage||An ex-con breaks into Alcatraz to stop a missile attack.
+Lethal Weapon|1987|M|MA15+|110|action comedy crime|Mel Gibson,Danny Glover||A loose-cannon cop and a by-the-book partner.
+Bad Boys|1995|M|MA15+|119|action comedy crime|Will Smith,Martin Lawrence||Two Miami cops swap identities to protect a witness.
+Men in Black|1997|M|PG|98|comedy scifi action|Will Smith,Tommy Lee Jones||Secret agents police aliens living on Earth.
+The Departed|2006|M|R18+|151|crime tension dark|Leonardo DiCaprio,Matt Damon,Jack Nicholson||A mole in the mob and a mole in the cops.
+Catch Me If You Can|2002|M|M|141|real crime comedy|Leonardo DiCaprio,Tom Hanks||A teen con artist poses as a pilot and a doctor.
+The Green Mile|1999|M|MA15+|189|emotion fantasy slow|Tom Hanks,Michael Clarke Duncan||A death row guard meets an inmate with a gift.
+Gladiator II|2024|M|MA15+|148|action epic revenge|Paul Mescal,Denzel Washington||Lucius fights his way through the arena.
+Blade Runner 2049|2017|M|MA15+|164|scifi mind slow|Ryan Gosling,Harrison Ford||A replicant hunter uncovers a buried secret.
+Godzilla Minus One|2023|M|M|125|scifi action emotion subtitles|Ryunosuke Kamiki||Post-war Japan faces Godzilla.
+Jurassic World|2015|M|M|124|action scifi family|Chris Pratt,Bryce Dallas Howard||A new dinosaur breaks loose at the park.
+Rocketman|2019|M|MA15+|121|music real emotion|Taron Egerton||Elton John's life as a musical fantasy.
+A Complete Unknown|2024|M|M|141|music real|Timothée Chalamet||A young Bob Dylan goes electric.
+Better Man|2024|M|MA15+|135|music real comedy|Jonno Davies||Robbie Williams' story, told with a CGI chimp.
+Back to Black|2024|M|MA15+|122|music real emotion|Marisa Abela||Amy Winehouse's rise.
+Sing Street|2016|M|M|106|music comedy feelgood comingofage|Ferdia Walsh-Peelo||A Dublin teen starts a band to impress a girl.
+Begin Again|2013|M|M|104|music romance feelgood|Keira Knightley,Mark Ruffalo||A singer and a washed-up producer make an album on the streets.
+School of Rock|2003|M|PG|109|comedy music family feelgood|Jack Black||A fake substitute teacher turns his class into a band.
+Raging Bull|1980|M|MA15+|129|sport real grit|Robert De Niro||Boxer Jake LaMotta's brutal career.
+Cinderella Man|2005|M|M|144|sport real underdog emotion|Russell Crowe||A broke boxer fights his way back in the Depression.
+Southpaw|2015|M|MA15+|124|sport emotion grit|Jake Gyllenhaal||A champion boxer loses everything and fights back.
+Senna|2010|M|M|106|sport real emotion|Ayrton Senna||The life and death of F1 legend Ayrton Senna.
+King Richard|2021|M|M|144|sport real underdog family|Will Smith||Venus and Serena Williams' dad and his plan.
+Pumping Iron|1977|M|PG|85|sport real fitness|Arnold Schwarzenegger||Arnold's road to Mr Olympia.
+The Wrestler|2008|M|MA15+|109|sport emotion grit|Mickey Rourke||A fading wrestler gets one last shot.
+Crazy Rich Asians|2018|M|M|120|romance comedy glossy|Constance Wu,Henry Golding||She meets her boyfriend's very rich family.
+The Holiday|2006|M|M|136|romance comedy feelgood|Cameron Diaz,Kate Winslet,Jude Law||Two women swap houses for Christmas.
+Notting Hill|1999|M|M|124|romance comedy|Julia Roberts,Hugh Grant||A bookshop owner falls for a movie star.
+Pretty Woman|1990|M|M|119|romance comedy|Julia Roberts,Richard Gere||A businessman hires an escort for a week.
+Mamma Mia! Here We Go Again|2018|M|PG|114|music comedy feelgood romance|Amanda Seyfried,Lily James||The story of how Donna got to the island.
+Red Dog|2011|M|PG|92|family emotion feelgood aussie|Josh Lucas||The legendary dog of the Pilbara.
+Babe|1995|M|G|91|family feelgood aussie|James Cromwell||A pig who wants to be a sheepdog.
+Strictly Ballroom|1992|M|PG|94|romance comedy music aussie|Paul Mercurio||A dancer breaks the rules of ballroom.
+Lion|2016|M|PG|118|real emotion aussie|Dev Patel,Nicole Kidman||A lost boy uses Google Earth to find his home.
+Animal Kingdom|2010|M|MA15+|113|crime dark aussie tension|Ben Mendelsohn,Jacki Weaver||A teen moves in with his criminal Melbourne family.
+Top End Wedding|2019|M|M|113|romance comedy feelgood aussie|Miranda Tapsell||A couple has ten days to find the bride's mum.
+Ferris Bueller's Day Off|1986|M|M|103|comedy feelgood comingofage|Matthew Broderick||The ultimate day off school.
+The Goonies|1985|M|PG|114|family comedy action|Sean Astin,Josh Brolin||Kids hunt for pirate treasure.
+Stand by Me|1986|M|M|89|emotion comingofage|Wil Wheaton,River Phoenix||Four boys walk out to find a body.
+Ghostbusters|1984|M|PG|105|comedy scifi family|Bill Murray,Dan Aykroyd||Three scientists start a ghost-catching business.
+Die Hard 2|1990|M|MA15+|124|action tension|Bruce Willis||John McClane takes on terrorists at an airport.
+Terminator 2: Judgment Day|1991|M|MA15+|137|action scifi tension|Arnold Schwarzenegger,Linda Hamilton||A reprogrammed Terminator protects young John Connor.
+Logan Lucky|2017|M|M|118|heist comedy crime|Channing Tatum,Adam Driver,Daniel Craig||Two brothers plan a NASCAR heist.
+21 Jump Street|2012|M|MA15+|109|comedy action|Channing Tatum,Jonah Hill||Two cops go undercover at high school.
+Magic Mike|2012|M|MA15+|110|comedy romance music|Channing Tatum||A stripper mentors a newcomer.
+The Fall Guy|2024|M|M|126|action comedy romance|Ryan Gosling,Emily Blunt||A stuntman hunts for a missing movie star.
+The Gray Man|2022|M|MA15+|122|action spy fast|Ryan Gosling,Chris Evans||A CIA operative is hunted by a psycho ex-colleague.
+Wolfs|2024|M|MA15+|108|comedy crime|George Clooney,Brad Pitt||Two fixers get assigned the same job.
+The Lost Bus|2025|M|M|129|real tension survival|Matthew McConaughey||A bus driver gets kids out of a wildfire.
+Nobody|2021|M|R18+|92|action revenge fast|Bob Odenkirk||A quiet dad turns out to be very dangerous.
+Kung Fu Panda|2008|M|PG|92|family comedy action|Jack Black||A clumsy panda becomes a kung fu master.
+How to Train Your Dragon|2010|M|PG|98|family fantasy action|Jay Baruchel||A Viking teen befriends a dragon.
+Ratatouille|2007|M|G|111|family comedy|Patton Oswalt||A rat dreams of being a Paris chef.
+Moana|2016|M|PG|107|family music fantasy|Auliʻi Cravalho,Dwayne Johnson||A girl sails out to save her island.
+Encanto|2021|M|PG|102|family music fantasy|Stephanie Beatriz||The one family member without a magical gift.
+The Super Mario Bros. Movie|2023|M|PG|92|family comedy action|Chris Pratt,Jack Black||Two plumbers fall into the Mushroom Kingdom.
+Puss in Boots: The Last Wish|2022|M|PG|102|family comedy action fantasy|Antonio Banderas||Puss is down to his last life.
+Spider-Man: Into the Spider-Verse|2018|M|PG|117|family action superhero|Shameik Moore||Miles Morales becomes Spider-Man.
+Spider-Man: No Way Home|2021|M|M|148|action superhero comedy|Tom Holland,Zendaya||Peter's secret gets out, and the multiverse cracks open.
+Deadpool & Wolverine|2024|M|MA15+|128|action comedy gore|Ryan Reynolds,Hugh Jackman||Deadpool drags Wolverine into one more mission.
+Guardians of the Galaxy Vol. 2|2017|M|M|136|scifi action comedy space|Chris Pratt||The Guardians meet Peter's father.
+Avatar: The Way of Water|2022|M|M|192|scifi action epic family|Sam Worthington,Zoe Saldaña||Jake's family takes refuge with the reef clans.`;
 
 /* storyline + sport tags layered on top */
 const EXTRA={'Rocky':'boxing','Creed':'boxing','The Fighter':'boxing','Warrior':'boxing',
@@ -254,8 +536,11 @@ const EXTRA={'Rocky':'boxing','Creed':'boxing','The Fighter':'boxing','Warrior':
 const TITLES=RAW.trim().split('\n').map((l,i)=>{
   const [t,y,k,c,r,tags,actors,svc,blurb]=l.split('|');
   const tg=tags.split(' ').filter(Boolean).concat((EXTRA[t]||'').split(' ').filter(Boolean));
-  return {id:i,t,y:+y,k,c,r:+r,tags:[...new Set(tg)],actors:actors?actors.split(',').map(s=>s.trim()):[],svc:svc||'',blurb};
+  return {id:i,t,y:+y,k,c,r:+r,tags:[...new Set(tg)],actors:actors?actors.split(',').map(s=>s.trim()):[],svc:svc==='LIB'?'':(svc||''),own:svc==='LIB',blurb};
 });
+const LIB=TITLES.filter(t=>t.own);
+/* taste learned from your Apple TV library: tags you watch more than average */
+const LIBTASTE=(()=>{const a={},b={};TITLES.forEach(t=>t.tags.forEach(k=>a[k]=(a[k]||0)+1));LIB.forEach(t=>t.tags.forEach(k=>b[k]=(b[k]||0)+1));const o={};for(const k in a)o[k]=Math.min(1.2,(b[k]||0)/LIB.length*2.5-.15);return o})();
 
 /* ===== vocab ===== */
 const CERTS={'G':0,'PG':1,'M':2,'MA15+':3,'R18+':4};
@@ -313,13 +598,14 @@ function eligible(t){
   if(store.fmt==='movie'&&t.k!=='M')return false;
   if(store.fmt==='series'&&t.k!=='S')return false;
   if(P().deal.some(d=>t.tags.includes(d)))return false;
+  if(t.own)return false;
   if(store.seen.includes(t.id)||store.loved.includes(t.id)||store.nope.includes(t.id)||store.chosen.includes(t.id))return false;
   if(S&&S.out.includes(t.id))return false;
   return true;
 }
 function score(t){
   const p=P(),why=[];let s=0;
-  for(const k of t.tags)s+=(S?S.vec[k]||0:0)+.6*(store.taste[k]||0);
+  for(const k of t.tags)s+=(S?S.vec[k]||0:0)+.6*(store.taste[k]||0)+(LIBTASTE[k]||0);
   s/=Math.sqrt(t.tags.length||1);
   for(const k of t.tags){
     if(p.genres[k]===1){s+=1.5;why.push([1.5,LABEL[k]])}if(p.genres[k]===-1)s-=3;
@@ -330,6 +616,8 @@ function score(t){
   if(S&&S.said)for(const k of t.tags)if(S.said[k])why.push([3.2,'You said '+S.said[k].toLowerCase()]);
   let best=null,bo=0;for(const id of store.loved){const o=jacc(TITLES[id].tags,t.tags);if(o>bo){bo=o;best=TITLES[id]}}
   if(bo>=.34){s+=bo*3.5;why.push([3.5,'Like '+best.t])}
+  let lb=null,lo=0;for(const o of LIB){const j=jacc(o.tags,t.tags)+(o.actors.some(a=>t.actors.includes(a))?.25:0);if(j>lo){lo=j;lb=o}}
+  if(lo>=.4){s+=lo*2;why.push([3.4,'Like '+lb.t])}
   if(S)for(const id of S.wants){const o=jacc(TITLES[id].tags,t.tags);if(o>=.4){s+=o*1.5;if(id!==t.id)why.push([2,'Like '+TITLES[id].t]);break}}
   if(p.services.length&&t.svc){if(p.services.includes(t.svc)){s+=.8;why.push([.6,'On '+t.svc])}else s-=2.5}
   const top=Object.entries(S?S.vec:{}).filter(([k,v])=>v>.9&&t.tags.includes(k)&&LABEL[k]).sort((a,b)=>b[1]-a[1]).slice(0,2);
@@ -357,11 +645,11 @@ function nextCard(){
 
 /* ===== home ===== */
 function home(){
-  const has=store.seen.length+store.loved.length+store.nope.length>0;
+  const has=true;
   render(`<div class="row" style="margin:4px 0 26px"><div class="wordmark"><i></i>MoodReel</div><span class="spacer"></span><button class="textbtn" data-act="taste">Your taste</button></div>
     <h1>Swipe.<br>Pick.<br><span class="accent">Watch.</span></h1>
-    <p class="sub" style="margin-top:14px">Swipe a few titles, get three picks, say yes or no. Keep going until one hits.</p>
-    ${has?`<div class="stats"><button class="stat" data-act="list"><b>${store.loved.length}</b><span>Loved</span></button><button class="stat" data-act="list"><b>${store.seen.length}</b><span>Seen</span></button><button class="stat" data-act="list"><b>${store.chosen.length}</b><span>Picked</span></button></div>`:'<div style="height:22px"></div>'}
+    <p class="sub" style="margin-top:14px">Swipe a few titles, get three picks, say yes or no. Keep going until one hits. Already knows the ${LIB.length} films in your Apple TV library, and never suggests them.</p>
+    ${has?`<div class="stats"><button class="stat" data-act="list"><b>${LIB.length+store.loved.length}</b><span>Loved</span></button><button class="stat" data-act="list"><b>${store.seen.length}</b><span>Seen</span></button><button class="stat" data-act="list"><b>${store.chosen.length}</b><span>Picked</span></button></div>`:'<div style="height:22px"></div>'}
     <div class="cta"><button class="btn" data-act="go">Start swiping</button>${has?`<button class="btn ghost" data-act="surprise">Surprise me</button>`:''}</div>
     <p class="note"><button class="textbtn" data-act="how">How it picks</button><br>Prototype · ${TITLES.length} sample titles</p>`);
 }
@@ -613,7 +901,7 @@ function listView(){
   const sec=(k,title)=>`<div class="group"><h3>${title} · ${store[k].length}</h3>${store[k].length?store[k].slice().reverse().map(id=>`<div class="listrow"><span>${h(TITLES[id].t)}</span><button data-act="unmark" data-v="${k}:${id}">Remove</button></div>`).join(''):'<p class="sub" style="margin:0">Nothing yet.</p>'}</div>`;
   render(`<div class="row"><button class="textbtn" data-act="home">Done</button></div>
     <h2 style="margin-top:6px">Your history</h2><p class="sub">None of these get suggested. Remove one to let it come back.</p>
-    ${sec('chosen','Picked to watch')}${sec('loved','Loved')}${sec('seen','Seen')}${sec('nope','Not for me')}`);
+    ${sec('chosen','Picked to watch')}<div class="group"><h3>Apple TV library · ${LIB.length}</h3><p class="sub" style="margin:0">Counted as watched and liked. Used to learn your taste.</p></div>${sec('loved','Loved')}${sec('seen','Seen')}${sec('nope','Not for me')}`);
 }
 
 home();
