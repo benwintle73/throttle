@@ -3749,13 +3749,13 @@ function closeRadar(){ stopRadar(); $('radarPage').classList.remove('open'); }
 $('rpClose').onclick = closeRadar;
 
 /* ---------- card layout (reorderable) ---------- */
-const CARD_KEYS = ['daily','thought','rain','hourly','details','climate','todo','puzzle','fun','news','tips','saju','mind'];   // weather first; the extras below
+const CARD_KEYS = ['daily','thought','todo','puzzle','fun','saju','rain','hourly','details','climate','news','tips','mind'];   // Ben's chosen order
 const CARD_NAMES = { thought:'Thought', todo:'To-do', puzzle:'Daily puzzle', fun:'Just for fun', news:'Local news', saju:'Korean fortune', mind:'Mind Reader', tips:'Best bets', rain:'Next 2 hours', radar:'Rain radar', hourly:'Next 24 hours', daily:'Forecast', climate:'Typical weather', details:'Wind, UV & more' };
 let editLayout = false;
 // one-off: the forecast moves to the top of saved card orders
 (() => { if (store.get('wx_mig_daily1', false)) return; const o = store.get('wx_order', []); if (Array.isArray(o) && o.length){ store.set('wx_order', ['daily', ...o.filter(k => k !== 'daily')]); } store.set('wx_mig_daily1', true, true); })();
-// one-off: reset saved card orders to the default (forecast, thought, next 2 hours, next 24 hours, details, ...)
-(() => { if (store.get('wx_mig_order2', false)) return; store.set('wx_order', CARD_KEYS.slice()); store.set('wx_mig_order2', true, true); })();
+// one-off: set saved card orders to Ben's chosen order (forecast, thought, to-do, puzzle, fun, fortune, then weather detail)
+(() => { if (store.get('wx_mig_order3', false)) return; store.set('wx_order', CARD_KEYS.slice()); store.set('wx_mig_order3', true, true); })();
 function layoutOrder(){
   const o = (store.get('wx_order', []) || []).filter(k => CARD_KEYS.includes(k));
   CARD_KEYS.forEach((k, i) => { if (!o.includes(k)){ const prev = CARD_KEYS[i-1], at = prev ? o.indexOf(prev) : -1; o.splice(at + 1, 0, k); } });
@@ -4371,7 +4371,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.39', APP_BUILT = '22 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.40', APP_BUILT = '22 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
