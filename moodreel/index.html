@@ -134,6 +134,17 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;paddin
 .pick2 .about[open]{position:relative;z-index:2}
 .ab.again{width:100%;margin-top:-2px;color:var(--love);font-size:14px}
 .wl{margin-top:8px;width:100%;padding:8px;border-radius:9px;font-size:12.5px;font-weight:600;color:var(--muted);background:transparent;border:1px dashed var(--line2)}.wl.on{color:var(--good);border-style:solid;border-color:#235c46;background:#12261f}
+
+/* home: one fixed screen, no scrolling */
+body.nohscroll{overflow:hidden;height:100dvh;overscroll-behavior:none;touch-action:manipulation}
+body.nohscroll .wrap{padding-bottom:0}
+.homefix{height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 16px);display:flex;flex-direction:column;justify-content:space-between;padding-bottom:6px;box-sizing:border-box}
+.hhero h1{font-size:clamp(44px,13vw,64px);line-height:.92;margin-top:2vh}
+.hhero .sub{margin:12px 0 0;font-size:15px}
+.hstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0}
+.hstats .stat{padding:10px 8px;text-align:center}.hstats .stat b{font-size:28px}.hstats .stat span{font-size:11.5px}
+.hcta{gap:10px}.hrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}.hrow .btn{padding:14px 8px;font-size:15px}
+.hnote{margin:0;font-size:12px}.hnote .textbtn{font-size:13px;padding:4px 0}
 .topnav{margin-bottom:4px}.backbtn{display:inline-flex;align-items:center;gap:4px;padding:9px 14px 9px 8px;border-radius:99px;background:var(--panel);border:1px solid var(--line);font-size:14px;font-weight:600}
 .backbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .pick2{display:block;padding:14px}.pick2 .ptop{display:grid;grid-template-columns:96px 1fr;gap:14px;margin-bottom:10px}
@@ -834,12 +845,15 @@ const toWatch=t=>rating(t)==='unseen'||(!rating(t)&&store.chosen.includes(t.id))
 function counts(){const c={love:0,like:0,ok:0,dislike:0,unseen:0,pass:0};TITLES.forEach(t=>{const r=rating(t);if(r&&r!=='unseen')c[r]++;if(toWatch(t))c.unseen++});store.custom.forEach(x=>{if(c[x.r]!=null)c[x.r]++});return c}
 function home(){
   const c=counts();
-  render(`<div class="row" style="margin:4px 0 26px"><div class="wordmark"><i></i>MoodReel</div><span class="spacer"></span><button class="textbtn" data-act="taste">Your taste</button></div>
-    <h1>Swipe.<br>Pick.<br><span class="accent">Watch.</span></h1>
-    <p class="sub" style="margin-top:14px">Swipe a few titles, get three picks, say yes or no. Keep going until one hits. Anything in your library is never suggested.</p>
-    <div class="stats stats4"><button class="stat" data-act="lib" data-v="watch"><b>${store.watchlist.length}</b><span>Watchlist</span></button><button class="stat" data-act="lib" data-v="love"><b>${c.love}</b><span>Loved</span></button><button class="stat" data-act="lib" data-v="like"><b>${c.like+c.ok}</b><span>Liked / OK</span></button><button class="stat" data-act="lib" data-v="dislike"><b>${c.dislike}</b><span>Disliked</span></button></div>
-    <div class="cta"><button class="btn" data-act="go">Start swiping</button><button class="btn ghost" data-act="lib">My library</button><button class="btn ghost" data-act="surprise">Surprise me</button></div>
-    <p class="note"><button class="textbtn" data-act="how">How it picks</button> · <button class="textbtn" data-act="list">Picks & passes</button><br>v${APP_VERSION} · ${TITLES.length} titles</p>`);
+  render(`<div class="homefix">
+    <div class="row"><div class="wordmark"><i></i>MoodReel</div><span class="spacer"></span><button class="textbtn" data-act="taste">Your taste</button></div>
+    <div class="hhero"><h1>Swipe. Pick.<br><span class="accent">Watch.</span></h1>
+    <p class="sub">Swipe, get picks, say yes or no until one hits. Nothing you've seen gets suggested.</p></div>
+    <div class="stats hstats"><button class="stat" data-act="lib" data-v="watch"><b>${store.watchlist.length}</b><span>Watchlist</span></button><button class="stat" data-act="lib" data-v="love"><b>${c.love}</b><span>Loved</span></button><button class="stat" data-act="lib" data-v="like"><b>${c.like+c.ok}</b><span>Liked</span></button><button class="stat" data-act="lib" data-v="dislike"><b>${c.dislike}</b><span>Disliked</span></button></div>
+    <div class="cta hcta"><button class="btn" data-act="go">Start swiping</button><div class="hrow"><button class="btn ghost" data-act="surprise">Surprise me</button><button class="btn ghost" data-act="lib">My library</button></div></div>
+    <p class="note hnote"><button class="textbtn" data-act="how">How it picks</button> · <button class="textbtn" data-act="list">Picks & passes</button> · v${APP_VERSION}</p>
+  </div>`);
+  document.body.classList.add('nohscroll');
 }
 
 /* ===== questions ===== */
@@ -1206,12 +1220,12 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='2.6';
+const APP_VERSION='2.7';
 function checkUpdate(){try{fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();if(v&&v!==APP_VERSION){try{if(sessionStorage.getItem('mr_reload')===v)return;sessionStorage.setItem('mr_reload',v)}catch(e){}location.replace(location.pathname+'?v='+v)}}).catch(()=>{})}catch(e){}}
 checkUpdate();document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
 
 function queueVisible(){const vis=[];document.querySelectorAll('[data-wk]').forEach(el=>{const t=TITLES.find(x=>wk(x)===el.dataset.wk);if(t)vis.push(t)});if(vis.length)wikiWant(vis,true)}
-const _render=render;render=html=>{_render(html);queueVisible()};
+const _render=render;render=html=>{document.body.classList.remove('nohscroll');_render(html);queueVisible()};
 setTimeout(()=>{try{const top=ranked().slice(0,40).map(r=>r.t);wikiWant(top);wikiWant(TITLES.filter(t=>!t.own));wikiWant(TITLES.filter(t=>t.own))}catch(e){}},1500);
 home();
 </script>
