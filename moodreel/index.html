@@ -1101,25 +1101,26 @@ function tonight3(){if(!S)newSession();FY.out=FY.out||[];
 let FY={out:[]};
 function fyRow(t,btns,line){const m=[t.k==='M'?'Film':'Series',t.y,t.c,t.k==='M'?`${Math.floor(t.r/60)}h ${t.r%60}m`:`${t.r} season${t.r>1?'s':''}`].join(' · ');
   return `<div class="fyrow"><div class="fyp" data-act="info" data-v="${t.id}">${poster(t)}</div><div class="fyb"><b data-act="info" data-v="${t.id}">${h(t.t)}</b><div class="fym">${m}</div><p class="fyl">${line}</p><div class="fybtns">${btns}</div></div></div>`}
-function forYou(){
-  const top=guessTop3(),tn=tonight3();
+function forYou(keep){
+  const y=window.scrollY;const top=guessTop3(),tn=tonight3();
   render(`${topBar('home')}
   <h2 class="fyh">Your top 3, guessed</h2><p class="sub fys">Based on everything you've rated. Tell it if it's wrong.</p>
   ${top.length?top.map((t,i)=>fyRow(t,(store.top3yes||[]).includes(t.id)?`<span class="fyok">Confirmed</span><button class="fyx" data-act="top3undo" data-v="${t.id}">Undo</button>`:`<button class="fyb1" data-act="top3yes" data-v="${t.id}">Yes, a favourite</button><button class="fyx" data-act="top3no" data-v="${t.id}">Not really</button>`,`<span class="fyn">#${i+1}</span> ${h(t.blurb||'')}`)).join(''):'<p class="sub">Rate a few films as Loved or Liked first.</p>'}
   ${top.length?(top.every(t=>(store.top3yes||[]).includes(t.id))?'<button class="btn" style="width:100%;margin-top:4px" data-act="top3reset">Nice. Guess 3 more</button>':'<button class="btn ghost" style="width:100%;margin-top:4px" data-act="top3reset">Guess 3 different</button>'):''}
   <h2 class="fyh" style="margin-top:22px">Three for tonight</h2><p class="sub fys">${h(tonightLine())}</p>
   ${tn.length?tn.map(r=>fyRow(r.t,`<button class="fyb1" data-act="fyWatch" data-v="${r.t.id}">Watch tonight</button><button class="fyx" data-act="fyLater" data-v="${r.t.id}">Want to watch</button><button class="fyx" data-act="fyNot" data-v="${r.t.id}">Not tonight</button><button class="fyx" data-act="fySkip" data-v="${r.t.id}">Never show</button>`,explain(r.t).line)).join(''):'<p class="sub">Nothing left that fits tonight. Try changing Tonight on the home screen.</p>'}
-  <button class="btn ghost" style="margin-top:14px;width:100%" data-act="fyMore">Show me 3 others</button>`)}
+  <button class="btn ghost" style="margin-top:14px;width:100%" data-act="fyMore">Show me 3 others</button>`);
+  if(keep){try{window.scrollTo(0,y)}catch(e){}requestAnimationFrame(()=>{try{window.scrollTo(0,y)}catch(e){}})}}
 ACT.foryou=()=>{FY={out:[]};newSession();forYou()};
-ACT.top3yes=v=>{store.top3yes=store.top3yes||[];uniqPush(store.top3yes,+v);setRate(+v,'love');forYou()};
-ACT.top3no=v=>{store.top3no=store.top3no||[];uniqPush(store.top3no,+v);save();forYou()};
-ACT.top3reset=()=>{const cur=guessTop3().map(t=>t.id);store.top3yes=[];store.top3no=[...new Set([...(store.top3no||[]),...cur])];save();forYou();toast('New guess')};
-ACT.top3undo=v=>{store.top3yes=(store.top3yes||[]).filter(x=>x!==+v);save();forYou()};
-ACT.fyWatch=v=>{const id=+v;uniqPush(store.chosen,id);uniqPush(store.suggested,id);RV++;save();toast('Enjoy the film');FY.out.push(id);forYou()};
-ACT.fyLater=v=>{const id=+v;setRate(id,'unseen');uniqPush(store.watchlist,id);uniqPush(store.suggested,id);save();toast('Added to your watchlist');FY.out.push(id);forYou()};
-ACT.fyNot=v=>{FY.out.push(+v);forYou()};
-ACT.fySkip=v=>{const id=+v;uniqPush(store.suggested,id);save();FY.out.push(id);forYou()};
-ACT.fyMore=()=>{tonight3().forEach(r=>{FY.out.push(r.t.id);uniqPush(store.suggested,r.t.id)});save();forYou()};
+ACT.top3yes=v=>{store.top3yes=store.top3yes||[];uniqPush(store.top3yes,+v);setRate(+v,'love');forYou(true)};
+ACT.top3no=v=>{store.top3no=store.top3no||[];uniqPush(store.top3no,+v);save();forYou(true)};
+ACT.top3reset=()=>{const cur=guessTop3().map(t=>t.id);store.top3yes=[];store.top3no=[...new Set([...(store.top3no||[]),...cur])];save();forYou(true);toast('New guess')};
+ACT.top3undo=v=>{store.top3yes=(store.top3yes||[]).filter(x=>x!==+v);save();forYou(true)};
+ACT.fyWatch=v=>{const id=+v;uniqPush(store.chosen,id);uniqPush(store.suggested,id);RV++;save();toast('Enjoy the film');FY.out.push(id);forYou(true)};
+ACT.fyLater=v=>{const id=+v;setRate(id,'unseen');uniqPush(store.watchlist,id);uniqPush(store.suggested,id);save();toast('Added to your watchlist');FY.out.push(id);forYou(true)};
+ACT.fyNot=v=>{FY.out.push(+v);forYou(true)};
+ACT.fySkip=v=>{const id=+v;uniqPush(store.suggested,id);save();FY.out.push(id);forYou(true)};
+ACT.fyMore=()=>{tonight3().forEach(r=>{FY.out.push(r.t.id);uniqPush(store.suggested,r.t.id)});save();forYou(true)};
 
 /* ===== home ===== */
 const toWatch=t=>rating(t)==='unseen'||(!rating(t)&&store.chosen.includes(t.id));
@@ -1580,7 +1581,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.21';
+const APP_VERSION='3.22';
 window._updNow=true;setTimeout(()=>{window._updNow=false},4000);setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
 ACT.update=()=>{toast('Checking for updates…');fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();
   if(v&&v!==APP_VERSION){try{sessionStorage.removeItem('mr_reload')}catch(e){}toast('Updating to v'+v);setTimeout(()=>location.replace(location.pathname+'?v='+v+'&t='+Date.now()),400)}
