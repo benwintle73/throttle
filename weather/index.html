@@ -392,7 +392,7 @@
   .pz-card .go{margin-left:auto;padding:9px 16px;border-radius:999px;background:#fff;color:#333;font-weight:600;font-size:14px;flex-shrink:0}
   .pz{position:fixed;inset:0;z-index:30;background:rgba(12,10,30,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
     display:flex;flex-direction:column;align-items:center;opacity:0;pointer-events:none;transition:opacity .25s;
-    padding:calc(env(safe-area-inset-top) + 12px) 10px calc(env(safe-area-inset-bottom) + 12px)}
+    padding:calc(env(safe-area-inset-top) + 30px) 10px calc(env(safe-area-inset-bottom) + 12px)}
   .pz.open{opacity:1;pointer-events:auto}
   .pz-in{width:100%;max-width:440px;height:100%;display:flex;flex-direction:column}
   .pz-head{display:flex;align-items:center;gap:10px;padding:2px 6px;flex-shrink:0}
@@ -4375,7 +4375,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.45', APP_BUILT = '22 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.46', APP_BUILT = '23 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
