@@ -119,6 +119,19 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;paddin
 .lthumb .poster .pt{font-size:13px}.lthumb .poster .pk,.lthumb .poster .pg,.lthumb .poster .rule{display:none}
 .lrow .lt b{font-size:16px}.lrow .lt{flex-wrap:wrap;row-gap:2px}
 .card .info p{font-size:15.5px}.card .info .meta{font-size:14px}.card .credits{font-size:14px}
+
+/* fixed-size pick card: buttons always land in the same place */
+.pick2 .ptop{align-items:start;grid-template-columns:150px 1fr!important;height:225px;overflow:hidden}
+.pick2 .ptop .poster{height:225px;width:150px;aspect-ratio:auto}
+.pick2 .ptop>div:last-child{height:100%;display:flex;flex-direction:column;min-width:0}
+.pick2 h4{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.3em}
+.pick2 .meta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pick2 .ptop p{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin:0}
+.pick2 .ifliked{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;height:1.5em;margin:0 0 8px}
+.pick2 .whyslot{height:34px;overflow:hidden;margin-bottom:6px}.pick2 .whyslot .why{flex-wrap:nowrap}
+.pick2 .credits{height:3em}.pick2 .credits div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pick2 .aboutslot{height:1.8em;overflow:visible;position:relative}
+.pick2 .about[open]{position:relative;z-index:2}
 .topnav{margin-bottom:4px}.backbtn{display:inline-flex;align-items:center;gap:4px;padding:9px 14px 9px 8px;border-radius:99px;background:var(--panel);border:1px solid var(--line);font-size:14px;font-weight:600}
 .backbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .pick2{display:block;padding:14px}.pick2 .ptop{display:grid;grid-template-columns:96px 1fr;gap:14px;margin-bottom:10px}
@@ -707,6 +720,7 @@ function whyHTML(why){const like=why.filter(w=>w.startsWith('Like ')).map(w=>w.s
   return `${like.length?`<p class="ifliked">If you liked <b>${h(like[0])}</b>, you might like this.</p>`:''}${rest.length?`<div class="why">${rest.map(w=>`<span>${h(w)}</span>`).join('')}</div>`:''}`}
 /* ===== Wikipedia + Wikidata enrichment (free, no key, cached on this device) ===== */
 const WKEY='mr_wiki_v1';let WIKI={};try{WIKI=JSON.parse(localStorage.getItem(WKEY))||{}}catch(e){}
+try{if(localStorage.getItem('mr_wiki_retry')!=='2'){for(const k in WIKI)if(WIKI[k].miss)delete WIKI[k];localStorage.setItem('mr_wiki_retry','2')}}catch(e){}
 let _wsT=null;function wsave(){clearTimeout(_wsT);_wsT=setTimeout(()=>{try{localStorage.setItem(WKEY,JSON.stringify(WIKI))}catch(e){}},400)}
 const wk=t=>t.t+'|'+t.y;
 const GENREMAP=[[/biograph|documentar|docudrama/,'real'],[/science fiction|sci-fi|cyberpunk/,'scifi'],[/thriller|suspense/,'tension'],[/comedy/,'comedy'],[/action/,'action'],[/horror|slasher/,'horror'],[/romance|romantic/,'romance'],[/sport|boxing|racing/,'sport'],[/war film|war drama|military/,'war'],[/crime|gangster|neo-noir|noir/,'crime'],[/musical|music/,'music'],[/animat|children|family/,'family'],[/fantasy/,'fantasy'],[/mystery|detective|whodunit/,'mystery'],[/superhero/,'superhero'],[/heist|caper/,'heist'],[/coming-of-age|teen/,'comingofage'],[/disaster|survival/,'survival'],[/spy|espionage/,'spy'],[/drama/,'emotion'],[/psychological|philosoph|dystopia|surreal/,'mind'],[/adventure/,'action']];
@@ -721,18 +735,24 @@ async function wRun(){if(wBusy||!WQ.length||wFails>4)return;wBusy=true;
   wBusy=false;if(WQ.length)setTimeout(wRun,wFails?4000:350)}
 const wget=async u=>{const r=await fetch(u);if(!r.ok)throw new Error(r.status);return r.json()};
 async function wFetch(batch){
-  const cands=batch.map(t=>t.k==='S'?[`${t.t} (TV series)`,`${t.t} (${t.y} TV series)`,t.t]:[`${t.t} (${t.y} film)`,`${t.t} (film)`,t.t]);
+  const cands=batch.map(t=>t.k==='S'?[`${t.t} (TV series)`,`${t.t} (${t.y} TV series)`,`${t.t} (American TV series)`,`${t.t} (Australian TV series)`,`${t.t} (miniseries)`,t.t]:[`${t.t} (${t.y} film)`,`${t.t} (film)`,`${t.t} (${t.y} documentary)`,`${t.t} (documentary)`,t.t]);
   const all=[...new Set(cands.flat())];
   const j=await wget('https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&redirects=1&prop=pageimages|extracts|pageprops|description&piprop=thumbnail&pithumbsize=500&pilicense=any&exintro=1&explaintext=1&exsentences=3&exlimit=20&ppprop=wikibase_item|disambiguation&titles='+encodeURIComponent(all.join('|')));
   const q=j.query||{},alias={};(q.normalized||[]).forEach(n=>alias[n.from]=n.to);(q.redirects||[]).forEach(n=>alias[n.from]=n.to);
   const byTitle={};Object.values(q.pages||{}).forEach(p=>{if(p.missing===undefined)byTitle[p.title]=p});
   const page=x=>{let y=alias[x]||x;y=alias[y]||y;return byTitle[y]};
+  const kindOk=(t,p)=>{if(!p||(p.pageprops&&p.pageprops.disambiguation!==undefined))return false;const d=(p.description||'').toLowerCase();return t.k==='S'?/series|television|show|sitcom|miniseries|programme|program/.test(d):/film|movie|documentary/.test(d)};
   const found=batch.map((t,i)=>{let best=null;
     for(const c of cands[i]){const p=page(c);if(!p||(p.pageprops&&p.pageprops.disambiguation!==undefined))continue;
       const d=(p.description||'').toLowerCase();const kindOk=t.k==='S'?/series|television|show|sitcom|miniseries/.test(d):/film|movie|documentary/.test(d);
       if(!kindOk)continue;const yearOk=d.includes(String(t.y))||d.includes(String(t.y-1))||d.includes(String(t.y+1));
       if(yearOk){best=p;break}if(!best)best=p}
     return best});
+  for(let i=0;i<batch.length;i++){if(found[i])continue;const t=batch[i];
+    try{const sj=await wget('https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrlimit=4&gsrsearch='+encodeURIComponent(`${t.t} ${t.y} ${t.k==='S'?'television series':'film'}`)+'&prop=pageimages|extracts|pageprops|description&piprop=thumbnail&pithumbsize=500&pilicense=any&exintro=1&explaintext=1&exsentences=3&exlimit=4&ppprop=wikibase_item|disambiguation');
+      const ps=Object.values((sj.query&&sj.query.pages)||{}).sort((a,b)=>(a.index||0)-(b.index||0));
+      const norm=x=>x.toLowerCase().replace(/[^a-z0-9]/g,'');
+      found[i]=ps.find(p=>kindOk(t,p)&&norm(p.title).startsWith(norm(t.t).slice(0,12)))||null}catch(e){}}
   const qids=found.map(p=>p&&p.pageprops&&p.pageprops.wikibase_item).filter(Boolean);
   let ents={};if(qids.length)ents=(await wget('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&origin=*&props=claims&ids='+qids.join('|'))).entities||{};
   const ids=(e,p,n)=>((e&&e.claims&&e.claims[p])||[]).map(c=>c.mainsnak&&c.mainsnak.datavalue&&c.mainsnak.datavalue.value&&c.mainsnak.datavalue.value.id).filter(Boolean).slice(0,n);
@@ -744,11 +764,17 @@ async function wFetch(batch){
   const L=a=>a.map(x=>labels[x]).filter(Boolean);
   batch.forEach((t,i)=>{const p=found[i];if(!p){WIKI[wk(t)]={miss:1};return}const r=per[i]||{dir:[],cast:[],g:[]};
     WIKI[wk(t)]={img:p.thumbnail&&p.thumbnail.source||'',ex:(p.extract||'').trim(),url:'https://en.wikipedia.org/wiki/'+encodeURIComponent(p.title.replace(/ /g,'_')),dir:L(r.dir),cast:L(r.cast),g:L(r.g)};
-    applyWiki(t);paintPoster(t)});
+    applyWiki(t);paintPoster(t);document.querySelectorAll(`[data-about="${CSS.escape(wk(t))}"]`).forEach(el=>{if(!el.innerHTML.trim())el.innerHTML=aboutHTML(t)})});
   RV++;wsave();
 }
 function paintPoster(t){const w=WIKI[wk(t)];if(!w||!w.img)return;document.querySelectorAll(`[data-wk="${CSS.escape(wk(t))}"]`).forEach(el=>{el.classList.add('img');el.style.backgroundImage=`linear-gradient(180deg,transparent 55%,rgba(0,0,0,.55)),url("${w.img}")`})}
-function aboutHTML(t){const w=WIKI[wk(t)];if(!w||!w.ex)return '';return `<details class="about"><summary>About the film</summary><p>${h(w.ex)}</p><a href="${h(w.url)}" target="_blank" rel="noopener">Read more on Wikipedia</a></details>`}
+function slotHTML(r){const t=r.t,like=r.why.filter(w=>w.startsWith('Like ')).map(w=>w.slice(5)),rest=r.why.filter(w=>!w.startsWith('Like '));
+  const W=WIKI[wk(t)],d=DIRECTOR[t.t]||(W&&W.dir&&W.dir.length?W.dir.join(', '):''),cast=t.actors.slice(0,3),lbl=/^(Created|Developed)/.test(d)?'':'Directed by ';
+  return `<p class="ifliked">${like.length?`If you liked <b>${h(like[0])}</b>, you might like this.`:'&nbsp;'}</p>
+    <div class="whyslot">${rest.length?`<div class="why">${rest.map(w=>`<span>${h(w)}</span>`).join('')}</div>`:''}</div>
+    <div class="credits"><div>${cast.length?`<span>Starring</span> ${h(cast.join(', '))}`:'&nbsp;'}</div><div>${d?`<span>${lbl}</span>${h(d.replace(/^(Created|Developed) by /,m=>m))}`:'&nbsp;'}</div></div>
+    <div class="aboutslot" data-about="${h(wk(t))}">${aboutHTML(t)}</div>`}
+function aboutHTML(t){const w=WIKI[wk(t)];if(!w||!w.ex)return '';return `<details class="about"><summary>About ${t.k==='S'?'the series':'the film'}</summary><p>${h(w.ex)}</p><a href="${h(w.url)}" target="_blank" rel="noopener">Read more on Wikipedia</a></details>`}
 
 /* ===== engine ===== */
 let S=null; // session
@@ -1006,7 +1032,7 @@ function pickCard(r,mode){const t=r.t,su=mode==='surprise';
   return `<div class="sug pick2" id="s${t.id}"><div class="ptop">${poster(t)}<div>
       <h4>${h(t.t)}</h4><div class="meta">${t.k==='M'?'Film':'Series'} · ${t.y} · ${t.c} · ${runtime(t)}</div>
       ${svcTag(t)}<p>${h(t.blurb)}</p></div></div>
-    ${whyHTML(r.why)}${credits(t)}${aboutHTML(t)}
+    ${slotHTML(r)}
     <div class="acts">
       <div class="albl">Haven't seen it</div>
       <div class="arow">
@@ -1171,7 +1197,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='2.4';
+const APP_VERSION='2.5';
 function checkUpdate(){try{fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();if(v&&v!==APP_VERSION){try{if(sessionStorage.getItem('mr_reload')===v)return;sessionStorage.setItem('mr_reload',v)}catch(e){}location.replace(location.pathname+'?v='+v)}}).catch(()=>{})}catch(e){}}
 checkUpdate();document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
 
