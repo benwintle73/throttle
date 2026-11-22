@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0c0b10">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MoodReel">
@@ -717,7 +719,7 @@ function home(){
     <p class="sub" style="margin-top:14px">Swipe a few titles, get three picks, say yes or no. Keep going until one hits. Anything in your library is never suggested.</p>
     <div class="stats"><button class="stat" data-act="lib" data-v="love"><b>${c.love}</b><span>Loved</span></button><button class="stat" data-act="lib" data-v="like"><b>${c.like}</b><span>Seen</span></button><button class="stat" data-act="lib" data-v="dislike"><b>${c.dislike}</b><span>Didn't like</span></button></div>
     <div class="cta"><button class="btn" data-act="go">Start swiping</button><button class="btn ghost" data-act="lib">My library</button><button class="btn ghost" data-act="surprise">Surprise me</button></div>
-    <p class="note"><button class="textbtn" data-act="how">How it picks</button> · <button class="textbtn" data-act="list">Picks & passes</button><br>Prototype · ${TITLES.length} titles</p>`);
+    <p class="note"><button class="textbtn" data-act="how">How it picks</button> · <button class="textbtn" data-act="list">Picks & passes</button><br>v${APP_VERSION} · ${TITLES.length} titles</p>`);
 }
 
 /* ===== questions ===== */
@@ -1052,6 +1054,11 @@ Object.assign(ACT,{
   libundo(){const p=LS.hist.pop();if(!p)return;setRate(p.id,p.prev||null);LS.i--;LS.done--;libCard()},
   libswipeown(){startLibSwipe(true)}
 });
+
+/* ===== auto-update: reload when a newer version is published ===== */
+const APP_VERSION='1.4';
+function checkUpdate(){try{fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();if(v&&v!==APP_VERSION){try{if(sessionStorage.getItem('mr_reload')===v)return;sessionStorage.setItem('mr_reload',v)}catch(e){}location.replace(location.pathname+'?v='+v)}}).catch(()=>{})}catch(e){}}
+checkUpdate();document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
 
 home();
 </script>
