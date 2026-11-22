@@ -1365,7 +1365,7 @@
 const DEFAULT_PLACE = { name:'Maryborough', sub:'Victoria, Australia', lat:-37.0457, lon:143.7393 };
 
 /* ---------- storage (safe) ---------- */
-const SYNC_KEYS = ['wx_saved','wx_last','wx_neon','wx_theme','wx_pz_stats','wx_todo','wx_order','wx_tips','wx_otd_on','wx_saju_on','wx_movie_on','wx_mind_on'];
+const SYNC_KEYS = ['wx_saved','wx_last','wx_neon','wx_theme','wx_pz_stats','wx_todo','wx_order','wx_tips','wx_otd_on','wx_saju_on','wx_movie_on','wx_mind_on','wx_arrange'];
 const store = {
   get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch{ return d; } },
   set(k, v, quiet){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} if (!quiet && SYNC_KEYS.includes(k) && window.syncSoon) window.syncSoon(); }
@@ -1617,7 +1617,7 @@ function render(d){
     ${cardsHTML}
 
     <div class="refresh-wrap"><button class="refresh ${refState === 'spin' ? 'spinning' : refState}" id="refreshBtn" onclick="refreshNow()">${refBtnHTML()}</button></div>
-    <p class="foot" style="margin-top:10px">Tip: hold a card to rearrange</p>
+    ${store.get('wx_arrange', false) ? '<p class="foot" style="margin-top:10px">Tip: hold a card to rearrange</p>' : ''}
     <p class="foot">Updated ${new Date(lastFetch).toLocaleTimeString('en-AU',{hour:'numeric',minute:'2-digit'})} · Data by <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a></p>
   `;
   buildClouds(kind(c.weather_code));
@@ -3632,6 +3632,7 @@ function toggleLayoutEdit(on = !editLayout){
   C.addEventListener('touchstart', e => {
     const t = e.touches[0];
     if (!editLayout){
+      if (!store.get('wx_arrange', false)) return;   // rearranging is switched off in Settings
       if (!cardAt(e.target) || e.target.closest('input,button.ck,.hourly')) return;
       lpXY = { x: t.clientX, y: t.clientY };
       lp = setTimeout(() => { lp = null; eatClick = true; toggleLayoutEdit(true); }, 500);
@@ -4216,7 +4217,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.22', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.23', APP_BUILT = '21 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
@@ -4232,7 +4233,9 @@ function appearanceHTML(){
     <label class="sw-row"><span>Show movie quote quiz<small>Guess the film from a famous line, in Just for fun.</small></span>
       <input type="checkbox" id="movieToggle" ${store.get('wx_movie_on', true) ? 'checked' : ''}><i class="sw"></i></label>
     <label class="sw-row"><span>Show Mind Reader<small>Think of something and it guesses it in 20 questions.</small></span>
-      <input type="checkbox" id="mindToggle" ${store.get('wx_mind_on', false) ? 'checked' : ''}><i class="sw"></i></label></div>
+      <input type="checkbox" id="mindToggle" ${store.get('wx_mind_on', false) ? 'checked' : ''}><i class="sw"></i></label>
+    <label class="sw-row"><span>Rearrange cards<small>When on, hold a card to make them wiggle, then drag to move. Off stops it happening by accident.</small></span>
+      <input type="checkbox" id="arrangeToggle" ${store.get('wx_arrange', false) ? 'checked' : ''}><i class="sw"></i></label></div>
   <div class="appear"><h4>Appearance</h4><div class="opts">
     <button type="button" data-theme="classic" class="${theme==='classic'?'on':''}"><i class="pv-classic"></i><span>Classic<b></b></span></button>
     <button type="button" data-theme="neon" class="${theme==='neon'?'on':''}"><i class="pv-neon"></i><span>🌴 Neon<b></b></span></button>
@@ -4259,6 +4262,8 @@ function bindAppearance(){
   if (mvt) mvt.onchange = () => { store.set('wx_movie_on', mvt.checked); if (lastData) render(lastData); };
   const mdt = $('mindToggle');
   if (mdt) mdt.onchange = () => { store.set('wx_mind_on', mdt.checked); if (lastData) render(lastData); };
+  const art = $('arrangeToggle');
+  if (art) art.onchange = () => { store.set('wx_arrange', art.checked); if (!art.checked && editLayout) toggleLayoutEdit(false); else if (lastData) render(lastData); };
   $('acctBody').querySelectorAll('[data-theme]').forEach(b => b.onclick = () => {
     const want = b.dataset.theme; if (want === theme) return;
     theme = want; store.set('wx_theme', theme); store.set('wx_neon', theme === 'neon'); applyMode(); drawAcct();
