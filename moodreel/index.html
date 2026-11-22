@@ -841,7 +841,7 @@ function slotHTML(r){const t=r.t,like=r.why.filter(w=>w.startsWith('Like ')).map
     <div class="credits"><div>${cast.length?`<span>Starring</span> ${h(cast.join(', '))}`:'&nbsp;'}</div><div>${d?`<span>${lbl}</span>${h(d.replace(/^(Created|Developed) by /,m=>m))}`:'&nbsp;'}</div></div>
     <div class="aboutslot" data-about="${h(wk(t))}">${aboutHTML(t)}</div>`}
 function aboutHTML(t){const w=WIKI[wk(t)];if(!w||!w.ex)return '';return `<button class="aboutbtn" data-act="about" data-v="${t.id}">About ${t.k==='S'?'the series':'the film'} ›</button>`}
-ACT.about=v=>{const t=TITLES[+v],w=WIKI[wk(t)];if(!w)return;const o=document.createElement('div');o.className='sheet';
+ACT.about=v=>{const t=TITLES[+v],w=WIKI[wk(t)];if(!w)return;ACT.closesheet();const o=document.createElement('div');o.className='sheet';
   o.innerHTML=`<div class="sheetbox"><div class="row"><b>${h(t.t)}</b><span class="spacer"></span><button class="textbtn" data-act="closesheet">Close</button></div><p>${h(w.ex)}</p><a href="${h(w.url)}" target="_blank" rel="noopener">Read more on Wikipedia</a></div>`;
   o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o)};
 ACT.closesheet=()=>{document.querySelectorAll('.sheet').forEach(x=>x.remove())};
@@ -1083,7 +1083,7 @@ function suggest(empty){
   const wild=pool.slice(8,60).filter(r=>!picks.includes(r)&&picks.every(p=>jacc(p.t.tags,r.t.tags)<.3));
   const w=wild.length?wild[Math.random()*Math.min(wild.length,15)|0]:pool.find(r=>!picks.includes(r));
   if(w){w.label='Wildcard';picks.push(w)}
-  if(!picks.length){render(`<h2>You've been through the lot</h2><p class="sub">Nothing left in the sample catalogue that fits. Try changing who's watching or film/series.</p><button class="btn" data-act="home">Home</button>`);return}
+  if(!picks.length)return outOfFilms();
   picks.forEach(r=>{S.offered.push(r.t.id);uniqPush(store.suggested,r.t.id)});save();
   S.picks=picks.map(r=>r.t.id);
   render(`${topBar('sugBack',`<span class="pill" style="margin-right:12px">Round ${S.offered.length/3|0}</span>`)}
@@ -1148,7 +1148,7 @@ let SP={stack:[],cur:null};
 function showSurprise(pick){SP.cur=pick;S.picks=[pick.t.id];
   render(`<div class="spfix"><div class="row sphead"><button class="backbtn" data-act="spBack"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Back</button><span class="sptitle">Try this</span><button class="textbtn" data-act="home">Home</button></div>
     ${pickCard(pick,'surprise')}</div>`);document.body.classList.add('nohscroll')}
-ACT.surprise=keep=>{if(!S||keep!==true){newSession();SP={stack:[],cur:null}}const all=ranked();const pool=all.slice(0,10);if(!pool.length)return toast('Nothing left to suggest');
+ACT.surprise=keep=>{if(!S||keep!==true){newSession();SP={stack:[],cur:null}}const all=ranked();const pool=all.slice(0,10);if(!pool.length)return outOfFilms();
   if(Math.random()<.25&&all.length>20){const w=all.slice(10,50);const pick=w[Math.random()*w.length|0];pick.label='Wildcard';S.offered.push(pick.t.id);uniqPush(store.suggested,pick.t.id);save();return showSurprise(pick)}
   const mx=pool[0].s,ws=pool.map(r=>Math.exp((r.s-mx)/1.2));let x=Math.random()*ws.reduce((a,b)=>a+b,0),pick=pool[0];
   for(let i=0;i<pool.length;i++){x-=ws[i];if(x<=0){pick=pool[i];break}}
@@ -1167,7 +1167,7 @@ ACT.againAs=v=>{const id=+v,t=TITLES[id];setRate(id,'love');uniqPush(store.watch
   const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{el.remove();S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length)ACT.keep()},250)};
 const WHY={pass:[['seen','Seen it already'],['slow','Looks too slow'],['dark','Too dark or violent'],['funny','Not my kind of funny'],['cast','Not into the cast'],['genre','Not my genre'],['long','Too long']],
   dislike:[['slow','Too slow'],['dark','Too violent or dark'],['funny','Not funny'],['cast',"Didn't like the cast"],['story',"Story didn't grab me"],['long','Too long']]};
-function askWhy(id,kind){setTimeout(()=>{const t=TITLES[id];const o=document.createElement('div');o.className='sheet';
+function askWhy(id,kind){setTimeout(()=>{ACT.closesheet();const t=TITLES[id];const o=document.createElement('div');o.className='sheet';
   o.innerHTML=`<div class="sheetbox"><div class="row"><b>Why ${kind==='pass'?'not':'didn\'t you like'} ${h(t.t)}?</b><span class="spacer"></span><button class="textbtn" data-act="closesheet">Skip</button></div><p class="sub" style="margin:4px 0 12px">Helps it learn what to avoid.</p>
     <div class="chips">${WHY[kind].map(([k,l])=>`<button class="chip" data-act="why" data-v="${id}:${kind}:${k}">${h(l)}</button>`).join('')}</div></div>`;
   o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o)},280)}
@@ -1233,6 +1233,16 @@ function listView(){
     ${sec('chosen','Picked to watch')}<button class="btn ghost" data-act="lib" data-v="pass">See Not for me</button><div class="group" style="margin-top:22px"><h3>Already suggested · ${store.suggested.length}</h3><p class="sub" style="margin:0 0 10px">Every film it has suggested is never suggested again. Clear this only if you run out.</p><button class="btn ghost" data-act="clearSuggested">Allow past suggestions again</button></div>`);
 }
 
+
+function outOfFilms(){const tn=tonight(),filt=tn.mood.length||tn.time!=='any'||tn.intensity!=='mid'||store.svcMode==='only'||store.aud!=='adults';
+  render(`${topBar('home')}<h2 style="margin-top:8px">That's every match</h2>
+    <p class="sub">You've been through every film that fits${filt?' tonight\'s settings':''}. Nothing is suggested twice, and the catalogue only has ${TITLES.length} titles until TMDB is connected.</p>
+    <div class="cta">${filt?`<button class="btn" data-act="resetTonight">Clear tonight's settings</button>`:''}
+    <button class="btn ${filt?'ghost':''}" data-act="clearSuggested2">Allow past suggestions again (${store.suggested.length})</button>
+    <button class="btn ghost" data-act="lib" data-v="unseen">Open Haven't seen</button>
+    <button class="btn ghost" data-act="home">Home</button></div>`)}
+ACT.resetTonight=()=>{store.tonight=null;store.svcMode=store.svcMode==='only'?'prefer':store.svcMode;store.aud='adults';store.fmt='both';save();toast("Tonight's settings cleared");home()};
+ACT.clearSuggested2=()=>{store.suggested=[];save();toast('Past suggestions can come back');home()};
 
 /* ===== tonight ===== */
 function tonightView(){const t=tonight(),p=P();
@@ -1342,12 +1352,12 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.3';
+const APP_VERSION='3.4';
 function checkUpdate(){try{fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();if(v&&v!==APP_VERSION){try{if(sessionStorage.getItem('mr_reload')===v)return;sessionStorage.setItem('mr_reload',v)}catch(e){}location.replace(location.pathname+'?v='+v)}}).catch(()=>{})}catch(e){}}
 checkUpdate();document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
 
 function queueVisible(){const vis=[];document.querySelectorAll('[data-wk]').forEach(el=>{const t=TITLES.find(x=>wk(x)===el.dataset.wk);if(t)vis.push(t)});if(vis.length)wikiWant(vis,true)}
-const _render=render;render=html=>{document.body.classList.remove('nohscroll');_render(html);queueVisible()};
+const _render=render;render=html=>{document.querySelectorAll('.sheet').forEach(x=>x.remove());window._busy=false;document.body.classList.remove('nohscroll');_render(html);queueVisible()};
 setTimeout(()=>{try{const top=ranked().slice(0,40).map(r=>r.t);wikiWant(top);wikiWant(TITLES.filter(t=>!t.own));wikiWant(TITLES.filter(t=>t.own))}catch(e){}},1500);
 home();
 </script>
