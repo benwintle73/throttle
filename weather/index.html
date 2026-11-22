@@ -278,7 +278,6 @@
   .rp-seg button{border:0;background:none;color:#fff;font-size:13px;font-weight:600;padding:7px 11px;border-radius:999px;cursor:pointer}
   .rp-seg button.on{background:#fff;color:#222}
   .rp-note{font-size:12px;color:var(--soft);margin-top:6px}
-  .rp-bom{clip-path:inset(3.2% 0 3.2% 0)}   /* hide the text strips BoM prints along the top and bottom edges of each frame */
   .rp-credit{font-size:11px;color:var(--soft);margin-top:6px}
   .rp-credit a{color:#fff}
   .radar-card{cursor:pointer}
@@ -3725,7 +3724,7 @@ async function openRadar(){
   RMAP._here = L.circleMarker([current.lat, current.lon], { radius: 7, color: '#fff', weight: 3, fillColor: '#FF2E78', fillOpacity: 1 }).addTo(RMAP);
   rLayers.forEach(l => RMAP.removeLayer(l));
   rLayers = rSrc === 'bom'
-    ? rFrames.map(f => L.imageOverlay(`${SB_URL}/functions/v1/weather-radar?img=${f.name}`, bom.bounds, { opacity: 0, zIndex: 5, className: 'rp-bom' }).addTo(RMAP))
+    ? rFrames.map(f => L.imageOverlay(`${SB_URL}/functions/v1/weather-radar?img=${f.name}&v=2`, bom.bounds, { opacity: 0, zIndex: 5, className: 'rp-bom' }).addTo(RMAP))
     : rFrames.map(f => L.tileLayer(`${rHost}${f.path}/256/{z}/{x}/{y}/2/1_1.png`, { opacity: 0, maxNativeZoom: 7, maxZoom: 10, zIndex: 5 }).addTo(RMAP));
   $('rpSlider').max = rFrames.length - 1;
   document.querySelector('.rp-key i').style.background = rSrc === 'bom' ? BOM_KEY : RV_KEY;
@@ -4370,7 +4369,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.36', APP_BUILT = '22 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.37', APP_BUILT = '22 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
