@@ -90,6 +90,9 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;paddin
 .sug p{margin:0 0 8px;font-size:13.5px;color:#d9d5e2}
 .why{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
 .why span{font-size:11.5px;padding:3px 8px;border-radius:6px;background:var(--panel2);border:1px solid var(--line);color:#d6d0e4}
+.seenrow{margin-top:10px;font-size:12px;color:var(--dim)}.seenrow span{display:block;margin-bottom:6px;font-weight:600;letter-spacing:.4px;text-transform:uppercase}
+.seg3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.seg3 button{padding:8px 2px;border-radius:9px;font-size:12.5px;font-weight:600;background:var(--panel2);border:1px solid var(--line)}
+.seg3 .love{color:var(--love)}.seg3 .like{color:var(--seen)}.seg3 .dislike{color:var(--bad)}
 .yn{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .yn button{padding:10px;border-radius:10px;font-weight:600;font-size:14px}
 .yn .y{background:var(--good);color:#06140e}.yn .n{background:var(--panel2);border:1px solid var(--line)}
@@ -879,6 +882,7 @@ function suggest(empty){
       ${svcTag(r.t)}<p>${h(r.t.blurb)}</p>
       ${r.why.length?`<div class="why">${r.why.map(w=>`<span>${h(w)}</span>`).join('')}</div>`:''}
       <div class="yn"><button class="n" data-act="no" data-v="${r.t.id}">No</button><button class="y" data-act="yes" data-v="${r.t.id}">Yes</button></div>
+      <div class="seenrow"><span>Seen it?</span><div class="seg3"><button class="love" data-act="seenAs" data-v="${r.t.id}:love">Loved it</button><button class="like" data-act="seenAs" data-v="${r.t.id}:like">Liked it</button><button class="dislike" data-act="seenAs" data-v="${r.t.id}:dislike">Didn't like</button></div></div>
     </div></div>`).join('')}
     <button class="btn ghost" data-act="keep">None of these, keep swiping</button>
     <button class="textbtn" data-act="how" style="display:block;margin:14px auto 0">How are these picked?</button>`);
@@ -918,8 +922,12 @@ ACT.surprise=keep=>{if(!S||keep!==true)newSession();const pool=ranked().slice(0,
     <h2 style="margin-top:8px">Try this</h2><p class="sub">Picked at random from your best matches.</p>
     <div class="sug" id="s${pick.t.id}">${poster(pick.t)}<div><h4>${h(pick.t.t)}</h4><div class="meta">${pick.t.k==='M'?'Film':'Series'} · ${pick.t.y} · ${pick.t.c} · ${runtime(pick.t)}</div>${svcTag(pick.t)}<p>${h(pick.t.blurb)}</p>
     ${pick.why.length?`<div class="why">${pick.why.map(w=>`<span>${h(w)}</span>`).join('')}</div>`:''}
-    <div class="yn"><button class="n" data-act="surpriseNo" data-v="${pick.t.id}">No</button><button class="y" data-act="yes" data-v="${pick.t.id}">Yes</button></div></div></div>
+    <div class="yn"><button class="n" data-act="surpriseNo" data-v="${pick.t.id}">No</button><button class="y" data-act="yes" data-v="${pick.t.id}">Yes</button></div><div class="seenrow"><span>Seen it?</span><div class="seg3"><button class="love" data-act="seenSurprise" data-v="${pick.t.id}:love">Loved it</button><button class="like" data-act="seenSurprise" data-v="${pick.t.id}:like">Liked it</button><button class="dislike" data-act="seenSurprise" data-v="${pick.t.id}:dislike">Didn't like</button></div></div></div></div>
     <button class="btn ghost" data-act="go">Swipe instead</button>`)};
+ACT.seenAs=v=>{const [i,r]=v.split(':'),id=+i,t=TITLES[id];setRate(id,r);S.out.push(id);add(S.vec,t.tags,r==='dislike'?-.4:r==='love'?.4:.15);
+  toast(r==='love'?'Loved. More like this':r==='like'?'Added to your library':'Got it. Less like this');
+  const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{el.remove();S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length)ACT.keep()},250)};
+ACT.seenSurprise=v=>{const [i,r]=v.split(':'),id=+i;setRate(id,r);toast(r==='love'?'Loved. More like this':r==='like'?'Added to your library':'Got it. Less like this');S.out.push(id);ACT.surprise(true)};
 ACT.surpriseNo=v=>{const t=TITLES[+v];add(store.taste,t.tags,-.08);save();S.out.push(+v);ACT.surprise(true)};
 
 /* ===== your taste ===== */
