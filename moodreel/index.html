@@ -919,18 +919,21 @@ async function loadMore(force){
   if(window._extLoading)return;window._extLoading=true;
   const m=extMeta();if(force){m.done=[]}
   const have=new Set();TITLES.forEach(t=>{[0,-1,1].forEach(d=>have.add(NORMT(t.t)+'|'+(t.y+d)))});
-  const todo=EXTYEARS.filter(y=>!m.done.includes(y));let added=0,errs=[];
-  for(const y of todo){
-    setStatus(`Adding films from ${y}…`);
-    try{const links=[...new Set([...(await pageLinks(`List of ${y} box office number-one films in the United States`)),...(await pageLinks(`List of ${y} box office number-one films in Australia`)),...(await pageLinks(`List of ${y} box office number-one films in the United Kingdom`))])];
+  // refresh: recent years re-checked weekly so new releases keep arriving
+  const now=Date.now(),cy=new Date().getFullYear();m.seen=m.seen||{};
+  if(!m.fresh||now-m.fresh>6*864e5){m.done=m.done.filter(k=>!(k===cy||k===cy-1||k==='a'+cy||k==='a'+(cy-1)||k==='tv'));m.fresh=now}
+  const jobs=[];
+  EXTYEARS.forEach(y=>jobs.push({k:y,pages:[`List of ${y} box office number-one films in the United States`,`List of ${y} box office number-one films in Australia`,`List of ${y} box office number-one films in the United Kingdom`]}));
+  jobs.push({k:'tv',pages:['List of most watched television broadcasts','List of Netflix original programming','List of Apple TV+ original programming','List of HBO original programming','List of Stan original programming','List of Disney+ original programming','List of Amazon Prime Video original programming'],cap:900});
+  EXTYEARS.filter(y=>y>=1985).forEach(y=>jobs.push({k:'a'+y,pages:[`List of American films of ${y}`,`List of Australian films of ${y}`,`List of British films of ${y}`]}));
+  let added=0,errs=[];
+  for(const j of jobs){if(m.done.includes(j.k))continue;
+    try{let links=[];for(const pg of j.pages)links=links.concat(await pageLinks(pg));links=[...new Set(links)];if(j.cap)links=links.slice(0,j.cap);
       const got=await filmsFromTitles(links,have);
-      got.forEach(e=>{m.list.push(e);addExt(e);added++});m.done.push(y);extSave(m);
+      got.forEach(e=>{m.list.push(e);addExt(e);added++});m.done.push(j.k);extSave(m);
       if(got.length){RV++;onNewFilms(got.length)}}
-    catch(e){errs.push(y+': '+e.message);if(errs.length>3)break}
+    catch(e){errs.push(j.k+': '+e.message);if(errs.length>3)break}
   }
-  if(!m.done.includes('tv')&&errs.length<=3){setStatus('Adding TV series…');
-    try{const links=[...new Set([...(await pageLinks('List of most watched television broadcasts')),...(await pageLinks('List of Netflix original programming')),...(await pageLinks('List of Apple TV+ original programming')),...(await pageLinks('List of HBO original programming'))])].slice(0,600);
-      const got=await filmsFromTitles(links,have);got.forEach(e=>{m.list.push(e);addExt(e);added++});m.done.push('tv');extSave(m);if(got.length){RV++;onNewFilms(got.length)}}catch(e){errs.push('tv: '+e.message)}}
   window._extLoading=false;setStatus('');
   try{localStorage.setItem('mr_ext_status',JSON.stringify({at:Date.now(),n:m.list.length,errs}))}catch(e){}
 }
@@ -1449,7 +1452,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.10';
+const APP_VERSION='3.11';
 function checkUpdate(){try{fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();if(v&&v!==APP_VERSION){try{if(sessionStorage.getItem('mr_reload')===v)return;sessionStorage.setItem('mr_reload',v)}catch(e){}location.replace(location.pathname+'?v='+v)}}).catch(()=>{})}catch(e){}}
 checkUpdate();document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
 
