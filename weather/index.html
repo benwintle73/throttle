@@ -272,6 +272,13 @@
   .rp-ctl input{flex:1;accent-color:#fff}
   .rp-key{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--soft);margin-top:8px}
   .rp-key i{flex:1;height:6px;border-radius:6px;background:linear-gradient(90deg,#88DDEE,#0099CC,#0077AA,#FFEE00,#FF8800,#FF0000)}
+  .rp-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+  .rp-seg{display:flex;background:rgba(255,255,255,.16);border-radius:999px;padding:3px}
+  .rp-seg span{font-size:12px;color:var(--soft);align-self:center;padding:0 8px 0 4px}
+  .rp-seg button{border:0;background:none;color:#fff;font-size:13px;font-weight:600;padding:7px 11px;border-radius:999px;cursor:pointer}
+  .rp-seg button.on{background:#fff;color:#222}
+  .rp-note{font-size:12px;color:var(--soft);margin-top:6px}
+  .rp-bom{image-rendering:auto}
   .rp-credit{font-size:11px;color:var(--soft);margin-top:6px}
   .rp-credit a{color:#fff}
   .radar-card{cursor:pointer}
@@ -1355,13 +1362,15 @@
       <h3>Rain radar<small id="rpTime">Loading…</small></h3>
       <button class="icon-btn" id="rpClose" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
+    <div class="rp-opts" id="rpOpts"></div>
+    <div class="rp-note" id="rpNote" style="display:none"></div>
     <div id="radarMap"></div>
     <div class="rp-ctl">
       <button id="rpPlay" aria-label="Play">▶</button>
       <input type="range" id="rpSlider" min="0" max="0" value="0">
     </div>
     <div class="rp-key"><span>Light</span><i></i><span>Heavy</span></div>
-    <p class="rp-credit">Radar: <a href="https://www.rainviewer.com" target="_blank" rel="noopener">Weather data by RainViewer</a> · Map © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</p>
+    <p class="rp-credit" id="rpCredit"></p>
   </div>
 </div>
 <div class="tp" id="todoPage">
@@ -1405,7 +1414,7 @@
 const DEFAULT_PLACE = { name:'Maryborough', sub:'Victoria, Australia', lat:-37.0457, lon:143.7393 };
 
 /* ---------- storage (safe) ---------- */
-const SYNC_KEYS = ['wx_saved','wx_last','wx_neon','wx_theme','wx_pz_stats','wx_todo','wx_order','wx_tips','wx_otd_on','wx_saju_on','wx_movie_on','wx_mind_on','wx_arrange','wx_news_on','wx_wear_on'];
+const SYNC_KEYS = ['wx_saved','wx_last','wx_neon','wx_theme','wx_pz_stats','wx_todo','wx_order','wx_tips','wx_otd_on','wx_saju_on','wx_movie_on','wx_mind_on','wx_arrange','wx_news_on','wx_wear_on','wx_radar_src'];
 const store = {
   get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch{ return d; } },
   set(k, v, quiet){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} if (!quiet && SYNC_KEYS.includes(k) && window.syncSoon) window.syncSoon(); }
@@ -3658,42 +3667,82 @@ function tipsCard(){
 function radarCard(){
   return `<section class="card radar-card" onclick="openRadar()">
     <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6-6"/></svg> Rain radar</h2>
-    <div class="row"><div class="pv"></div><div class="mid"><div class="t1">See rain moving</div><div class="t2">Last 2 hours around ${esc(current.name || 'you')}</div></div><div class="go">Open</div></div>
+    <div class="row"><div class="pv"></div><div class="mid"><div class="t1">See rain moving</div><div class="t2">Bureau of Meteorology radar around ${esc(current.name || 'you')}</div></div><div class="go">Open</div></div>
   </section>`;
 }
-let RMAP = null, rFrames = [], rLayers = [], rIdx = 0, rTimer = null, rHost = '';
+let RMAP = null, rFrames = [], rLayers = [], rIdx = 0, rTimer = null, rHost = '', rSrc = 'bom', rNote = '';
+const R_ZOOM = { 64: 10, 128: 9, 256: 8, 512: 7 };
+const BOM_KEY = 'linear-gradient(90deg,#B4B4FF,#7878FF,#1414FF,#00D8C3,#009690,#FFFF00,#FFC800,#FF9600,#FF6400,#FF0000,#C80000,#780000)';
+const RV_KEY = 'linear-gradient(90deg,#88DDEE,#0099CC,#0077AA,#FFEE00,#FF8800,#FF0000)';
 function loadOnce(tag, attrs){ return new Promise((ok, bad) => { if (document.querySelector(`[data-lib="${attrs['data-lib']}"]`)) return ok(); const el = document.createElement(tag); Object.assign(el, attrs); el.setAttribute('data-lib', attrs['data-lib']); el.onload = ok; el.onerror = bad; document.head.appendChild(el); }); }
+function radarPills(kms){
+  const src = store.get('wx_radar_src', 'bom'), km = store.get('wx_radar_km', 128);
+  const seg = `<div class="rp-seg">${[['bom','BoM'],['rv','RainViewer']].map(([k,l]) => `<button class="${src === k ? 'on' : ''}" onclick="setRadarSrc('${k}')">${l}</button>`).join('')}</div>`;
+  const sizes = rSrc === 'bom' && kms && kms.length > 1 ? `<div class="rp-seg">${kms.map(k => `<button class="${k === km || (!kms.includes(km) && k === kms[0]) ? 'on' : ''}" onclick="setRadarKm(${k})">${k}</button>`).join('')}<span>km</span></div>` : '';
+  $('rpOpts').innerHTML = seg + sizes;
+}
+function setRadarSrc(k){ store.set('wx_radar_src', k); openRadar(); }
+function setRadarKm(k){ store.set('wx_radar_km', k, true); openRadar(); }
+async function loadBom(){
+  const km = store.get('wx_radar_km', 128);
+  const r = await fetch(`${SB_URL}/functions/v1/weather-radar?lat=${current.lat.toFixed(3)}&lon=${current.lon.toFixed(3)}&km=${km}`);
+  const j = await r.json();
+  if (j.outside) throw new Error('outside');
+  if (!j.frames || !j.frames.length) throw new Error('no frames');
+  return j;
+}
 async function openRadar(){
   $('radarPage').classList.add('open');
-  $('rpTime').textContent = 'Loading…';
+  $('rpTime').textContent = 'Loading…'; stopRadar();
+  const want = store.get('wx_radar_src', 'bom');
+  let bom = null; rNote = '';
   try {
     await loadOnce('link', { rel: 'stylesheet', href: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css', 'data-lib': 'lcss' });
     if (!window.L) await loadOnce('script', { src: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js', 'data-lib': 'ljs' });
-    const res = await fetch('https://api.rainviewer.com/public/weather-maps.json');
-    const j = await res.json();
-    rHost = j.host; rFrames = (j.radar && j.radar.past) || [];
-    if (!rFrames.length) throw new Error('no frames');
   } catch { $('rpTime').textContent = 'Radar unavailable right now'; return; }
+  if (want === 'bom'){
+    try { bom = await loadBom(); } catch (e) { rNote = e.message === 'outside' ? 'BoM radar doesn’t cover here, showing RainViewer' : 'BoM radar not responding, showing RainViewer'; }
+  }
+  rSrc = bom ? 'bom' : 'rv';
+  if (!bom){
+    try {
+      const res = await fetch('https://api.rainviewer.com/public/weather-maps.json');
+      const j = await res.json();
+      rHost = j.host; rFrames = ((j.radar && j.radar.past) || []).map(f => ({ t: f.time, path: f.path }));
+      if (!rFrames.length) throw new Error('no frames');
+    } catch { $('rpTime').textContent = 'Radar unavailable right now'; radarPills(); return; }
+  } else rFrames = bom.frames;
+  radarPills(bom && bom.kms);
   if (!RMAP){
-    RMAP = L.map('radarMap', { zoomControl: false, attributionControl: false, maxZoom: 10, minZoom: 4 });
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 10 }).addTo(RMAP);
+    RMAP = L.map('radarMap', { zoomControl: false, attributionControl: false, maxZoom: 12, minZoom: 4 });
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 12 }).addTo(RMAP);
     $('rpPlay').onclick = () => rTimer ? stopRadar() : playRadar();
     $('rpSlider').oninput = e => { stopRadar(); showFrame(+e.target.value); };
   }
-  RMAP.setView([current.lat, current.lon], 7);
+  RMAP.setMaxZoom(rSrc === 'bom' ? 12 : 10);
+  RMAP.setView([current.lat, current.lon], rSrc === 'bom' ? (R_ZOOM[bom.km] || 9) : 7);
   if (RMAP._here) RMAP.removeLayer(RMAP._here);
   RMAP._here = L.circleMarker([current.lat, current.lon], { radius: 7, color: '#fff', weight: 3, fillColor: '#FF2E78', fillOpacity: 1 }).addTo(RMAP);
   rLayers.forEach(l => RMAP.removeLayer(l));
-  rLayers = rFrames.map(f => L.tileLayer(`${rHost}${f.path}/256/{z}/{x}/{y}/2/1_1.png`, { opacity: 0, maxNativeZoom: 7, maxZoom: 10, zIndex: 5 }).addTo(RMAP));
+  rLayers = rSrc === 'bom'
+    ? rFrames.map(f => L.imageOverlay(`${SB_URL}/functions/v1/weather-radar?img=${f.name}`, bom.bounds, { opacity: 0, zIndex: 5, className: 'rp-bom' }).addTo(RMAP))
+    : rFrames.map(f => L.tileLayer(`${rHost}${f.path}/256/{z}/{x}/{y}/2/1_1.png`, { opacity: 0, maxNativeZoom: 7, maxZoom: 10, zIndex: 5 }).addTo(RMAP));
   $('rpSlider').max = rFrames.length - 1;
+  document.querySelector('.rp-key i').style.background = rSrc === 'bom' ? BOM_KEY : RV_KEY;
+  $('rpCredit').innerHTML = (rSrc === 'bom'
+    ? `Radar: ${esc(bom.name)} (${bom.km} km) · <a href="https://www.bom.gov.au/australia/radar/" target="_blank" rel="noopener">© Bureau of Meteorology</a>`
+    : `Radar: <a href="https://www.rainviewer.com" target="_blank" rel="noopener">Weather data by RainViewer</a>`)
+    + ` · Map © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors`;
+  $('rpNote').textContent = rNote; $('rpNote').style.display = rNote ? '' : 'none';
   setTimeout(() => RMAP.invalidateSize(), 60);
   showFrame(rFrames.length - 1); playRadar();
 }
 function showFrame(i){
-  rIdx = i; rLayers.forEach((l, k) => l.setOpacity(k === i ? .75 : 0));
+  rIdx = i; rLayers.forEach((l, k) => l.setOpacity(k === i ? (rSrc === 'bom' ? .85 : .75) : 0));
   $('rpSlider').value = i;
-  const t = new Date(rFrames[i].time * 1000), ago = Math.round((Date.now() - t) / 60000);
-  $('rpTime').textContent = `${t.toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' })} · ${ago < 5 ? 'latest' : ago + ' min ago'}`;
+  const t = new Date(rFrames[i].t * 1000), ago = Math.round((Date.now() - t) / 60000);
+  const pt = new Date(t.getTime() + ((lastData && lastData.utc_offset_seconds) || 0) * 1000);
+  $('rpTime').textContent = `${pt.toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit', timeZone: 'UTC' })} · ${ago < 8 ? 'latest' : ago + ' min ago'}`;
 }
 function playRadar(){ stopRadar(); $('rpPlay').textContent = '❚❚'; let i = 0; rTimer = setInterval(() => { showFrame(i); i = (i + 1) % rFrames.length; if (i === 0) { clearInterval(rTimer); setTimeout(() => { if ($('rpPlay').textContent === '❚❚') playRadar(); }, 1200); } }, 500); }
 function stopRadar(){ clearInterval(rTimer); rTimer = null; $('rpPlay').textContent = '▶'; }
@@ -4321,7 +4370,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.34', APP_BUILT = '22 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.35', APP_BUILT = '22 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
