@@ -241,6 +241,8 @@ body:has(.pick2) #dlstat{display:none!important}
 .fyn{color:var(--accent);font-weight:700}
 .fybtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto}.fybtns button{padding:8px 11px;border-radius:9px;font-size:13px;font-weight:600;background:var(--panel2);border:1px solid var(--line2);color:var(--text)}
 .fybtns .fyb1{background:var(--good);color:#0b1a13;border-color:transparent}.fyok{font-size:13px;font-weight:700;color:var(--good);align-self:center;margin-right:4px}
+.fybtns:has(.fyb1[data-act=fyWatch]){display:grid;grid-template-columns:1fr 1fr}.fybtns:has(.fyb1[data-act=fyWatch]) button{padding:9px 4px}.fybtns .fyb1[data-act=fyWatch]{grid-column:1/-1}
+.fyreset{color:var(--accent);font-size:14px;padding:0}
 </style>
 </head>
 <body>
@@ -1040,17 +1042,19 @@ function fyRow(t,btns,line){const m=[t.k==='M'?'Film':'Series',t.y,t.c,t.k==='M'
 function forYou(){
   const top=guessTop3(),tn=tonight3();
   render(`${topBar('home')}
-  <h2 class="fyh">Your top 3, guessed</h2><p class="sub fys">Based on everything you've rated. Tell it if it's wrong.</p>
+  <h2 class="fyh">Your top 3, guessed</h2><p class="sub fys">Based on everything you've rated. Tell it if it's wrong.${(store.top3yes||[]).length||(store.top3no||[]).length?' <button class="textbtn fyreset" data-act="top3reset">Guess again</button>':''}</p>
   ${top.length?top.map((t,i)=>fyRow(t,(store.top3yes||[]).includes(t.id)?`<span class="fyok">Confirmed</span><button class="fyx" data-act="top3undo" data-v="${t.id}">Undo</button>`:`<button class="fyb1" data-act="top3yes" data-v="${t.id}">Yes, a favourite</button><button class="fyx" data-act="top3no" data-v="${t.id}">Not really</button>`,`<span class="fyn">#${i+1}</span> ${h(t.blurb||'')}`)).join(''):'<p class="sub">Rate a few films as Loved or Liked first.</p>'}
   <h2 class="fyh" style="margin-top:22px">Three for tonight</h2><p class="sub fys">${h(tonightLine())}</p>
-  ${tn.length?tn.map(r=>fyRow(r.t,`<button class="fyb1" data-act="fyWatch" data-v="${r.t.id}">Watch tonight</button><button class="fyx" data-act="fyLater" data-v="${r.t.id}">Want to watch</button><button class="fyx" data-act="fySkip" data-v="${r.t.id}">Skip</button>`,explain(r.t).line)).join(''):'<p class="sub">Nothing left that fits tonight. Try changing Tonight on the home screen.</p>'}
+  ${tn.length?tn.map(r=>fyRow(r.t,`<button class="fyb1" data-act="fyWatch" data-v="${r.t.id}">Watch tonight</button><button class="fyx" data-act="fyLater" data-v="${r.t.id}">Want to watch</button><button class="fyx" data-act="fyNot" data-v="${r.t.id}">Not tonight</button><button class="fyx" data-act="fySkip" data-v="${r.t.id}">Never show</button>`,explain(r.t).line)).join(''):'<p class="sub">Nothing left that fits tonight. Try changing Tonight on the home screen.</p>'}
   <button class="btn ghost" style="margin-top:14px;width:100%" data-act="fyMore">Show me 3 others</button>`)}
 ACT.foryou=()=>{FY={out:[]};newSession();forYou()};
 ACT.top3yes=v=>{store.top3yes=store.top3yes||[];uniqPush(store.top3yes,+v);setRate(+v,'love');forYou()};
 ACT.top3no=v=>{store.top3no=store.top3no||[];uniqPush(store.top3no,+v);save();forYou()};
+ACT.top3reset=()=>{store.top3yes=[];store.top3no=[];save();forYou()};
 ACT.top3undo=v=>{store.top3yes=(store.top3yes||[]).filter(x=>x!==+v);save();forYou()};
 ACT.fyWatch=v=>{const id=+v;uniqPush(store.chosen,id);uniqPush(store.suggested,id);RV++;save();toast('Enjoy the film');FY.out.push(id);forYou()};
 ACT.fyLater=v=>{const id=+v;setRate(id,'unseen');uniqPush(store.watchlist,id);uniqPush(store.suggested,id);save();toast('Added to your watchlist');FY.out.push(id);forYou()};
+ACT.fyNot=v=>{FY.out.push(+v);forYou()};
 ACT.fySkip=v=>{const id=+v;uniqPush(store.suggested,id);save();FY.out.push(id);forYou()};
 ACT.fyMore=()=>{tonight3().forEach(r=>{FY.out.push(r.t.id);uniqPush(store.suggested,r.t.id)});save();forYou()};
 
@@ -1498,7 +1502,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.12';
+const APP_VERSION='3.13';
 function checkUpdate(){try{fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();if(v&&v!==APP_VERSION){try{if(sessionStorage.getItem('mr_reload')===v)return;sessionStorage.setItem('mr_reload',v)}catch(e){}location.replace(location.pathname+'?v='+v)}}).catch(()=>{})}catch(e){}}
 checkUpdate();document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
 
