@@ -261,7 +261,7 @@ body:has(.pick2) #dlstat{display:none!important}
 .pick2 .heads{margin:0 0 6px}
 .pick2 .credits{height:auto!important;margin-bottom:6px}
 .pick2 .ifliked,.spfix .pick2 .ifliked{min-height:0!important}
-.spfix .pick2>*{flex-shrink:0}.spfix .pick2 .story{flex:1 1 auto;min-height:1.45em;flex-shrink:1}
+.spfix .pick2>*{flex-shrink:0}.spfix .pick2 .story{flex:1 1 0;min-height:0;flex-shrink:1;margin-bottom:4px}.pick2 .credits{margin:0 0 8px}.pick2 .heads{margin:0 0 8px!important}
 </style>
 </head>
 <body>
@@ -791,6 +791,8 @@ const jacc=(a,b)=>{const A=new Set(a),i=b.filter(x=>A.has(x)).length;return i/(n
 const uniqPush=(a,v)=>{if(!a.includes(v))a.push(v)};
 const remove=(a,v)=>{const i=a.indexOf(v);if(i>=0)a.splice(i,1)};
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1400)}
+function fitStory(){document.querySelectorAll('.spfix .story').forEach(el=>{el.style.webkitLineClamp='';el.style.display='';const lh=parseFloat(getComputedStyle(el).lineHeight)||21,n=Math.floor((el.clientHeight+1)/lh);if(n<1){el.style.display='none'}else{el.style.webkitLineClamp=String(n);el.style.display='-webkit-box'}})}
+window.addEventListener('resize',()=>setTimeout(fitStory,50));
 let render=function(html){app.innerHTML=`<div class="fade">${html}</div>`;try{window.scrollTo(0,0)}catch(e){}}
 function primary(t){for(const p of PRIMARY)if(t.tags.includes(p))return p;return 'dark'}
 function genreLine(t){return t.tags.filter(x=>['action','comedy','emotion','tension','crime','scifi','fantasy','horror','romance','real','family','music','war','mystery','sport'].includes(x)).slice(0,3).map(x=>LABEL[x]||({emotion:'Drama',tension:'Thriller',real:'True story'})[x]).join(' · ')}
@@ -922,8 +924,8 @@ function slotHTML(r){const t=r.t,like=r.why.filter(w=>w.startsWith('Like ')).map
   const ex=explain(t);
   return `<p class="ifliked">${ex.line}</p>
     ${ex.heads?`<p class="heads">${ex.heads}</p>`:''}
-    <p class="story" data-story="${h(wk(t))}">${h(storyText(t))}</p>
     ${cast.length||d?`<div class="credits">${cast.length?`<div><span>Starring</span> ${h(cast.join(', '))}</div>`:''}${d?`<div><span>${lbl}</span>${h(d)}</div>`:''}</div>`:''}
+    <p class="story" data-story="${h(wk(t))}">${h(storyText(t))}</p>
     <div class="aboutslot" data-about="${h(wk(t))}">${aboutHTML(t)}</div>`}
 function aboutHTML(t){const w=WIKI[wk(t)];if(!w||!w.ex)return '';return `<button class="aboutbtn" data-act="about" data-v="${t.id}">About ${t.k==='S'?'the series':'the film'} ›</button>`}
 /* film info sheet: tap any poster or title */
@@ -1001,7 +1003,7 @@ async function tmResolve(t){const k=wk(t),c=TM[k];if(tmFresh(c))return c;
   const cast=(cr.cast||[]).slice(0,4).map(x=>x.name),dirs=(cr.crew||[]).filter(x=>x.job==='Director'||x.job==='Executive Producer'&&kind==='tv').slice(0,kind==='tv'?1:2).map(x=>x.name);
   TM[k]={id,kind,p:(r&&r.poster_path)||t.tmp||'',ov:r?shortOv(r.overview):(t.tmov||''),ovl:r?(r.overview||'').slice(0,420):((c&&c.ovl)||''),cast,dir:dirs.join(', '),va:r?Math.round(r.vote_average*10)/10:(c&&c.va)||0,
     prov:[...new Set((au.flatrate||[]).concat(au.ads||[]).map(p=>SVCMAP[p.provider_name]).filter(Boolean))],at:Date.now()};
-  tmSave();applyTM(t);tmPaint(t);document.querySelectorAll(`[data-story="${CSS.escape(k)}"]`).forEach(el=>{el.textContent=storyText(t)});return TM[k]}
+  tmSave();applyTM(t);tmPaint(t);document.querySelectorAll(`[data-story="${CSS.escape(k)}"]`).forEach(el=>{el.textContent=storyText(t)});fitStory();return TM[k]}
 const TQ=[];let tmBusy=0,tmDown=0;
 function tmWant(list,front){if(tmDown>3)return;list.filter(Boolean).forEach(t=>{if(tmFresh(TM[wk(t)]))return;if(TQ.includes(t)){if(!front)return;TQ.splice(TQ.indexOf(t),1)}front?TQ.unshift(t):TQ.push(t)});tmRun()}
 function tmRun(){while(tmBusy<4&&TQ.length){const t=TQ.shift();tmBusy++;tmResolve(t).then(()=>{tmDown=0;RV++}).catch(()=>{tmDown++}).finally(()=>{tmBusy--;setTimeout(tmRun,60)})}}
@@ -1421,7 +1423,7 @@ const topBar=(back,extra='')=>`<div class="row topnav"><button class="backbtn" d
 let SP={stack:[],cur:null};
 function showSurprise(pick){SP.cur=pick;S.picks=[pick.t.id];
   render(`<div class="spfix"><div class="row sphead"><button class="backbtn" data-act="spBack"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Back</button><span class="sptitle">Try this</span><button class="textbtn" data-act="home">Home</button></div>
-    ${pickCard(pick,'surprise')}</div>`);document.body.classList.add('nohscroll')}
+    ${pickCard(pick,'surprise')}</div>`);document.body.classList.add('nohscroll');requestAnimationFrame(fitStory);setTimeout(fitStory,300)}
 ACT.surprise=keep=>{if(!S||keep!==true){newSession();SP={stack:[],cur:null}}const all=ranked();const pool=all.slice(0,10);if(!pool.length)return outOfFilms();
   if(Math.random()<.25&&all.length>20){const w=all.slice(10,50);const pick=w[Math.random()*w.length|0];pick.label='Wildcard';S.offered.push(pick.t.id);uniqPush(store.suggested,pick.t.id);save();return showSurprise(pick)}
   const mx=pool[0].s,ws=pool.map(r=>Math.exp((r.s-mx)/1.2));let x=Math.random()*ws.reduce((a,b)=>a+b,0),pick=pool[0];
@@ -1641,7 +1643,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.25';
+const APP_VERSION='3.26';
 window._updNow=true;setTimeout(()=>{window._updNow=false},4000);setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
 ACT.update=()=>{toast('Checking for updates…');fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();
   if(v&&v!==APP_VERSION){try{sessionStorage.removeItem('mr_reload')}catch(e){}toast('Updating to v'+v);setTimeout(()=>location.replace(location.pathname+'?v='+v+'&t='+Date.now()),400)}
