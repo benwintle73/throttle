@@ -297,6 +297,11 @@ a.svc{display:block;text-decoration:none}a.svc.go{background:var(--text);color:#
 #acct .row .btn{flex:1}#acct .bad,.bad{color:var(--bad)}
 .whyb{display:grid;gap:8px;margin-top:12px}.whyb .btn{width:100%}
 .s0row{grid-template-columns:1fr 1fr .7fr!important}.ab.skipb{color:var(--muted)}
+/* v3.41: fixed story block, buttons straight after it, bigger */
+.spfix .pick2 .story{flex:0 0 auto!important;height:4.35em!important;-webkit-line-clamp:3!important;display:-webkit-box!important;visibility:visible!important;margin:0 0 4px!important}
+.spfix .pick2 .acts{margin-top:10px!important;height:auto!important;padding-top:10px}
+.acts .arow .ab{height:62px!important;font-size:18px!important;border-radius:16px}
+.acts .albl{font-size:13px}
 </style>
 </head>
 <body>
@@ -832,7 +837,7 @@ function fitCard(){const sp=document.querySelector('.spfix'),card=sp&&sp.querySe
   const over=card.scrollHeight-card.clientHeight;
   if(over>0&&ph>100){ph=Math.max(100,ph-over-2);window._ph=ph;sp.style.setProperty('--ph',ph+'px')}}
 window.addEventListener('resize',()=>{window._ph=0;setTimeout(()=>{fitCard();fitStory()},60)});
-function fitStory(){document.querySelectorAll('.spfix .story').forEach(el=>{el.style.webkitLineClamp='';const lh=parseFloat(getComputedStyle(el).lineHeight)||21,n=Math.floor((el.clientHeight+1)/lh);if(n<1){el.style.visibility='hidden'}else{el.style.webkitLineClamp=String(n);el.style.display='-webkit-box';el.style.visibility=''}})}
+function fitStory(){return;document.querySelectorAll('.spfix .story').forEach(el=>{el.style.webkitLineClamp='';const lh=parseFloat(getComputedStyle(el).lineHeight)||21,n=Math.floor((el.clientHeight+1)/lh);if(n<1){el.style.visibility='hidden'}else{el.style.webkitLineClamp=String(n);el.style.display='-webkit-box';el.style.visibility=''}})}
 window.addEventListener('resize',()=>setTimeout(fitStory,50));
 let render=function(html){app.innerHTML=`<div class="fade">${html}</div>`;try{window.scrollTo(0,0)}catch(e){}}
 function primary(t){for(const p of PRIMARY)if(t.tags.includes(p))return p;return 'dark'}
@@ -1742,7 +1747,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.40';
+const APP_VERSION='3.41';
 window._updNow=true;setTimeout(()=>{window._updNow=false},4000);setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
 ACT.update=()=>{toast('Checking for updates…');fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();
   if(v&&v!==APP_VERSION){try{sessionStorage.removeItem('mr_reload')}catch(e){}toast('Updating to v'+v);setTimeout(()=>location.replace(location.pathname+'?v='+v+'&t='+Date.now()),400)}
