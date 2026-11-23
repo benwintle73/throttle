@@ -261,6 +261,7 @@ body:has(.pick2) #dlstat{display:none!important}
 .pick2 .heads{margin:0 0 6px}
 .pick2 .credits{height:auto!important;margin-bottom:6px}
 .pick2 .ifliked,.spfix .pick2 .ifliked{min-height:0!important}
+.spfix .pick2>*{flex-shrink:0}.spfix .pick2 .story{flex:1 1 auto;min-height:1.45em;flex-shrink:1}
 </style>
 </head>
 <body>
@@ -1640,7 +1641,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.24';
+const APP_VERSION='3.25';
 window._updNow=true;setTimeout(()=>{window._updNow=false},4000);setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
 ACT.update=()=>{toast('Checking for updates…');fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();
   if(v&&v!==APP_VERSION){try{sessionStorage.removeItem('mr_reload')}catch(e){}toast('Updating to v'+v);setTimeout(()=>location.replace(location.pathname+'?v='+v+'&t='+Date.now()),400)}
