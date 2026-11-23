@@ -791,7 +791,7 @@ const jacc=(a,b)=>{const A=new Set(a),i=b.filter(x=>A.has(x)).length;return i/(n
 const uniqPush=(a,v)=>{if(!a.includes(v))a.push(v)};
 const remove=(a,v)=>{const i=a.indexOf(v);if(i>=0)a.splice(i,1)};
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1400)}
-function fitStory(){document.querySelectorAll('.spfix .story').forEach(el=>{el.style.webkitLineClamp='';el.style.display='';const lh=parseFloat(getComputedStyle(el).lineHeight)||21,n=Math.floor((el.clientHeight+1)/lh);if(n<1){el.style.display='none'}else{el.style.webkitLineClamp=String(n);el.style.display='-webkit-box'}})}
+function fitStory(){document.querySelectorAll('.spfix .story').forEach(el=>{el.style.webkitLineClamp='';el.style.display='';el.style.maxHeight='';el.style.flex='';const lh=parseFloat(getComputedStyle(el).lineHeight)||21,n=Math.floor((el.clientHeight+1)/lh);if(n<1){el.style.display='none'}else{el.style.webkitLineClamp=String(n);el.style.display='-webkit-box';el.style.maxHeight=(n*lh)+'px';el.style.flex='0 0 auto'}})}
 window.addEventListener('resize',()=>setTimeout(fitStory,50));
 let render=function(html){app.innerHTML=`<div class="fade">${html}</div>`;try{window.scrollTo(0,0)}catch(e){}}
 function primary(t){for(const p of PRIMARY)if(t.tags.includes(p))return p;return 'dark'}
@@ -1643,7 +1643,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.26';
+const APP_VERSION='3.27';
 window._updNow=true;setTimeout(()=>{window._updNow=false},4000);setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
 ACT.update=()=>{toast('Checking for updates…');fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();
   if(v&&v!==APP_VERSION){try{sessionStorage.removeItem('mr_reload')}catch(e){}toast('Updating to v'+v);setTimeout(()=>location.replace(location.pathname+'?v='+v+'&t='+Date.now()),400)}
