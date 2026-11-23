@@ -293,6 +293,8 @@ a.svc{display:block;text-decoration:none}a.svc.go{background:var(--text);color:#
 .nudge{margin-top:18px;padding:14px;border-radius:14px;background:var(--panel);border:1px solid var(--line)}.nudge b{font-size:16px}.nudge p{margin:6px 0 12px;font-size:14px;color:var(--muted);line-height:1.45}.nudge .btn{width:100%}
 .shcard{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:8px}.shp .poster{width:180px;height:270px;border-radius:14px}.shcard b{font-size:20px;text-align:center}
 .acts .arow .ab{height:46px;padding:0 4px;font-size:14.5px;line-height:1.15}.spfix .acts{height:126px}.acts .step[hidden]{display:none!important}
+.inp{width:100%;box-sizing:border-box;height:46px;border-radius:12px;border:1px solid var(--line2);background:var(--panel2);color:var(--text);padding:0 14px;font-size:16px;margin-top:8px}
+#acct .row .btn{flex:1}#acct .bad,.bad{color:var(--bad)}
 </style>
 </head>
 <body>
@@ -811,7 +813,7 @@ const SEG=[['love','Loved it'],['like','Liked it'],['ok','It was OK'],['dislike'
 const rating=t=>store.rate[t.id]||(t.own?'like':null);
 const known=t=>{const r=rating(t);return r==='love'||r==='like'||r==='ok'||r==='dislike'||r==='seen'};
 let RV=0;function setRate(id,r){if(r)store.rate[id]=r;else delete store.rate[id];RV++;save()}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}if(typeof syncDirty==='function')syncDirty()}
 const P=()=>store.profile;
 
 /* ===== util ===== */
@@ -1068,6 +1070,49 @@ async function tmRecs(){if(window._tmRec||tmDown>3)return;window._tmRec=true;
       RECM.done[wk(s)]=1;extSave(m);tmSave();try{localStorage.setItem(RECKEY,JSON.stringify(RECM))}catch(e){}RV++}
     if(added&&typeof onNewFilms==='function')onNewFilms(added)}
   catch(e){tmDown++}finally{window._tmRec=false}}
+/* ===== account + sync (Supabase auth, one private row per user) ===== */
+const SB_URL='https://nkkhbtrrytctpfwjenrz.supabase.co',SB_KEY='sb_publishable_1bZLkfdxFTM4w3SWqPklDw_l3leLxxl';
+let _sb=null,SYNC={user:null,state:'off',msg:''};
+async function sbc(){if(_sb)return _sb;const m=await import('https://esm.sh/@supabase/supabase-js@2');_sb=m.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,storageKey:'mr_auth'}});return _sb}
+const syncMeta=()=>{try{return JSON.parse(localStorage.getItem('mr_sync'))||{}}catch(e){return {}}};
+const setSyncMeta=o=>{try{localStorage.setItem('mr_sync',JSON.stringify({...syncMeta(),...o}))}catch(e){}};
+function syncPayload(){return {v:1,store,ext:extMeta(),recm:RECM}}
+let _push=null;
+function syncDirty(){setSyncMeta({at:Date.now()});if(!SYNC.user)return;clearTimeout(_push);_push=setTimeout(syncPush,3000)}
+async function syncPush(){if(!SYNC.user)return;try{const sb=await sbc(),at=syncMeta().at||Date.now();
+  const {error}=await sb.from('moodreel_sync').upsert({user_id:SYNC.user.id,data:syncPayload(),updated_at:new Date(at).toISOString()});
+  if(error)throw error;setSyncMeta({pushed:at});SYNC.state='ok';SYNC.msg='Synced '+new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}
+  catch(e){SYNC.state='err';SYNC.msg="Couldn't sync: "+(e.message||e)}paintSync()}
+function applyRemote(d,at){try{localStorage.setItem(KEY,JSON.stringify(d.store));if(d.ext)localStorage.setItem(EXTKEY,JSON.stringify(d.ext));if(d.recm)localStorage.setItem(RECKEY,JSON.stringify(d.recm))}catch(e){toast("Couldn't save the synced data");return}
+  setSyncMeta({at,pushed:at,first:1});toast('Loading your synced ratings');setTimeout(()=>location.replace(location.pathname+'?s='+Date.now()),600)}
+async function syncPull(first){if(!SYNC.user)return;try{const sb=await sbc();
+  const {data,error}=await sb.from('moodreel_sync').select('data,updated_at').eq('user_id',SYNC.user.id).maybeSingle();if(error)throw error;
+  const m=syncMeta(),local=m.at||0;
+  if(!data){await syncPush();return}
+  const remote=Date.parse(data.updated_at);
+  if(first&&!m.first){const lr=Object.keys(store.rate||{}).length,rr=Object.keys((data.data.store||{}).rate||{}).length;
+    if(lr&&lr!==rr&&!confirm(`Your account has ${rr} ratings saved. This device has ${lr}.\n\nOK = use your account's ratings here\nCancel = replace the account with this device's ratings`)){setSyncMeta({first:1,at:Date.now()});await syncPush();return}
+    if(rr)return applyRemote(data.data,remote);setSyncMeta({first:1});await syncPush();return}
+  if(remote>local+1000)return applyRemote(data.data,remote);
+  if(local>remote+1000)await syncPush();else{SYNC.state='ok';SYNC.msg='Up to date';paintSync()}}
+  catch(e){SYNC.state='err';SYNC.msg="Couldn't sync: "+(e.message||e);paintSync()}}
+async function syncStart(){try{if(!localStorage.getItem('mr_auth'))return}catch(e){return}try{const sb=await sbc();const {data}=await sb.auth.getSession();SYNC.user=data.session&&data.session.user||null;if(SYNC.user)await syncPull(false);paintSync()}catch(e){}}
+function paintSync(){const el=document.getElementById('acct');if(el)el.outerHTML=acctHTML()}
+function acctHTML(){if(SYNC.user)return `<div class="group" id="acct"><h3>Your account</h3><p class="sub" style="margin:0 0 10px">Signed in as <b>${h(SYNC.user.email)}</b>. Ratings, watchlist and settings sync to any phone or computer you sign in on.<br><span class="${SYNC.state==='err'?'bad':''}">${h(SYNC.msg||'')}</span></p>
+    <div class="row" style="gap:8px"><button class="btn" data-act="syncNow">Sync now</button><button class="btn ghost" data-act="signOut">Sign out</button></div></div>`;
+  return `<div class="group" id="acct"><h3>Your account</h3><p class="sub" style="margin:0 0 10px">Sign in to keep your ratings safe and open MoodReel on your computer or another phone.${SYNC.msg?`<br><span class="bad">${h(SYNC.msg)}</span>`:''}</p>
+    <input id="aemail" class="inp" type="email" autocomplete="email" placeholder="Email"><input id="apass" class="inp" type="password" autocomplete="current-password" placeholder="Password (6+ characters)">
+    <div class="row" style="gap:8px;margin-top:8px"><button class="btn" data-act="signIn">Sign in</button><button class="btn ghost" data-act="signUp">Create account</button></div></div>`}
+async function authDo(kind){const email=($('#aemail')||{}).value||'',password=($('#apass')||{}).value||'';if(!email.includes('@')||password.length<6){SYNC.msg='Enter your email and a password of 6+ characters';return paintSync()}
+  try{const sb=await sbc();const r=kind==='up'?await sb.auth.signUp({email,password,options:{emailRedirectTo:location.origin+location.pathname}}):await sb.auth.signInWithPassword({email,password});
+    if(r.error)throw r.error;if(!r.data.session){SYNC.msg='Check your email to confirm your account, then sign in here.';return paintSync()}
+    SYNC.user=r.data.session.user;SYNC.msg='Signed in';toast('Signed in');await syncPull(true);paintSync()}
+  catch(e){SYNC.msg=e.message||String(e);paintSync()}}
+ACT.signIn=()=>authDo('in');ACT.signUp=()=>authDo('up');
+ACT.syncNow=async()=>{SYNC.msg='Syncing…';paintSync();await syncPull(false)};
+ACT.signOut=async()=>{try{const sb=await sbc();await sb.auth.signOut()}catch(e){}SYNC.user=null;SYNC.msg='Signed out. Your ratings stay on this device.';paintSync()};
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&SYNC.user)syncPull(false)});
+
 async function pageLinks(title){try{const j=await wget('https://en.wikipedia.org/w/api.php?action=parse&format=json&origin=*&prop=links&redirects=1&page='+encodeURIComponent(title));
   return ((j.parse&&j.parse.links)||[]).filter(l=>l.ns===0&&l.exists!==undefined).map(l=>l['*'])}catch(e){return []}}
 async function filmsFromTitles(titles,have){
@@ -1255,7 +1300,7 @@ function home(){
     <button class="tonightbtn" data-act="tonight"><span>Tonight</span><b>${h(tonightLine())}</b><i>Change</i></button></div>
     <div class="stats hstats"><button class="stat" data-act="lib" data-v="watch"><b>${store.watchlist.length}</b><span>Watchlist</span></button><button class="stat" data-act="lib" data-v="love"><b>${c.love}</b><span>Loved</span></button><button class="stat" data-act="lib" data-v="like"><b>${c.like+c.ok}</b><span>Liked</span></button><button class="stat" data-act="lib" data-v="dislike"><b>${c.dislike}</b><span>Disliked</span></button></div>
     <div class="cta hcta"><button class="btn" data-act="foryou">Pick something for tonight</button><div class="hrow h3"><button class="btn ghost" data-act="go">Swipe</button><button class="btn ghost" data-act="surprise">Surprise me</button><button class="btn ghost" data-act="lib">My library</button></div></div>
-    <p class="note hnote"><button class="textbtn" data-act="how">How it picks</button> · <button class="textbtn" data-act="list">History & backup</button> · <span class="cnt">${TITLES.length} titles</span> · <button class="textbtn" data-act="update">v${APP_VERSION} · Update</button></p>
+    <p class="note hnote"><button class="textbtn" data-act="how">How it picks</button> · <button class="textbtn" data-act="list">${SYNC.user?"Account":"Sign in"} & backup</button> · <span class="cnt">${TITLES.length} titles</span> · <button class="textbtn" data-act="update">v${APP_VERSION} · Update</button></p>
   </div>`);
   document.body.classList.add('nohscroll');
   if(window._updV&&window._updV!==APP_VERSION)setTimeout(checkUpdate,300);
@@ -1574,7 +1619,8 @@ Object.assign(ACT,{
 function listView(){
   const sec=(k,title)=>`<div class="group"><h3>${title} · ${store[k].length}</h3>${store[k].length?store[k].slice().reverse().map(id=>`<div class="listrow"><span>${h(TITLES[id].t)}</span><button data-act="unmark" data-v="${k}:${id}">Remove</button></div>`).join(''):'<p class="sub" style="margin:0">Nothing yet.</p>'}</div>`;
   render(`<div class="row"><button class="textbtn" data-act="home">Done</button></div>
-    <h2 style="margin-top:6px">History & backup</h2><p class="sub">Films you picked to watch. Not for me and films you've seen live in My library.</p>
+    <h2 style="margin-top:6px">Account & backup</h2><p class="sub">Films you picked to watch. Not for me and films you've seen live in My library.</p>
+    ${acctHTML()}
     <div class="group"><h3>Backup</h3><p class="sub" style="margin:0 0 10px">Your ratings live on this phone, in this browser only. That's why the Claude preview and the website show different counts. Copy a backup to keep them safe or move them to another device.</p>
       <div class="hrow"><button class="btn ghost" data-act="backup">Copy backup</button><button class="btn ghost" data-act="restoreshow">Restore</button></div>
       <textarea id="bk" class="bk" placeholder="Backup code appears here, or paste one to restore" style="display:none"></textarea>
@@ -1696,7 +1742,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.37';
+const APP_VERSION='3.38';
 window._updNow=true;setTimeout(()=>{window._updNow=false},4000);setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
 ACT.update=()=>{toast('Checking for updates…');fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();
   if(v&&v!==APP_VERSION){try{sessionStorage.removeItem('mr_reload')}catch(e){}toast('Updating to v'+v);setTimeout(()=>location.replace(location.pathname+'?v='+v+'&t='+Date.now()),400)}
@@ -1708,6 +1754,7 @@ function queueVisible(){const vis=[];document.querySelectorAll('[data-wk]').forE
 const _render=render;render=html=>{document.querySelectorAll('.sheet').forEach(x=>x.remove());window._busy=false;document.body.classList.remove('nohscroll');_render(html);queueVisible()};
 TITLES.forEach(applyTM);
 setTimeout(()=>loadMore(false),1500);
+syncStart();
 setTimeout(()=>{tmRecs();try{if(!S)newSession();tmWant(ranked().slice(0,40).map(r=>r.t))}catch(e){}},2500);
 setTimeout(()=>{try{const top=ranked().slice(0,40).map(r=>r.t);wikiWant(top);wikiWant(TITLES.slice(0,BASE_N).filter(t=>!t.own));wikiWant(TITLES.slice(0,BASE_N).filter(t=>t.own))}catch(e){}},1500);
 home();
