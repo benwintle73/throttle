@@ -281,6 +281,8 @@ body:has(.pick2) #dlstat{display:none!important}
 .ynb.yes{background:var(--good);color:#0b1a13}
 .ynb:active{transform:scale(.97)}
 .ynskip{text-align:center;margin-top:6px}
+.ynb{display:flex;align-items:center;justify-content:center;gap:8px}.ynb .th{width:22px;height:22px;fill:currentColor}.ynb small{font-size:11px;font-weight:600;opacity:.7;letter-spacing:.2px}
+.card .stamp.into,.card .stamp.nope{left:50%;right:auto;transform:translateX(-50%) rotate(0)}.card .stamp.into{top:auto;bottom:26%}.card .stamp.nope{top:22%}
 </style>
 </head>
 <body>
@@ -1276,7 +1278,7 @@ function deck(){
   const ic=q?{nope:ARROW.l,seen:ARROW.d,loved:ARROW.u,into:ARROW.r}:ICON;
   render(`<div class="row"><button class="backbtn" data-act="home"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Home</button><span class="spacer"></span>
       <button class="pill" data-act="aud">${h(AUDS.find(a=>a[0]===store.aud)[1])}</button><button class="pill" data-act="fmt">${h(FMTS.find(f=>f[0]===store.fmt)[1])}</button></div>
-    ${swipeFrame(`${S.nxt&&!q?cardHTML(S.nxt,'back'):''}${q?qHTML(c):cardHTML(c,'front')}`,q?'Swipe right for yes, left for no':'Want to watch it?',!!q)}
+    ${swipeFrame(`${S.nxt&&!q?cardHTML(S.nxt,'back'):''}${q?qHTML(c):cardHTML(c,'front')}`,q?'Swipe up for yes, down for no':'Want to watch it?',!!q)}
     <div class="row" style="margin-top:16px"><button class="textbtn" data-act="undo" ${S.history.length?'':'style="visibility:hidden"'}>Undo</button><span class="spacer"></span>
       <div class="dots">${Array.from({length:ROUND},(_,i)=>`<i class="${i<S.sinceSug?'on':''}"></i>`).join('')}</div><span class="spacer"></span>
       <button class="textbtn" data-act="sugnow">Picks now</button></div>
@@ -1296,27 +1298,27 @@ function qHTML(q){
 /* swipe directions sit where you swipe to: up above, down below, left and right at the sides */
 function swipeFrame(deck,q,skip){return `<div class="deck" id="deck">${deck}</div>
   <p class="ynq">${h(q)}</p>
-  <div class="yn"><button class="ynb no" data-act="sw" data-v="nope">No</button><button class="ynb yes" data-act="sw" data-v="into">Yes</button></div>
+  <div class="yn"><button class="ynb no" data-act="sw" data-v="nope"><svg viewBox="0 0 24 24" class="th"><path d="M17 13V4h3v9h-3zm-2-9H6.8a2 2 0 0 0-2 1.6l-1.3 6A2 2 0 0 0 5.5 14H10l-.8 3.9A1.8 1.8 0 0 0 11 20l4-6.2V4z"/></svg>No <small>swipe down</small></button><button class="ynb yes" data-act="sw" data-v="into"><svg viewBox="0 0 24 24" class="th"><path d="M7 11v9H4v-9h3zm2 9h8.2a2 2 0 0 0 2-1.6l1.3-6A2 2 0 0 0 18.5 10H14l.8-3.9A1.8 1.8 0 0 0 13 4l-4 6.2V20z"/></svg>Yes <small>swipe up</small></button></div>
   ${skip?'<div class="ynskip"><button class="textbtn" data-act="sw" data-v="seen">Skip</button></div>':''}`}
 function bindDrag(){
   const el=$('#front');if(!el)return;
   let sx=0,sy=0,dx=0,dy=0,drag=false;
   const stamps={nope:el.querySelector('.stamp.nope'),into:el.querySelector('.stamp.into'),loved:el.querySelector('.stamp.loved'),seen:el.querySelector('.stamp.seen')};
-  const dir=()=>dx>0?'into':'nope';
+  const dir=()=>dy<0?'into':'nope';
   el.addEventListener('pointerdown',e=>{drag=true;sx=e.clientX;sy=e.clientY;dx=dy=0;el.style.transition='none';try{el.setPointerCapture(e.pointerId)}catch(_){}});
   el.addEventListener('pointermove',e=>{if(!drag)return;dx=e.clientX-sx;dy=e.clientY-sy;
-    el.style.transform=`translate(${dx}px,${dy*.15}px) rotate(${dx*.05}deg)`;
-    const d=dir(),amt=Math.min(1,Math.abs(dx)/110);
+    el.style.transform=`translate(${dx*.15}px,${dy}px)`;
+    const d=dir(),amt=Math.min(1,Math.abs(dy)/110);
     for(const k in stamps)stamps[k].style.opacity=k===d?amt:0});
   const end=()=>{if(!drag)return;drag=false;
-    if(Math.abs(dx)>95)fling(dir());
+    if(Math.abs(dy)>95)fling(dir());
     else{el.style.transition='transform .25s';el.style.transform='';for(const k in stamps)stamps[k].style.opacity=0}};
   el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);
 }
 function fling(kind){
   const el=$('#front');if(!el||window._busy)return;window._busy=true;
   const libKind=LS.on&&!LS.own&&kind==='nope'?'seen':kind;
-  const v={nope:[-600,0],into:[600,0],loved:[0,-700],seen:[0,700]}[kind];
+  const v={nope:[0,800],into:[0,-800],loved:[0,-800],seen:[0,800]}[kind];
   el.querySelector('.stamp.'+kind).style.opacity=1;
   el.style.transition='transform .28s ease-in';el.style.transform=`translate(${v[0]}px,${v[1]}px) rotate(${v[0]*.04}deg)`;
   setTimeout(()=>{window._busy=false;LS.on?libSwipe(libKind):swipe(kind)},230);
@@ -1387,7 +1389,7 @@ function suggest(empty){
     <button class="btn ghost" data-act="keep">None of these, keep swiping</button>
     <button class="textbtn" data-act="how" style="display:block;margin:14px auto 0">How are these picked?</button>`);
 }
-ACT.no=v=>{const id=+v,t=TITLES[id];askWhy(id,'pass');S.out.push(id);add(S.vec,t.tags,-.4);add(store.taste,t.tags,-.08);setRate(id,'pass');toast('Moved to Not for me');  const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{el.remove();S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length){toast('No worries, a few more swipes');ACT.keep()}},250)};
+ACT.no=v=>{const id=+v,t=TITLES[id];askWhy(id,'pass');S.out.push(id);add(S.vec,t.tags,-.4);add(store.taste,t.tags,-.08);setRate(id,'pass');toast('Moved to Not for me');  const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{if(el)el.remove();if(!S||!S.picks)return;S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length){toast('No worries, a few more swipes');ACT.keep()}},250)};
 ACT.keep=()=>{S.picks.forEach(id=>S.out.push(id));S.cur=nextQuestion()||nextCard();S.nxt=null;deck()};
 ACT.yes=v=>{const t=TITLES[+v];uniqPush(store.chosen,t.id);remove(store.watchlist,t.id);add(store.taste,t.tags,.35);save();enjoy(t)};
 
@@ -1658,7 +1660,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.33';
+const APP_VERSION='3.34';
 window._updNow=true;setTimeout(()=>{window._updNow=false},4000);setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
 ACT.update=()=>{toast('Checking for updates…');fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();
   if(v&&v!==APP_VERSION){try{sessionStorage.removeItem('mr_reload')}catch(e){}toast('Updating to v'+v);setTimeout(()=>location.replace(location.pathname+'?v='+v+'&t='+Date.now()),400)}
