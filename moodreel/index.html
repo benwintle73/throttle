@@ -255,6 +255,7 @@ body:has(.pick2) #dlstat{display:none!important}
 .infolinks{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.infolinks a{font-size:14px!important;color:var(--text)!important;padding:9px 13px;border-radius:9px;background:var(--panel2);border:1px solid var(--line2);text-decoration:none}
 .infowl{margin-top:12px;text-align:center;color:var(--good);font-weight:600;font-size:14px}
 .lthumb,.fyp,.ptop>[data-act=info]{cursor:pointer}.lt b.tap{cursor:pointer}
+.infos{margin-top:6px;font-size:13.5px;font-weight:600;color:var(--seen)}
 </style>
 </head>
 <body>
@@ -789,7 +790,7 @@ function primary(t){for(const p of PRIMARY)if(t.tags.includes(p))return p;return
 function genreLine(t){return t.tags.filter(x=>['action','comedy','emotion','tension','crime','scifi','fantasy','horror','romance','real','family','music','war','mystery','sport'].includes(x)).slice(0,3).map(x=>LABEL[x]||({emotion:'Drama',tension:'Thriller',real:'True story'})[x]).join(' · ')}
 Object.assign(LABEL,{emotion:'Drama',tension:'Thriller',real:'True story'});
 function runtime(t){return t.k==='M'?`${Math.floor(t.r/60)}h ${t.r%60}m`:`${t.r} season${t.r>1?'s':''}`}
-function poster(t){const c=PAL[primary(t)],w=WIKI[wk(t)],img=w&&w.img;
+function poster(t){const c=PAL[primary(t)],w=WIKI[wk(t)],tmm=TM[wk(t)],img=(tmm&&tmm.p?TMIMG+tmm.p:'')||(w&&w.img);
   return `<div class="poster${img?' img':''}" data-wk="${h(wk(t))}" style="background:${img?`linear-gradient(180deg,transparent 55%,rgba(0,0,0,.55)),url(&quot;${h(img)}&quot;)`:`linear-gradient(165deg,${c} 0%,${c}cc 35%,#0d0c12 95%)`}"><div class="pk">${t.k==='M'?'Film':'Series'} · ${t.y}</div><div class="pt">${h(t.t)}</div><div class="rule"></div><div class="pg">${h(genreLine(t))}</div></div>`}
 const svcTag=t=>t.svc?`<span class="svc">${h(t.svc)}</span>`:`<span class="svc unknown">Check where to watch</span>`;
 
@@ -854,7 +855,7 @@ async function wFetch(batch){
     applyWiki(t);paintPoster(t);document.querySelectorAll(`[data-about="${CSS.escape(wk(t))}"]`).forEach(el=>{if(!el.innerHTML.trim())el.innerHTML=aboutHTML(t)})});
   RV++;wsave();
 }
-function paintPoster(t){const w=WIKI[wk(t)];if(!w||!w.img)return;document.querySelectorAll(`[data-wk="${CSS.escape(wk(t))}"]`).forEach(el=>{el.classList.add('img');el.style.backgroundImage=`linear-gradient(180deg,transparent 55%,rgba(0,0,0,.55)),url("${w.img}")`})}
+function paintPoster(t){const w=WIKI[wk(t)];if(!w||!w.img||(TM[wk(t)]&&TM[wk(t)].p))return;document.querySelectorAll(`[data-wk="${CSS.escape(wk(t))}"]`).forEach(el=>{el.classList.add('img');el.style.backgroundImage=`linear-gradient(180deg,transparent 55%,rgba(0,0,0,.55)),url("${w.img}")`})}
 const READ={real:'true story',war:'wartime setting',mind:'makes you think',comedy:'humour',tension:'tension',action:'action',fast:'fast pace',slow:'slow burn',dark:'serious tone',emotion:'emotional',feelgood:'feel-good',inspiring:'inspiring',sport:'sport',crime:'crime',scifi:'sci-fi',family:'family-friendly',romance:'romance',music:'music',underdog:'underdog story',heist:'heist',spy:'spy story',superhero:'superheroes',horror:'scares',epic:'epic scale',survival:'survival story',fantasy:'fantasy',mystery:'mystery',grit:'gritty',boxing:'boxing',motorsport:'motorsport',space:'space',revenge:'revenge story',comingofage:'coming of age',familydrama:'family drama',glossy:'glossy',aussie:'Australian'};
 /* honest explanations: strongest reason + the Loved/Liked films that back it up */
 const FEAT_KIND={underdog:'storyline',heist:'storyline',revenge:'storyline',survival:'storyline',comingofage:'storyline',familydrama:'storyline',spy:'storyline',superhero:'storyline',space:'storyline',real:'storyline',war:'setting',
@@ -874,13 +875,16 @@ function evidence(t){const LT=libState();
   const sims=LT.liked.filter(o=>o.id!==t.id).map(o=>{const ca=o.actors.find(a=>t.actors.includes(a)),fr=sameFranchise(o,t),m=simW(o,t);
     return {o,ca,fr,spec:m.spec,j:(fr?1:m.j)*(rating(o)==='love'?1.15:1)+(ca?.25:0)}}).sort((a,b)=>b.j-a.j);
   const strong=sims.filter(x=>x.j>=.35).slice(0,2);
-  return {LT,sims,strong,level:strong.length?(strong[0].fr||strong[0].j>=.5||strong.length>1?'strong':'some'):'weak'}}
+  const rec=recFromIds(t).map(i=>TITLES[i]).filter(o=>{const r=rating(o);return (r==='love'||r==='like')&&o.id!==t.id}).sort((a,b)=>(rating(b)==='love')-(rating(a)==='love')).slice(0,2);
+  return {LT,sims,strong,rec,level:rec.length||(strong.length&&(strong[0].fr||strong[0].j>=.5||strong.length>1))?'strong':strong.length?'some':'weak'}}
 function explain(t){const ev=evidence(t),LT=ev.LT,sims=ev.strong;
   const verb=o=>rating(o)==='love'?'loved':'liked';
   const nm=xs=>{const v=xs.map(x=>verb(x.o));const names=xs.map(x=>`<b>${h(x.o.t)}</b>`).join(' and ');return v.every(x=>x===v[0])?`${names}, which you ${v[0]}`:xs.map(x=>`<b>${h(x.o.t)}</b> (${verb(x.o)})`).join(' and ')};
   let line='';
   const castSim=ev.sims.find(x=>x.ca&&x.j>=.25),fr=sims.find(x=>x.fr);
   if(fr)line=`Follows on from <b>${h(fr.o.t)}</b>, which you ${verb(fr.o)}.`;
+  else if(ev.rec.length){const v=ev.rec.map(o=>verb(o));line=`People who ${v.includes('loved')?'loved':'liked'} ${ev.rec.map(o=>`<b>${h(o.t)}</b>`).join(' and ')} also rate this highly${v.every(x=>x===v[0])?`. You ${v[0]} ${ev.rec.length>1?'both':'it'}`:''}.`;
+    const sh=sims[0]&&t.tags.filter(k=>READ[k]&&sims[0].o.tags.includes(k)&&!GENERIC[k])[0];if(sh)line+=` Also: ${h(READ[sh])}.`}
   else if(sims.length){
     const shared=t.tags.filter(k=>READ[k]&&sims.every(x=>x.o.tags.includes(k))).sort((a,b)=>(LT.taste[b]||0)-(LT.taste[a]||0));
     const sh=shared.length?shared:t.tags.filter(k=>READ[k]&&sims.some(x=>x.o.tags.includes(k)));
@@ -919,13 +923,13 @@ function infoHTML(t){const w=WIKI[wk(t)],d=DIRECTOR[t.t]||t.dir||(w&&w.dir&&w.di
   const r=rating(t),RL={love:'You loved it',like:'You liked it',ok:'You thought it was OK',dislike:'You disliked it',pass:'Marked not for me',unseen:"You haven't seen it",seen:'Seen it'};
   const meta=[t.k==='M'?'Film':'Series',t.y,t.c,runtime(t)].join(' · ');
   return `<div class="sheetbox info"><div class="row"><span class="spacer"></span><button class="textbtn" data-act="closesheet">Close</button></div>
-    <div class="infotop"><div class="infop">${poster(t)}</div><div><b class="infot">${h(t.t)}</b><div class="infom">${meta}</div>${r&&RL[r]?`<div class="infor">${RL[r]}</div>`:''}</div></div>
+    <div class="infotop"><div class="infop">${poster(t)}</div><div><b class="infot">${h(t.t)}</b><div class="infom">${meta}${TM[wk(t)]&&TM[wk(t)].va?` · TMDB ${TM[wk(t)].va}/10`:''}</div>${TM[wk(t)]&&TM[wk(t)].prov&&TM[wk(t)].prov.length?`<div class="infos">Streaming on ${h(TM[wk(t)].prov.join(', '))}</div>`:''}${r&&RL[r]?`<div class="infor">${RL[r]}</div>`:''}</div></div>
     ${cast.length?`<p class="infoc"><span>Starring</span> ${h(cast.join(', '))}</p>`:''}${d?`<p class="infoc"><span>${/^(Created|Developed)/.test(d)?'':'Directed by '}</span>${h(d)}</p>`:''}
     <p>${w&&w.ex?h(w.ex):w?h(t.blurb):`${h(t.blurb)} <span class="infoload">Loading more…</span>`}</p>
     ${!known(t)&&r!=='pass'?`<p class="infow">${explain(t).line}</p>`:''}
     <div class="infolinks">${w&&w.url?`<a href="${h(w.url)}" target="_blank" rel="noopener">Wikipedia</a>`:''}<a href="https://www.justwatch.com/au/search?q=${encodeURIComponent(t.t)}" target="_blank" rel="noopener">Where to watch</a><a href="https://www.youtube.com/results?search_query=${encodeURIComponent(t.t+' '+t.y+' trailer')}" target="_blank" rel="noopener">Trailer</a></div>
     ${store.watchlist.includes(t.id)?'<div class="infowl">On your watchlist</div>':known(t)?'':`<button class="btn" style="width:100%;margin-top:12px" data-act="infowl" data-v="${t.id}">Add to watchlist</button>`}</div>`}
-ACT.info=v=>{const t=TITLES[+v];if(!t)return;ACT.closesheet();const o=document.createElement('div');o.className='sheet';o.dataset.info=t.id;o.innerHTML=infoHTML(t);
+ACT.info=v=>{const t=TITLES[+v];if(!t)return;tmWant([t],true);ACT.closesheet();const o=document.createElement('div');o.className='sheet';o.dataset.info=t.id;o.innerHTML=infoHTML(t);
   o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o);
   if(!WIKI[wk(t)]){wikiWant([t],true);let n=0;const iv=setInterval(()=>{const el=document.querySelector(`.sheet[data-info="${t.id}"]`);if(!el||++n>20){clearInterval(iv);const l=el&&el.querySelector('.infoload');if(l)l.remove();return}if(WIKI[wk(t)]){el.innerHTML=infoHTML(t);clearInterval(iv)}},500)}};
 ACT.infowl=v=>{const id=+v;uniqPush(store.watchlist,id);if(!rating(TITLES[id]))setRate(id,'unseen');save();toast('Added to your watchlist');ACT.info(v)};
@@ -962,8 +966,53 @@ function titleFromUrl(u){let t=decodeURIComponent(u.split('/wiki/')[1]||'').repl
 function setStatus(m){return;let el=document.getElementById('dlstat');if(!el){el=document.createElement('div');el.id='dlstat';document.body.appendChild(el)}el.textContent=m;el.style.display=m?'block':'none'}
 /* ===== more films: Wikipedia box-office lists + Wikidata details (incremental, resumable) ===== */
 const EXTYEARS=(()=>{const a=[];for(let y=2026;y>=1975;y--)a.push(y);return a})();
-function extMeta(){try{return JSON.parse(localStorage.getItem(EXTKEY))||{list:[],done:[]}}catch(e){return {list:[],done:[]}}}
+let _extM=null;function extMeta(){if(_extM)return _extM;try{_extM=JSON.parse(localStorage.getItem(EXTKEY))||{list:[],done:[]}}catch(e){_extM={list:[],done:[]}}_extM.done=_extM.done||[];_extM.list=_extM.list||[];return _extM}
 function extSave(m){try{localStorage.setItem(EXTKEY,JSON.stringify(m))}catch(e){}}
+/* ===== TMDB (via our Supabase proxy; the key never reaches the page) ===== */
+const TMDB_URL='https://nkkhbtrrytctpfwjenrz.supabase.co/functions/v1/tmdb',TMKEY='mr_tmdb_v1',TMIMG='https://image.tmdb.org/t/p/w342';
+let TM={};try{TM=JSON.parse(localStorage.getItem(TMKEY))||{}}catch(e){TM={}}
+let _tms=null;function tmSave(){clearTimeout(_tms);_tms=setTimeout(()=>{try{localStorage.setItem(TMKEY,JSON.stringify(TM))}catch(e){}},1000)}
+const tmGet=(path,params={})=>{const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),15000);return fetch(TMDB_URL+'?'+new URLSearchParams({path,include_adult:'false',...params}),{signal:ctl.signal}).then(r=>{if(!r.ok)throw new Error('TMDB '+r.status);return r.json()}).finally(()=>clearTimeout(tm))};
+const SVCMAP={'Netflix':'Netflix','Netflix basic with Ads':'Netflix','Disney Plus':'Disney+','Amazon Prime Video':'Prime Video','Amazon Prime Video with Ads':'Prime Video','Apple TV Plus':'Apple TV+','Apple TV+':'Apple TV+','Stan':'Stan','Binge':'Binge','Paramount Plus':'Paramount+','Paramount+':'Paramount+','ABC iview':'ABC iview'};
+const TMGENRE={28:['action'],12:['action','epic'],16:['family'],35:['comedy'],80:['crime'],99:['real'],18:['emotion'],10751:['family'],14:['fantasy'],36:['real'],27:['horror'],10402:['music'],9648:['mystery'],10749:['romance'],878:['scifi'],53:['tension'],10752:['war'],37:['grit'],10759:['action'],10762:['family'],10765:['scifi'],10768:['war'],10764:['comedy'],9648:['mystery']};
+const tmTags=ids=>{const s=new Set();(ids||[]).forEach(i=>(TMGENRE[i]||[]).forEach(k=>s.add(k)));if(!s.size)s.add('emotion');return [...s]};
+const shortOv=o=>{o=(o||'').trim();if(!o)return '';const mm=o.match(/^[\s\S]*?[.!?](\s|$)/),s=(mm?mm[0]:o).trim();return s.length<=150?s:s.slice(0,147).replace(/\s\S*$/,'')+'…'};
+const tmYear=x=>+(String(x.release_date||x.first_air_date||'').slice(0,4))||0;
+function applyTM(t){const m=TM[wk(t)];if(!m||m.miss)return;
+  if(m.prov){const p=P().services;t.svc=m.prov.find(x=>p.includes(x))||m.prov[0]||''}
+  if(m.ov&&(!t.blurb||/^(Film|Series) from \d{4}\.$/.test(t.blurb)))t.blurb=m.ov}
+function tmPaint(t){const m=TM[wk(t)];if(!m||!m.p)return;document.querySelectorAll(`[data-wk="${CSS.escape(wk(t))}"]`).forEach(el=>{el.classList.add('img');el.style.backgroundImage=`linear-gradient(180deg,transparent 55%,rgba(0,0,0,.55)),url("${TMIMG+m.p}")`})}
+const tmFresh=c=>c&&(c.miss?Date.now()-c.at<14*864e5:!c.noprov&&Date.now()-c.at<7*864e5);
+async function tmResolve(t){const k=wk(t),c=TM[k];if(tmFresh(c))return c;
+  const kind=c&&c.kind||(t.k==='S'?'tv':'movie');let id=c&&!c.miss?c.id:0,r=null;if(id&&c)t.tmp=c.p,t.tmov=c.ov;
+  if(!id){let j=await tmGet('/search/'+kind,{query:t.t,[kind==='tv'?'first_air_date_year':'year']:t.y});r=(j.results||[])[0];
+    if(!r){j=await tmGet('/search/'+kind,{query:t.t});r=(j.results||[]).find(x=>Math.abs(tmYear(x)-t.y)<=1)}
+    if(!r){TM[k]={miss:1,at:Date.now()};tmSave();return TM[k]}id=r.id}
+  const pv=await tmGet(`/${kind}/${id}/watch/providers`).catch(()=>({}));const au=(pv.results&&pv.results.AU)||{};
+  TM[k]={id,kind,p:(r&&r.poster_path)||t.tmp||'',ov:r?shortOv(r.overview):(t.tmov||''),va:r?Math.round(r.vote_average*10)/10:(c&&c.va)||0,
+    prov:[...new Set((au.flatrate||[]).concat(au.ads||[]).map(p=>SVCMAP[p.provider_name]).filter(Boolean))],at:Date.now()};
+  tmSave();applyTM(t);tmPaint(t);return TM[k]}
+const TQ=[];let tmBusy=0,tmDown=0;
+function tmWant(list,front){if(tmDown>3)return;list.filter(Boolean).forEach(t=>{if(tmFresh(TM[wk(t)]))return;if(TQ.includes(t)){if(!front)return;TQ.splice(TQ.indexOf(t),1)}front?TQ.unshift(t):TQ.push(t)});tmRun()}
+function tmRun(){while(tmBusy<4&&TQ.length){const t=TQ.shift();tmBusy++;tmResolve(t).then(()=>{tmDown=0;RV++}).catch(()=>{tmDown++}).finally(()=>{tmBusy--;setTimeout(tmRun,60)})}}
+/* "people who liked X also liked Y": TMDB recommendations for your Loved and Liked films */
+const RECKEY='mr_tmrec_v1';let RECM;try{RECM=JSON.parse(localStorage.getItem(RECKEY))||{done:{},from:{}}}catch(e){RECM={done:{},from:{}}}
+function recFromIds(t){return (RECM.from[NORMT(t.t)+'|'+t.y]||[]).filter(i=>TITLES[i])}
+async function tmRecs(){if(window._tmRec||tmDown>3)return;window._tmRec=true;
+  try{const m=extMeta(),have=new Map();TITLES.forEach(t=>{[0,-1,1].forEach(d=>{const k=NORMT(t.t)+'|'+(t.y+d);if(!have.has(k))have.set(k,t)})});
+    const src=TITLES.filter(t=>{const r=rating(t);return (r==='love'||r==='like')&&!RECM.done[wk(t)]}).sort((a,b)=>(rating(b)==='love')-(rating(a)==='love')).slice(0,25);
+    let added=0;
+    for(const s of src){const info=await tmResolve(s);if(info.miss){RECM.done[wk(s)]=1;continue}
+      const j=await tmGet(`/${info.kind}/${info.id}/recommendations`);
+      for(const x of (j.results||[]).slice(0,10)){const title=x.title||x.name,y=tmYear(x);if(!title||!y||(x.vote_count||0)<80)continue;
+        const key=NORMT(title)+'|'+y;let t=have.get(key);
+        if(!t){const e=[title,y,info.kind==='tv'?'S':'M',tmTags(x.genre_ids).includes('family')?'PG':'M',info.kind==='tv'?1:110,tmTags(x.genre_ids),'','',[]];
+          m.list.push(e);addExt(e);t=TITLES[TITLES.length-1];[0,-1,1].forEach(d=>have.set(NORMT(title)+'|'+(y+d),t));added++;
+          TM[wk(t)]={id:x.id,kind:info.kind,p:x.poster_path||'',ov:shortOv(x.overview),va:Math.round((x.vote_average||0)*10)/10,at:Date.now(),noprov:1};applyTM(t)}
+        const fk=NORMT(t.t)+'|'+t.y;RECM.from[fk]=RECM.from[fk]||[];if(!RECM.from[fk].includes(s.id))RECM.from[fk].push(s.id)}
+      RECM.done[wk(s)]=1;extSave(m);tmSave();try{localStorage.setItem(RECKEY,JSON.stringify(RECM))}catch(e){}RV++}
+    if(added&&typeof onNewFilms==='function')onNewFilms(added)}
+  catch(e){tmDown++}finally{window._tmRec=false}}
 async function pageLinks(title){try{const j=await wget('https://en.wikipedia.org/w/api.php?action=parse&format=json&origin=*&prop=links&redirects=1&page='+encodeURIComponent(title));
   return ((j.parse&&j.parse.links)||[]).filter(l=>l.ns===0&&l.exists!==undefined).map(l=>l['*'])}catch(e){return []}}
 async function filmsFromTitles(titles,have){
@@ -991,7 +1040,7 @@ async function filmsFromTitles(titles,have){
 }
 async function loadMore(force){
   if(window._extLoading)return;window._extLoading=true;
-  const m=extMeta();if(force){m.done=[]}
+  const m=extMeta();if(force){m.done=m.done.filter(k=>String(k).startsWith('rec'))}
   const have=new Set();TITLES.forEach(t=>{[0,-1,1].forEach(d=>have.add(NORMT(t.t)+'|'+(t.y+d)))});
   // refresh: recent years re-checked weekly so new releases keep arriving
   const now=Date.now(),cy=new Date().getFullYear();m.seen=m.seen||{};
@@ -1057,6 +1106,7 @@ function score(t){
   for(const a of t.actors){const L=LT.actIdx[a];if(L)for(const o of L){act.add(o);if(!cnt.has(o))cnt.set(o,0)}}
   let lb=null,lo=0;cnt.forEach((c,o)=>{if(o.id===t.id)return;const j=(sameFranchise(o,t)?1:simW(o,t).j)*(rating(o)==='love'?1.15:1)+(act.has(o)?.25:0);if(j>lo){lo=j;lb=o}});
   if(lo>=.4){s+=lo*2.2;why.push([3.4,'Like '+lb.t])}
+  {const rf=recFromIds(t).filter(i=>{const r=rating(TITLES[i]);return r==='love'||r==='like'});if(rf.length){s+=Math.min(2.4,rf.reduce((a,i)=>a+(rating(TITLES[i])==='love'?1.3:.8),0));why.push([3.6,'Fans of '+TITLES[rf[0]].t])}}
   if(S)for(const id of S.wants){const o=jacc(TITLES[id].tags,t.tags);if(o>=.4){s+=o*1.5;if(id!==t.id)why.push([2,'Like '+TITLES[id].t]);break}}
   if(p.services.length&&t.svc){if(p.services.includes(t.svc)){s+=store.svcMode==='prefer'?2:.8;why.push([.6,'On '+t.svc])}else s-=2.5}
   const top=Object.entries(S?S.vec:{}).filter(([k,v])=>v>.9&&t.tags.includes(k)&&LABEL[k]).sort((a,b)=>b[1]-a[1]).slice(0,2);
@@ -1581,7 +1631,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.22';
+const APP_VERSION='3.23';
 window._updNow=true;setTimeout(()=>{window._updNow=false},4000);setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
 ACT.update=()=>{toast('Checking for updates…');fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();
   if(v&&v!==APP_VERSION){try{sessionStorage.removeItem('mr_reload')}catch(e){}toast('Updating to v'+v);setTimeout(()=>location.replace(location.pathname+'?v='+v+'&t='+Date.now()),400)}
@@ -1589,9 +1639,11 @@ ACT.update=()=>{toast('Checking for updates…');fetch('version.txt?t='+Date.now
 function checkUpdate(){try{fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();if(v&&v!==APP_VERSION){window._updV=v;if(!document.querySelector('.homefix')&&!window._updNow)return;try{if(sessionStorage.getItem('mr_reload')===v)return;sessionStorage.setItem('mr_reload',v)}catch(e){}location.replace(location.pathname+'?v='+v)}}).catch(()=>{})}catch(e){}}
 checkUpdate();document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
 
-function queueVisible(){const vis=[];document.querySelectorAll('[data-wk]').forEach(el=>{const t=TITLES.find(x=>wk(x)===el.dataset.wk);if(t)vis.push(t)});if(vis.length)wikiWant(vis,true)}
+function queueVisible(){const vis=[];document.querySelectorAll('[data-wk]').forEach(el=>{const t=TITLES.find(x=>wk(x)===el.dataset.wk);if(t)vis.push(t)});if(vis.length){wikiWant(vis,true);tmWant(vis,true)}}
 const _render=render;render=html=>{document.querySelectorAll('.sheet').forEach(x=>x.remove());window._busy=false;document.body.classList.remove('nohscroll');_render(html);queueVisible()};
+TITLES.forEach(applyTM);
 setTimeout(()=>loadMore(false),1500);
+setTimeout(()=>{tmRecs();try{if(!S)newSession();tmWant(ranked().slice(0,40).map(r=>r.t))}catch(e){}},2500);
 setTimeout(()=>{try{const top=ranked().slice(0,40).map(r=>r.t);wikiWant(top);wikiWant(TITLES.slice(0,BASE_N).filter(t=>!t.own));wikiWant(TITLES.slice(0,BASE_N).filter(t=>t.own))}catch(e){}},1500);
 home();
 </script>
