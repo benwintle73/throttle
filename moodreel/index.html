@@ -333,6 +333,15 @@ a.svc{display:block;text-decoration:none}a.svc.go{background:var(--text);color:#
 .tpq{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.tpq button{height:46px;border-radius:12px;background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:14.5px;font-weight:600}
 .tpdone{align-items:stretch;text-align:center}.tpdone .btn{text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;height:58px}
 .impl{display:grid;gap:10px;margin-top:8px}.imp{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:16px;border-radius:14px;background:var(--panel);border:1px solid var(--line);color:var(--text);text-align:left}.imp b{font-size:17px}.imp span{font-size:14px;color:var(--muted)}
+/* v3.46 */
+.tpg{color:var(--accent);font-size:13px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin:0 0 6px}
+.tpplot{margin:2px 0 0;font-size:15px;line-height:1.45;color:var(--muted);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.tpr{padding:12px 14px;border-radius:14px;background:var(--panel);border:1px solid var(--line);font-size:16px!important}.tpr span{display:block;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--good);margin-bottom:4px}
+.favg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:10px 0 90px}
+.fav{display:flex;flex-direction:column;gap:5px;background:none;border:0;padding:0;color:var(--text);text-align:left;position:relative}
+.fav .poster{width:100%;height:auto;aspect-ratio:2/3;border-radius:10px;border:3px solid transparent}.fav span{font-size:12px;line-height:1.2;max-height:2.4em;overflow:hidden}
+.fav.on .poster{border-color:var(--love)}.fav.on::after{content:'Loved';position:absolute;top:6px;right:6px;background:var(--love);color:#1a1200;font-size:11px;font-weight:800;padding:3px 7px;border-radius:8px}
+.favdone{position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));height:56px;z-index:5}
 </style>
 </head>
 <body>
@@ -1291,7 +1300,7 @@ function fyRow(t,btns,line){const m=[t.k==='M'?'Film':'Series',t.y,t.c,t.k==='M'
   return `<div class="fyrow"><div class="fyp" data-act="info" data-v="${t.id}">${poster(t)}</div><div class="fyb"><b data-act="info" data-v="${t.id}">${h(t.t)}</b><div class="fym">${m}</div><p class="fyl">${line}</p><div class="fybtns">${btns}</div></div></div>`}
 function nudgeHTML(){const c={love:0,like:0,ok:0,neg:0};TITLES.forEach(t=>{const r=rating(t);if(r==='love')c.love++;else if(r==='like')c.like++;else if(r==='ok')c.ok++;else if(r==='dislike')c.neg++});
   if(c.like<10||(c.love>=8&&c.neg>=3&&c.ok>=3))return '';
-  return `<div class="nudge"><b>Teach it faster</b><p>You've rated ${c.like} films Liked, ${c.love} Loved, ${c.ok} OK and ${c.neg} Disliked. Marking your real favourites, and the ones you didn't enjoy, makes picks much sharper.</p><button class="btn" data-act="sharpen">Sharpen my ratings</button></div>`}
+  return `<div class="nudge"><b>Teach it faster</b><p>You've rated ${c.like} films Liked, ${c.love} Loved, ${c.ok} OK and ${c.neg} Disliked. Marking your real favourites, and the ones you didn't enjoy, makes picks much sharper.</p><button class="btn" data-act="favs">Choose your favourites</button></div>`}
 let SH=null;
 function sharpenView(){if(!SH){const pool=TITLES.filter(t=>rating(t)==='like'&&!(store.sharpened||[]).includes(t.id));SH={q:pool.sort(()=>Math.random()-.5).slice(0,30),i:0,n:0}}
   const t=SH.q[SH.i];if(!t){SH=null;toast('All done, thanks');return forYou()}
@@ -1329,18 +1338,26 @@ ACT.fyMore=()=>{tonight3().forEach(r=>{FY.out.push(r.t.id);uniqPush(store.sugges
 
 /* ===== Tonight: one strong pick at a time ===== */
 let TP={out:[],skipped:[],cur:null};
-function shortReason(t){const ev=evidence(t),v=o=>rating(o)==='love'?'loved':'liked';
+/* one clear reason, always backed by films you rated */
+function shortReason(t){const ev=evidence(t),LT=ev.LT,v=o=>rating(o)==='love'?'loved':'liked';
+  const names=xs=>{const vs=xs.map(v);return xs.map(o=>`<b>${h(o.t)}</b>`).join(' and ')+`, which you ${vs.includes('loved')&&vs.includes('liked')?'rated highly':vs[0]}`};
   const fr=ev.strong.find(x=>x.fr);if(fr)return `Follows on from <b>${h(fr.o.t)}</b>, which you ${v(fr.o)}.`;
-  if(ev.rec.length){const o=ev.rec[0];return `Fans of <b>${h(o.t)}</b> rate this highly. You ${v(o)} it.`}
-  const feat=ev.strong.find(x=>!x.ca&&x.spec);if(feat){const o=feat.o,k=t.tags.find(x=>READ[x]&&o.tags.includes(x)&&!GENERIC[x]);return `Like <b>${h(o.t)}</b>${k?`: ${h(READ[k])}`:''}, which you ${v(o)}.`}
+  // a specific trait shared with films you rated well
+  const spec=t.tags.filter(k=>READ[k]&&!GENERIC[k]).sort((a,b)=>((LT.pos[a]||0)+(a==='real'?60:0))-((LT.pos[b]||0)+(b==='real'?60:0)));
+  for(const k of spec){const xs=ev.sims.filter(x=>x.o.tags.includes(k)&&x.j>=.3).slice(0,2).map(x=>x.o);if(xs.length)return `${READ[k].charAt(0).toUpperCase()+READ[k].slice(1)}, like ${names(xs)}.`}
+  // recommendation only when you loved the source and it is genuinely similar
+  const rec=ev.rec.find(o=>rating(o)==='love'&&simW(o,t).j>=.25);if(rec)return `Similar to <b>${h(rec.t)}</b>, which you loved.`;
   const ca=ev.sims.find(x=>x.ca&&x.j>=.45);if(ca)return `Stars ${h(ca.ca)}, like <b>${h(ca.o.t)}</b>, which you ${v(ca.o)}.`;
-  if(ev.strong.length){const o=ev.strong[0].o,k=t.tags.find(x=>READ[x]&&o.tags.includes(x)&&!GENERIC[x]);return `Like <b>${h(o.t)}</b>${k?`: ${h(READ[k])}`:''}, which you ${v(o)}.`}
-  const k=t.tags.find(x=>READ[x]&&!GENERIC[x]);return `Something a bit different${k?`: ${h(READ[k])}`:''}.`}
+  // your overall record with this kind of film
+  const k=spec.find(x=>(LT.pos[x]||0)>=3);if(k)return `You've liked ${LT.pos[k]} films with a ${READ[k]}.`.replace('a true story','true stories').replace('with a humour','with humour');
+  const g=spec[0];return `A change of pace${g?`: ${READ[g]}`:''}. Not much like what you usually rate.`}
+const GLAB=Object.fromEntries(GENRES);
+const GLAB0=1;const tpGenres=t=>{const g=t.tags.filter(k=>GLAB[k]).map(k=>GLAB[k]);return [...new Set(g)].slice(0,3).join(' · ')};
 function nextTonight(){if(!S)newSession();
   const all=ranked(t=>!TP.out.includes(t.id)&&!store.suggested.includes(t.id)&&!store.watchlist.includes(t.id));
   if(!all.length)return null;
-  const recent=TP.skipped.slice(-2).map(i=>TITLES[i]);
-  const ok=r=>!recent.some(o=>jacc(o.tags,r.t.tags)>.45||primary(o)===primary(r.t));
+  const recent=TP.skipped.slice(-3).map(i=>TITLES[i]);
+  const mg=x=>(x.tags.find(k=>GLAB[k])||primary(x));const ok=r=>!recent.some(o=>jacc(o.tags,r.t.tags)>.35||mg(o)===mg(r.t));
   return all.slice(0,60).find(ok)||all[0]}
 function tonightPick(){const r=TP.cur||(TP.cur=nextTonight());
   if(!r){render(`${topBar('home')}<h2>That's everything for tonight</h2><p class="sub">Nothing left that fits your Tonight settings. Change them on the home screen, or check your saved films.</p><button class="btn" data-act="tonight">Change Tonight settings</button>`);return}
@@ -1349,8 +1366,9 @@ function tonightPick(){const r=TP.cur||(TP.cur=nextTonight());
   render(`${topBar('home','<span class="tptitle">Tonight</span>')}
   <div class="tp">
     <div class="tptop"><div class="tpp" data-act="info" data-v="${t.id}">${poster(t)}</div>
-      <div class="tpi"><h2 class="tpt">${h(t.t)}</h2><div class="tpm">${runtime(t)} · ${h(t.c)} · ${t.y}</div>${sv}</div></div>
-    <p class="tpr">${shortReason(t)}</p>
+      <div class="tpi"><h2 class="tpt">${h(t.t)}</h2><div class="tpg">${h(tpGenres(t)||(t.k==='S'?'Series':'Film'))}</div><div class="tpm">${runtime(t)} · ${h(t.c)} · ${t.y}</div>${sv}</div></div>
+    <p class="tpplot" data-story="${h(wk(t))}">${h(storyText(t))}</p>
+    <p class="tpr"><span>Why it suits you</span>${shortReason(t)}</p>
     <button class="btn tpgo" data-act="tpPick">Pick this movie</button>
     <button class="btn ghost tpnext" data-act="tpNext">Show me another</button>
     <div class="tpq"><button data-act="tpSave">Save for later</button><button data-act="tpSeen">Seen it</button><button data-act="tpNo">Not for me</button></div>
@@ -1364,9 +1382,20 @@ ACT.tpNo=()=>{const t=TP.cur&&TP.cur.t;if(!t)return;setRate(t.id,'pass');add(sto
 ACT.tpPick=()=>{const t=TP.cur&&TP.cur.t;if(!t)return;uniqPush(store.chosen,t.id);uniqPush(store.suggested,t.id);add(store.taste,t.tags,.3);RV++;save();
   const sv=t.own?`<a class="btn" href="https://tv.apple.com/au/search?term=${encodeURIComponent(t.t)}" target="_blank" rel="noopener">Open Apple TV</a>`:t.svc?`<a class="btn" href="${(SVCURL[t.svc]||(()=>JW(t)))(encodeURIComponent(t.t))}" target="_blank" rel="noopener">Watch on ${h(t.svc)}</a>`:`<a class="btn ghost" href="${JW(t)}" target="_blank" rel="noopener">Find where to watch</a>`;
   render(`${topBar('home')}<div class="tp tpdone"><div class="tpp big" data-act="info" data-v="${t.id}">${poster(t)}</div><h2 class="tpt" style="text-align:center">${h(t.t)}</h2><p class="sub" style="text-align:center">Enjoy the movie. After you've watched it, rate it in My library.</p>${sv}<button class="btn ghost" data-act="home" style="margin-top:10px">Done</button></div>`)};
+function favView(){const LT=libState();
+  const pool=TITLES.filter(t=>rating(t)==='like').map(t=>({t,s:t.tags.reduce((a,k)=>a+(LT.taste[k]||0),0)+(t.own?.5:0)+(TM[wk(t)]&&TM[wk(t)].va||0)/5})).sort((a,b)=>b.s-a.s).slice(0,30).map(x=>x.t);
+  FAV=FAV||new Set();
+  render(`${topBar('improve')}<h2 style="margin-top:6px">Choose your favourites</h2><p class="sub">Tap the films you really loved. Pick as many or as few as you like.</p>
+   <div class="favg">${pool.map(t=>`<button class="fav ${FAV.has(t.id)?'on':''}" data-act="favT" data-v="${t.id}">${poster(t)}<span>${h(t.t)}</span></button>`).join('')}</div>
+   <button class="btn favdone" data-act="favDone">${FAV.size?`Save ${FAV.size} favourite${FAV.size>1?'s':''}`:'Done'}</button>`)}
+let FAV=null;
+ACT.favs=()=>{FAV=new Set();favView()};
+ACT.favT=v=>{const id=+v;FAV.has(id)?FAV.delete(id):FAV.add(id);const y=window.scrollY;favView();try{window.scrollTo(0,y)}catch(e){}};
+ACT.favDone=()=>{const n=FAV?FAV.size:0;if(FAV)FAV.forEach(id=>setRate(id,'love'));FAV=null;if(n)toast(`${n} marked as Loved`);improveView()};
 /* optional: everything that teaches MoodReel, kept off the decision screen */
 function improveView(){render(`${topBar('home')}<h2 style="margin-top:6px">Improve my picks</h2><p class="sub">All optional. Your picks already use your ratings and Tonight settings.</p>
   <div class="impl">
+   <button class="imp" data-act="favs"><b>Choose your favourites</b><span>Tap the Liked films you really loved. Takes a minute.</span></button>
    <button class="imp" data-act="sharpen"><b>Sharpen my ratings</b><span>Mark real favourites and ones you didn't enjoy</span></button>
    <button class="imp" data-act="libswipe"><b>Rate films I've seen</b><span>Quick yes / no on films you might know</span></button>
    <button class="imp" data-act="go"><b>Swipe for tonight's mood</b><span>A few yes / no questions, then picks</span></button>
@@ -1827,7 +1856,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.45';
+const APP_VERSION='3.46';
 window._updNow=true;setTimeout(()=>{window._updNow=false},4000);setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
 ACT.update=()=>{toast('Checking for updates…');fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();
   if(v&&v!==APP_VERSION){try{sessionStorage.removeItem('mr_reload')}catch(e){}toast('Updating to v'+v);setTimeout(()=>location.replace(location.pathname+'?v='+v+'&t='+Date.now()),400)}
