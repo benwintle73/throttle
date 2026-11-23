@@ -256,6 +256,11 @@ body:has(.pick2) #dlstat{display:none!important}
 .infowl{margin-top:12px;text-align:center;color:var(--good);font-weight:600;font-size:14px}
 .lthumb,.fyp,.ptop>[data-act=info]{cursor:pointer}.lt b.tap{cursor:pointer}
 .infos{margin-top:6px;font-size:13.5px;font-weight:600;color:var(--seen)}
+.pick2 .story{margin:2px 0 10px;font-size:15px;line-height:1.45;color:var(--muted);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:5;overflow:hidden}
+.spfix .pick2 .story{-webkit-line-clamp:7}
+.pick2 .heads{margin:0 0 6px}
+.pick2 .credits{height:auto!important;margin-bottom:6px}
+.pick2 .ifliked,.spfix .pick2 .ifliked{min-height:0!important}
 </style>
 </head>
 <body>
@@ -910,12 +915,14 @@ function explain(t){const ev=evidence(t),LT=ev.LT,sims=ev.strong;
   return {line,level:ev.level,heads:heads.length?'Heads-up: '+h(heads[0])+'.':''}}
 /* a label that matches the evidence: never call a weak pick a confident match */
 function honestLabel(r){const lv=evidence(r.t).level;if(r.label==='Wildcard')return 'Wildcard';if(lv==='weak')return 'Discovery';if(lv==='some'&&(r.label==='Best match'||r.label==='Top match'))return 'Good chance';return r.label||''}
+function storyText(t){const m=TM[wk(t)],w=WIKI[wk(t)];return (m&&m.ovl)||(w&&w.ex&&w.ex.slice(0,420))||t.blurb||''}
 function slotHTML(r){const t=r.t,like=r.why.filter(w=>w.startsWith('Like ')).map(w=>w.slice(5)),rest=r.why.filter(w=>!w.startsWith('Like '));
   const W=WIKI[wk(t)],d=DIRECTOR[t.t]||t.dir||(W&&W.dir&&W.dir.length?W.dir.join(', '):''),cast=t.actors.slice(0,3),lbl=/^(Created|Developed)/.test(d)?'':'Directed by ';
   const ex=explain(t);
   return `<p class="ifliked">${ex.line}</p>
-    <div class="whyslot"><p class="heads">${ex.heads||'&nbsp;'}</p></div>
-    <div class="credits"><div>${cast.length?`<span>Starring</span> ${h(cast.join(', '))}`:'&nbsp;'}</div><div>${d?`<span>${lbl}</span>${h(d.replace(/^(Created|Developed) by /,m=>m))}`:'&nbsp;'}</div></div>
+    ${ex.heads?`<p class="heads">${ex.heads}</p>`:''}
+    <p class="story" data-story="${h(wk(t))}">${h(storyText(t))}</p>
+    ${cast.length||d?`<div class="credits">${cast.length?`<div><span>Starring</span> ${h(cast.join(', '))}</div>`:''}${d?`<div><span>${lbl}</span>${h(d)}</div>`:''}</div>`:''}
     <div class="aboutslot" data-about="${h(wk(t))}">${aboutHTML(t)}</div>`}
 function aboutHTML(t){const w=WIKI[wk(t)];if(!w||!w.ex)return '';return `<button class="aboutbtn" data-act="about" data-v="${t.id}">About ${t.k==='S'?'the series':'the film'} ›</button>`}
 /* film info sheet: tap any poster or title */
@@ -978,7 +985,7 @@ const TMGENRE={28:['action'],12:['action','epic'],16:['family'],35:['comedy'],80
 const tmTags=ids=>{const s=new Set();(ids||[]).forEach(i=>(TMGENRE[i]||[]).forEach(k=>s.add(k)));if(!s.size)s.add('emotion');return [...s]};
 const shortOv=o=>{o=(o||'').trim();if(!o)return '';const mm=o.match(/^[\s\S]*?[.!?](\s|$)/),s=(mm?mm[0]:o).trim();return s.length<=150?s:s.slice(0,147).replace(/\s\S*$/,'')+'…'};
 const tmYear=x=>+(String(x.release_date||x.first_air_date||'').slice(0,4))||0;
-function applyTM(t){const m=TM[wk(t)];if(!m||m.miss)return;
+function applyTM(t){const m=TM[wk(t)];if(!m||m.miss)return;if(!t.actors.length&&m.cast&&m.cast.length)t.actors=m.cast;if(!t.dir&&m.dir)t.dir=(t.k==='S'?'Created by ':'')+m.dir;
   if(m.prov){const p=P().services;t.svc=m.prov.find(x=>p.includes(x))||m.prov[0]||''}
   if(m.ov&&(!t.blurb||/^(Film|Series) from \d{4}\.$/.test(t.blurb)))t.blurb=m.ov}
 function tmPaint(t){const m=TM[wk(t)];if(!m||!m.p)return;document.querySelectorAll(`[data-wk="${CSS.escape(wk(t))}"]`).forEach(el=>{el.classList.add('img');el.style.backgroundImage=`linear-gradient(180deg,transparent 55%,rgba(0,0,0,.55)),url("${TMIMG+m.p}")`})}
@@ -989,9 +996,11 @@ async function tmResolve(t){const k=wk(t),c=TM[k];if(tmFresh(c))return c;
     if(!r){j=await tmGet('/search/'+kind,{query:t.t});r=(j.results||[]).find(x=>Math.abs(tmYear(x)-t.y)<=1)}
     if(!r){TM[k]={miss:1,at:Date.now()};tmSave();return TM[k]}id=r.id}
   const pv=await tmGet(`/${kind}/${id}/watch/providers`).catch(()=>({}));const au=(pv.results&&pv.results.AU)||{};
-  TM[k]={id,kind,p:(r&&r.poster_path)||t.tmp||'',ov:r?shortOv(r.overview):(t.tmov||''),va:r?Math.round(r.vote_average*10)/10:(c&&c.va)||0,
+  let cr={};if(!t.actors.length||!(DIRECTOR[t.t]||t.dir)){cr=await tmGet(`/${kind}/${id}/credits`).catch(()=>({}))}
+  const cast=(cr.cast||[]).slice(0,4).map(x=>x.name),dirs=(cr.crew||[]).filter(x=>x.job==='Director'||x.job==='Executive Producer'&&kind==='tv').slice(0,kind==='tv'?1:2).map(x=>x.name);
+  TM[k]={id,kind,p:(r&&r.poster_path)||t.tmp||'',ov:r?shortOv(r.overview):(t.tmov||''),ovl:r?(r.overview||'').slice(0,420):((c&&c.ovl)||''),cast,dir:dirs.join(', '),va:r?Math.round(r.vote_average*10)/10:(c&&c.va)||0,
     prov:[...new Set((au.flatrate||[]).concat(au.ads||[]).map(p=>SVCMAP[p.provider_name]).filter(Boolean))],at:Date.now()};
-  tmSave();applyTM(t);tmPaint(t);return TM[k]}
+  tmSave();applyTM(t);tmPaint(t);document.querySelectorAll(`[data-story="${CSS.escape(k)}"]`).forEach(el=>{el.textContent=storyText(t)});return TM[k]}
 const TQ=[];let tmBusy=0,tmDown=0;
 function tmWant(list,front){if(tmDown>3)return;list.filter(Boolean).forEach(t=>{if(tmFresh(TM[wk(t)]))return;if(TQ.includes(t)){if(!front)return;TQ.splice(TQ.indexOf(t),1)}front?TQ.unshift(t):TQ.push(t)});tmRun()}
 function tmRun(){while(tmBusy<4&&TQ.length){const t=TQ.shift();tmBusy++;tmResolve(t).then(()=>{tmDown=0;RV++}).catch(()=>{tmDown++}).finally(()=>{tmBusy--;setTimeout(tmRun,60)})}}
@@ -1008,7 +1017,7 @@ async function tmRecs(){if(window._tmRec||tmDown>3)return;window._tmRec=true;
         const key=NORMT(title)+'|'+y;let t=have.get(key);
         if(!t){const e=[title,y,info.kind==='tv'?'S':'M',tmTags(x.genre_ids).includes('family')?'PG':'M',info.kind==='tv'?1:110,tmTags(x.genre_ids),'','',[]];
           m.list.push(e);addExt(e);t=TITLES[TITLES.length-1];[0,-1,1].forEach(d=>have.set(NORMT(title)+'|'+(y+d),t));added++;
-          TM[wk(t)]={id:x.id,kind:info.kind,p:x.poster_path||'',ov:shortOv(x.overview),va:Math.round((x.vote_average||0)*10)/10,at:Date.now(),noprov:1};applyTM(t)}
+          TM[wk(t)]={id:x.id,kind:info.kind,p:x.poster_path||'',ov:shortOv(x.overview),ovl:(x.overview||'').slice(0,420),va:Math.round((x.vote_average||0)*10)/10,at:Date.now(),noprov:1};applyTM(t)}
         const fk=NORMT(t.t)+'|'+t.y;RECM.from[fk]=RECM.from[fk]||[];if(!RECM.from[fk].includes(s.id))RECM.from[fk].push(s.id)}
       RECM.done[wk(s)]=1;extSave(m);tmSave();try{localStorage.setItem(RECKEY,JSON.stringify(RECM))}catch(e){}RV++}
     if(added&&typeof onNewFilms==='function')onNewFilms(added)}
@@ -1386,7 +1395,7 @@ ACT.howBack=()=>{const ids=S.picks;S.offered=S.offered.filter(id=>!ids.includes(
 function pickCard(r,mode){const t=r.t,su=mode==='surprise';
   return `<div class="sug pick2" id="s${t.id}"><div class="ptop"><div data-act="info" data-v="${t.id}">${poster(t)}</div><div>
       ${(()=>{const L=honestLabel(r);return `<div class="plabel ${L==='Wildcard'||L==='Discovery'?'wild':''}">${h(L)}</div>`})()}<h4>${h(t.t)}</h4><div class="meta">${t.k==='M'?'Film':'Series'} · ${t.y} · ${t.c} · ${runtime(t)}</div>
-      ${svcTag(t)}<p>${h(t.blurb)}</p></div></div>
+      ${svcTag(t)}</div></div>
     ${slotHTML(r)}
     <div class="acts">
       <div class="albl">Haven't seen it</div>
@@ -1631,7 +1640,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.23';
+const APP_VERSION='3.24';
 window._updNow=true;setTimeout(()=>{window._updNow=false},4000);setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
 ACT.update=()=>{toast('Checking for updates…');fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();
   if(v&&v!==APP_VERSION){try{sessionStorage.removeItem('mr_reload')}catch(e){}toast('Updating to v'+v);setTimeout(()=>location.replace(location.pathname+'?v='+v+'&t='+Date.now()),400)}
