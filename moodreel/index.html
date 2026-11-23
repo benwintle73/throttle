@@ -285,6 +285,14 @@ body:has(.pick2) #dlstat{display:none!important}
 .spfix .pick2 .ptop{height:var(--ph,195px)!important;grid-template-columns:calc(var(--ph,195px)*.667) 1fr!important}
 .spfix .pick2 .ptop .poster{height:var(--ph,195px)!important;width:calc(var(--ph,195px)*.667)!important}
 .spfix .ab{height:42px}.spfix .albl{margin:2px 0 4px}.spfix .arow{margin-bottom:6px}
+/* v3.37 */
+.acts .step{height:auto}.acts .albl{margin:2px 0 6px}.alink{text-align:center;margin-top:8px;min-height:22px;font-size:14px;color:var(--muted)}.alink .textbtn{font-size:14px}
+.arow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.arow3 .ab{width:100%;margin:0}
+.ab.seenq{color:var(--seen)}
+a.svc{display:block;text-decoration:none}a.svc.go{background:var(--text);color:#111}a.svc.unknown{color:var(--muted)}
+.nudge{margin-top:18px;padding:14px;border-radius:14px;background:var(--panel);border:1px solid var(--line)}.nudge b{font-size:16px}.nudge p{margin:6px 0 12px;font-size:14px;color:var(--muted);line-height:1.45}.nudge .btn{width:100%}
+.shcard{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:8px}.shp .poster{width:180px;height:270px;border-radius:14px}.shcard b{font-size:20px;text-align:center}
+.acts .arow .ab{height:46px;padding:0 4px;font-size:14.5px;line-height:1.15}.spfix .acts{height:126px}.acts .step[hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -820,7 +828,7 @@ function fitCard(){const sp=document.querySelector('.spfix'),card=sp&&sp.querySe
   const over=card.scrollHeight-card.clientHeight;
   if(over>0&&ph>100){ph=Math.max(100,ph-over-2);window._ph=ph;sp.style.setProperty('--ph',ph+'px')}}
 window.addEventListener('resize',()=>{window._ph=0;setTimeout(()=>{fitCard();fitStory()},60)});
-function fitStory(){fitCard();document.querySelectorAll('.spfix .story').forEach(el=>{el.style.webkitLineClamp='';const lh=parseFloat(getComputedStyle(el).lineHeight)||21,n=Math.floor((el.clientHeight+1)/lh);if(n<1){el.style.visibility='hidden'}else{el.style.webkitLineClamp=String(n);el.style.display='-webkit-box';el.style.visibility=''}})}
+function fitStory(){document.querySelectorAll('.spfix .story').forEach(el=>{el.style.webkitLineClamp='';const lh=parseFloat(getComputedStyle(el).lineHeight)||21,n=Math.floor((el.clientHeight+1)/lh);if(n<1){el.style.visibility='hidden'}else{el.style.webkitLineClamp=String(n);el.style.display='-webkit-box';el.style.visibility=''}})}
 window.addEventListener('resize',()=>setTimeout(fitStory,50));
 let render=function(html){app.innerHTML=`<div class="fade">${html}</div>`;try{window.scrollTo(0,0)}catch(e){}}
 function primary(t){for(const p of PRIMARY)if(t.tags.includes(p))return p;return 'dark'}
@@ -829,7 +837,13 @@ Object.assign(LABEL,{emotion:'Drama',tension:'Thriller',real:'True story'});
 function runtime(t){return t.k==='M'?`${Math.floor(t.r/60)}h ${t.r%60}m`:`${t.r} season${t.r>1?'s':''}`}
 function poster(t){const c=PAL[primary(t)],w=WIKI[wk(t)],tmm=TM[wk(t)],img=(tmm&&tmm.p?TMIMG+tmm.p:'')||(w&&w.img);
   return `<div class="poster${img?' img':''}" data-wk="${h(wk(t))}" style="background:${img?`linear-gradient(180deg,transparent 55%,rgba(0,0,0,.55)),url(&quot;${h(img)}&quot;)`:`linear-gradient(165deg,${c} 0%,${c}cc 35%,#0d0c12 95%)`}"><div class="pk">${t.k==='M'?'Film':'Series'} · ${t.y}</div><div class="pt">${h(t.t)}</div><div class="rule"></div><div class="pg">${h(genreLine(t))}</div></div>`}
-const svcTag=t=>t.svc?`<span class="svc">${h(t.svc)}</span>`:`<span class="svc unknown">Check where to watch</span>`;
+const SVCURL={'Netflix':q=>'https://www.netflix.com/search?q='+q,'Prime Video':q=>'https://www.primevideo.com/search/ref=atv_nb_sr?phrase='+q,'Disney+':q=>'https://www.disneyplus.com/search?q='+q,'Stan':q=>'https://play.stan.com.au/search?q='+q,'Binge':q=>'https://binge.com.au/search?q='+q,'Paramount+':q=>'https://www.paramountplus.com/au/search/?q='+q,'Apple TV+':q=>'https://tv.apple.com/au/search?term='+q,'ABC iview':q=>'https://iview.abc.net.au/search?keyword='+q};
+const JW=t=>'https://www.justwatch.com/au/search?q='+encodeURIComponent(t.t);
+const svcTag=t=>{const q=encodeURIComponent(t.t),m=typeof TM!=='undefined'&&TM[wk(t)];
+  if(t.own)return `<a class="svc go" href="https://tv.apple.com/au/search?term=${q}" target="_blank" rel="noopener">In your Apple TV library ›</a>`;
+  if(t.svc)return `<a class="svc go" href="${(SVCURL[t.svc]||(()=>JW(t)))(q)}" target="_blank" rel="noopener">Watch on ${h(t.svc)} ›</a>`;
+  if(m&&!m.miss&&!m.noprov&&m.prov)return `<a class="svc unknown" href="${JW(t)}" target="_blank" rel="noopener">Not on a streaming service · rent or buy ›</a>`;
+  return `<a class="svc unknown" href="${JW(t)}" target="_blank" rel="noopener">Streaming not known yet · check ›</a>`};
 
 const ACT={};
 document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(el&&ACT[el.dataset.act])ACT[el.dataset.act](el.dataset.v,el)});
@@ -858,7 +872,7 @@ function wikiWant(list,front){list.filter(Boolean).forEach(t=>{if(t.q||WIKI[wk(t
 async function wRun(){if(wBusy||!WQ.length||wFails>4)return;wBusy=true;
   try{await wFetch(WQ.splice(0,6));wFails=0}catch(e){wFails++}
   wBusy=false;if(WQ.length)setTimeout(wRun,wFails?4000:350)}
-const wget=async u=>{const r=await fetch(u);if(!r.ok)throw new Error(r.status);return r.json()};
+const wget=async(u,n=0)=>{const r=await fetch(u);if((r.status===429||r.status>=500)&&n<4){await new Promise(z=>setTimeout(z,2000*2**n));return wget(u,n+1)}if(!r.ok)throw new Error(r.status);return r.json()};
 async function wFetch(batch){
   const cands=batch.map(t=>t.k==='S'?[`${t.t} (TV series)`,`${t.t} (${t.y} TV series)`,`${t.t} (American TV series)`,`${t.t} (Australian TV series)`,`${t.t} (miniseries)`,t.t]:[`${t.t} (${t.y} film)`,`${t.t} (film)`,`${t.t} (${t.y} documentary)`,`${t.t} (documentary)`,t.t]);
   const all=[...new Set(cands.flat())];
@@ -1095,7 +1109,7 @@ async function loadMore(force){
     try{let links=[];for(const pg of j.pages)links=links.concat(await pageLinks(pg));links=[...new Set(links)];if(j.cap)links=links.slice(0,j.cap);
       const got=await filmsFromTitles(links,have);
       got.forEach(e=>{m.list.push(e);addExt(e);added++});m.done.push(j.k);extSave(m);
-      if(got.length){RV++;onNewFilms(got.length)}}
+      if(got.length){RV++;onNewFilms(got.length)}await new Promise(z=>setTimeout(z,600))}
     catch(e){errs.push(j.k+': '+e.message);if(errs.length>3)break}
   }
   window._extLoading=false;setStatus('');
@@ -1192,21 +1206,38 @@ function tonight3(){if(!S)newSession();FY.out=FY.out||[];
 let FY={out:[]};
 function fyRow(t,btns,line){const m=[t.k==='M'?'Film':'Series',t.y,t.c,t.k==='M'?`${Math.floor(t.r/60)}h ${t.r%60}m`:`${t.r} season${t.r>1?'s':''}`].join(' · ');
   return `<div class="fyrow"><div class="fyp" data-act="info" data-v="${t.id}">${poster(t)}</div><div class="fyb"><b data-act="info" data-v="${t.id}">${h(t.t)}</b><div class="fym">${m}</div><p class="fyl">${line}</p><div class="fybtns">${btns}</div></div></div>`}
-function forYou(keep){
-  const y=window.scrollY;const top=guessTop3(),tn=tonight3();
-  render(`${topBar('home')}
-  <h2 class="fyh">Your top 3, guessed</h2><p class="sub fys">Based on everything you've rated. Tell it if it's wrong.</p>
+function nudgeHTML(){const c={love:0,like:0,ok:0,neg:0};TITLES.forEach(t=>{const r=rating(t);if(r==='love')c.love++;else if(r==='like')c.like++;else if(r==='ok')c.ok++;else if(r==='dislike')c.neg++});
+  if(c.like<10||(c.love>=8&&c.neg>=3&&c.ok>=3))return '';
+  return `<div class="nudge"><b>Teach it faster</b><p>You've rated ${c.like} films Liked, ${c.love} Loved, ${c.ok} OK and ${c.neg} Disliked. Marking your real favourites, and the ones you didn't enjoy, makes picks much sharper.</p><button class="btn" data-act="sharpen">Sharpen my ratings</button></div>`}
+let SH=null;
+function sharpenView(){if(!SH){const pool=TITLES.filter(t=>rating(t)==='like'&&!(store.sharpened||[]).includes(t.id));SH={q:pool.sort(()=>Math.random()-.5).slice(0,30),i:0,n:0}}
+  const t=SH.q[SH.i];if(!t){SH=null;toast('All done, thanks');return forYou()}
+  render(`${topBar('foryou')}<h2 class="fyh">Sharpen your ratings</h2><p class="sub fys">You rated these Liked. How did you really feel? ${SH.n?`${SH.n} done.`:''}</p>
+   <div class="shcard"><div class="shp" data-act="info" data-v="${t.id}">${poster(t)}</div><b>${h(t.t)}</b><div class="fym">${t.y} · ${runtime(t)}</div></div>
+   <div class="arow arow4" style="margin-top:14px"><button class="ab love" data-act="shr" data-v="love">Loved it</button><button class="ab like" data-act="shr" data-v="like">Liked it</button><button class="ab ok" data-act="shr" data-v="ok">It was OK</button><button class="ab dislike" data-act="shr" data-v="dislike">Disliked</button></div>
+   <div class="alink" style="text-align:center;margin-top:10px"><button class="textbtn" data-act="shr" data-v="skip">Skip</button> · <button class="textbtn" data-act="foryou">Done</button></div>`)}
+ACT.sharpen=()=>{SH=null;sharpenView()};
+ACT.shr=v=>{const t=SH&&SH.q[SH.i];if(!t)return;store.sharpened=store.sharpened||[];uniqPush(store.sharpened,t.id);if(v!=='skip'){if(v!=='like')setRate(t.id,v);SH.n++}else save();SH.i++;sharpenView()};
+function top3HTML(){const top=guessTop3();return `<div class="group" id="top3">
+  <h3 class="settingsh" style="margin-top:0">Your top 3, guessed</h3><p class="sub fys">Based on everything you've rated. Tell it if it's wrong.</p>
   ${top.length?top.map((t,i)=>fyRow(t,(store.top3yes||[]).includes(t.id)?`<span class="fyok">Confirmed</span><button class="fyx" data-act="top3undo" data-v="${t.id}">Undo</button>`:`<button class="fyb1" data-act="top3yes" data-v="${t.id}">Yes, a favourite</button><button class="fyx" data-act="top3no" data-v="${t.id}">Not really</button>`,`<span class="fyn">#${i+1}</span> ${h(t.blurb||'')}`)).join(''):'<p class="sub">Rate a few films as Loved or Liked first.</p>'}
   ${top.length?(top.every(t=>(store.top3yes||[]).includes(t.id))?'<button class="btn" style="width:100%;margin-top:4px" data-act="top3reset">Nice. Guess 3 more</button>':'<button class="btn ghost" style="width:100%;margin-top:4px" data-act="top3reset">Guess 3 different</button>'):''}
-  <h2 class="fyh" style="margin-top:22px">Three for tonight</h2><p class="sub fys">${h(tonightLine())}</p>
+</div>`}
+function forYou(keep){
+  const y=window.scrollY;const tn=tonight3();
+  render(`${topBar('home')}
+  <h2 class="fyh">Tonight's picks</h2><p class="sub fys">${h(tonightLine())}</p>
   ${tn.length?tn.map(r=>fyRow(r.t,`<button class="fyb1" data-act="fyWatch" data-v="${r.t.id}">Watch tonight</button><button class="fyx" data-act="fyLater" data-v="${r.t.id}">Want to watch</button><button class="fyx" data-act="fyNot" data-v="${r.t.id}">Not tonight</button><button class="fyx" data-act="fySkip" data-v="${r.t.id}">Never show</button>`,explain(r.t).line)).join(''):'<p class="sub">Nothing left that fits tonight. Try changing Tonight on the home screen.</p>'}
-  <button class="btn ghost" style="margin-top:14px;width:100%" data-act="fyMore">Show me 3 others</button>`);
+  <button class="btn ghost" style="margin-top:14px;width:100%" data-act="fyMore">Show me 3 others</button>
+  <button class="btn ghost" style="margin-top:10px;width:100%" data-act="go">Refine by swiping</button>
+  ${nudgeHTML()}`);
   if(keep){try{window.scrollTo(0,y)}catch(e){}requestAnimationFrame(()=>{try{window.scrollTo(0,y)}catch(e){}})}}
 ACT.foryou=()=>{FY={out:[]};newSession();forYou()};
-ACT.top3yes=v=>{store.top3yes=store.top3yes||[];uniqPush(store.top3yes,+v);setRate(+v,'love');forYou(true)};
-ACT.top3no=v=>{store.top3no=store.top3no||[];uniqPush(store.top3no,+v);save();forYou(true)};
-ACT.top3reset=()=>{const cur=guessTop3().map(t=>t.id);store.top3yes=[];store.top3no=[...new Set([...(store.top3no||[]),...cur])];save();forYou(true);toast('New guess')};
-ACT.top3undo=v=>{store.top3yes=(store.top3yes||[]).filter(x=>x!==+v);save();forYou(true)};
+function reTop3(){const y=window.scrollY;if(document.querySelector('.tastev'))taste();else forYou(true);try{window.scrollTo(0,y)}catch(e){}}
+ACT.top3yes=v=>{store.top3yes=store.top3yes||[];uniqPush(store.top3yes,+v);setRate(+v,'love');reTop3()};
+ACT.top3no=v=>{store.top3no=store.top3no||[];uniqPush(store.top3no,+v);save();reTop3()};
+ACT.top3reset=()=>{const cur=guessTop3().map(t=>t.id);store.top3yes=[];store.top3no=[...new Set([...(store.top3no||[]),...cur])];save();reTop3();toast('New guess')};
+ACT.top3undo=v=>{store.top3yes=(store.top3yes||[]).filter(x=>x!==+v);save();reTop3()};
 ACT.fyWatch=v=>{const id=+v;uniqPush(store.chosen,id);uniqPush(store.suggested,id);RV++;save();toast('Enjoy the film');FY.out.push(id);forYou(true)};
 ACT.fyLater=v=>{const id=+v;setRate(id,'unseen');uniqPush(store.watchlist,id);uniqPush(store.suggested,id);save();toast('Added to your watchlist');FY.out.push(id);forYou(true)};
 ACT.fyNot=v=>{FY.out.push(+v);forYou(true)};
@@ -1223,7 +1254,7 @@ function home(){
     <div class="hhero"><h1>Swipe. Pick.<br><span class="accent">Watch.</span></h1>
     <button class="tonightbtn" data-act="tonight"><span>Tonight</span><b>${h(tonightLine())}</b><i>Change</i></button></div>
     <div class="stats hstats"><button class="stat" data-act="lib" data-v="watch"><b>${store.watchlist.length}</b><span>Watchlist</span></button><button class="stat" data-act="lib" data-v="love"><b>${c.love}</b><span>Loved</span></button><button class="stat" data-act="lib" data-v="like"><b>${c.like+c.ok}</b><span>Liked</span></button><button class="stat" data-act="lib" data-v="dislike"><b>${c.dislike}</b><span>Disliked</span></button></div>
-    <div class="cta hcta"><button class="btn" data-act="go">Start swiping</button><div class="hrow h3"><button class="btn ghost" data-act="foryou">Top picks</button><button class="btn ghost" data-act="surprise">Surprise me</button><button class="btn ghost" data-act="lib">My library</button></div></div>
+    <div class="cta hcta"><button class="btn" data-act="foryou">Pick something for tonight</button><div class="hrow h3"><button class="btn ghost" data-act="go">Swipe</button><button class="btn ghost" data-act="surprise">Surprise me</button><button class="btn ghost" data-act="lib">My library</button></div></div>
     <p class="note hnote"><button class="textbtn" data-act="how">How it picks</button> · <button class="textbtn" data-act="list">History & backup</button> · <span class="cnt">${TITLES.length} titles</span> · <button class="textbtn" data-act="update">v${APP_VERSION} · Update</button></p>
   </div>`);
   document.body.classList.add('nohscroll');
@@ -1231,7 +1262,8 @@ function home(){
 }
 
 /* ===== questions ===== */
-const ROUND=8; // swipes (titles + questions) before picks
+let ROUND=8; // swipes before picks; fewer once your ratings already say a lot
+function setRound(){try{ROUND=libState().rated>=30?4:8}catch(e){ROUND=8}}
 const MOODQ=[
   {id:'m1',text:'Tonight you want to…',l:['Laugh',{comedy:2,feelgood:1}],r:['Be on edge',{tension:2,crime:1,mystery:.5}]},
   {id:'m2',text:'Light or heavy?',l:['Light & easy',{feelgood:1.5,comedy:1,dark:-1.2}],r:['Dark & intense',{dark:1.5,grit:1,tension:1}]},
@@ -1250,7 +1282,7 @@ function makeQ(type,key){
   return {q:true,id:type+':'+key,type,key,text:QTEXT[type](key),
     l:['No',tagW?{[key]:-1.6}:null],r:['Yes',tagW],u:[type==='actor'?'Love them':'Love it',tagW?{[key]:2.4}:null],d:['Skip',null]};
 }
-function nextQuestion(){
+function nextQuestion(){setRound();
   S.asked=S.asked||[];
   const nq=S.asked.length;
   // open with two mood questions, then mix in one every few cards
@@ -1281,7 +1313,7 @@ function deck(){
   if(!S.cur)S.cur=nextItem();
   if(!S.cur)return suggest(true);
   if(!S.nxt||S.nxt===S.cur)S.nxt=S.cur.q?nextCard():null; // preview card behind (titles only)
-  const left=ROUND-S.sinceSug,c=S.cur,q=c.q;
+  setRound();const left=Math.max(1,ROUND-S.sinceSug),c=S.cur,q=c.q;
   const lab=q?{nope:c.l[0],seen:c.d[0],loved:c.u[0],into:c.r[0]}:{nope:'Nope',seen:'Seen it',loved:'Loved it',into:'Into it'};
   const ic=q?{nope:ARROW.l,seen:ARROW.d,loved:ARROW.u,into:ARROW.r}:ICON;
   render(`<div class="row"><button class="backbtn" data-act="home"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Home</button><span class="spacer"></span>
@@ -1430,21 +1462,15 @@ function pickCard(r,mode){const t=r.t,su=mode==='surprise';
       ${svcTag(t)}</div></div>
     ${slotHTML(r)}
     <div class="acts">
-      <div class="albl">Haven't seen it</div>
-      <div class="arow arow4 hs4">
-        <button class="ab watch" data-act="${su?'unseenSurprise':'unseenAs'}" data-v="${t.id}">Want to watch</button>
-        <button class="ab maybe" data-act="${su?'maybeSurprise':'maybeAs'}" data-v="${t.id}">Maybe later</button>
-        <button class="ab later" data-act="${su?'skipSurprise':'skipAs'}" data-v="${t.id}">No thanks</button>
-        <button class="ab pass" data-act="${su?'surpriseNo':'no'}" data-v="${t.id}">Not for me</button>
-      </div>
-      <div class="albl">Seen it</div>
-      <div class="arow arow4">
-        <button class="ab love" data-act="${su?'seenSurprise':'seenAs'}" data-v="${t.id}:love">Loved it</button>
-        <button class="ab like" data-act="${su?'seenSurprise':'seenAs'}" data-v="${t.id}:like">Liked it</button>
-        <button class="ab ok" data-act="${su?'seenSurprise':'seenAs'}" data-v="${t.id}:ok">It was OK</button>
-        <button class="ab dislike" data-act="${su?'seenSurprise':'seenAs'}" data-v="${t.id}:dislike">Disliked</button>
-      </div>
-      <div class="arow arow2"><button class="ab forgot" data-act="${su?'forgotSurprise':'forgotAs'}" data-v="${t.id}">Can't remember</button><button class="ab again" data-act="${su?'againSurprise':'againAs'}" data-v="${t.id}">Watch again</button></div>
+      <div class="step s0"><div class="albl">Have you seen it?</div>
+        <div class="arow arow2"><button class="ab seenq" data-act="step" data-v="${t.id}:seen">Yes, seen it</button><button class="ab watch" data-act="step" data-v="${t.id}:unseen">No, not yet</button></div>
+        <div class="alink"><button class="textbtn" data-act="${su?'skipSurprise':'skipAs'}" data-v="${t.id}">Skip this one</button></div></div>
+      <div class="step s1" hidden><div class="albl">Not seen it</div>
+        <div class="arow arow3"><button class="ab watch" data-act="${su?'unseenSurprise':'unseenAs'}" data-v="${t.id}">Want to watch</button><button class="ab maybe" data-act="${su?'maybeSurprise':'maybeAs'}" data-v="${t.id}">Maybe later</button><button class="ab pass" data-act="${su?'surpriseNo':'no'}" data-v="${t.id}">Not for me</button></div>
+        <div class="alink"><button class="textbtn" data-act="step" data-v="${t.id}:q">‹ Back</button></div></div>
+      <div class="step s2" hidden><div class="albl">How was it?</div>
+        <div class="arow arow4"><button class="ab love" data-act="${su?'seenSurprise':'seenAs'}" data-v="${t.id}:love">Loved it</button><button class="ab like" data-act="${su?'seenSurprise':'seenAs'}" data-v="${t.id}:like">Liked it</button><button class="ab ok" data-act="${su?'seenSurprise':'seenAs'}" data-v="${t.id}:ok">It was OK</button><button class="ab dislike" data-act="${su?'seenSurprise':'seenAs'}" data-v="${t.id}:dislike">Disliked</button></div>
+        <div class="alink"><button class="textbtn" data-act="step" data-v="${t.id}:q">‹ Back</button> · <button class="textbtn" data-act="${su?'forgotSurprise':'forgotAs'}" data-v="${t.id}">Can't remember</button> · <button class="textbtn" data-act="${su?'againSurprise':'againAs'}" data-v="${t.id}">Watch again</button></div></div>
     </div></div>`}
 const topBar=(back,extra='')=>`<div class="row topnav"><button class="backbtn" data-act="${back}"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Back</button><span class="spacer"></span>${extra}<button class="textbtn" data-act="home">Home</button></div>`;
 
@@ -1486,6 +1512,7 @@ ACT.why=v=>{const [i,kind,k]=v.split(':'),id=+i,t=TITLES[id],T=store.taste,a=(x,
   store.whyLog.push({id,kind,k});RV++;save();ACT.closesheet();toast(k==='seen'?'Marked as seen, no rating':'Got it, noted')};
 ACT.maybeSurprise=v=>{const id=+v;spPush(id);setRate(id,'unseen');toast("Saved to Haven't seen");S.out.push(id);ACT.surprise(true)};
 ACT.maybeAs=v=>{const id=+v;setRate(id,'unseen');S.out.push(id);toast("Saved to Haven't seen");const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{if(el)el.remove();if(!S||!S.picks)return;S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length)ACT.keep()},250)};
+ACT.step=v=>{const [id,st]=v.split(':'),c=document.getElementById('s'+id);if(!c)return;const want=st==='seen'?'s2':st==='unseen'?'s1':'s0';c.querySelectorAll('.step').forEach(e=>{e.hidden=!e.classList.contains(want)})};
 ACT.skipSurprise=v=>{const id=+v;spPush(id);S.out.push(id);ACT.surprise(true)};
 ACT.skipAs=v=>{const id=+v;S.out.push(id);const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{if(el)el.remove();if(!S||!S.picks)return;S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length)ACT.keep()},250)};
 ACT.sugBack=()=>{S.picks=[];deck()};
@@ -1513,7 +1540,8 @@ function taste(){
   const y=window.scrollY;
   render(`<div class="row"><button class="textbtn" data-act="home">Done</button></div>
     <h2 style="margin-top:6px">Your taste</h2>
-    ${learnedHTML()}
+    <div class="tastev"></div>${learnedHTML()}
+    ${nudgeHTML()}${top3HTML()}
     <h3 class="settingsh">Your settings</h3><p class="sub">What you've told it. All optional, and kept separate from what it learns.</p>
     <div class="group"><h3>Genres</h3><div class="hintline">Tap once to love, twice to avoid</div>${chipList(GENRES,k=>tri(p.genres,k),'g')}</div>
     <div class="group"><h3>Storylines</h3>${chipList(STORIES,k=>tri(p.stories,k),'st')}</div>
@@ -1551,7 +1579,7 @@ function listView(){
       <div class="hrow"><button class="btn ghost" data-act="backup">Copy backup</button><button class="btn ghost" data-act="restoreshow">Restore</button></div>
       <textarea id="bk" class="bk" placeholder="Backup code appears here, or paste one to restore" style="display:none"></textarea>
       <button class="btn" id="bkgo" data-act="restore" style="display:none;margin-top:10px">Restore from this code</button></div>
-    <div class="group"><h3>Film catalogue · ${TITLES.length} titles</h3><p class="sub" style="margin:0 0 10px">${TITLES.length-BASE_N} extra films and series from Wikipedia box-office lists, added year by year.${(()=>{try{const st=JSON.parse(localStorage.getItem('mr_ext_status'));return st?` Last download: ${new Date(st.at).toLocaleString()}, ${st.n} titles${st.errs&&st.errs.length?`. Problems: ${h(st.errs.join('; '))}`:''}.`:' Not downloaded yet.'}catch(e){return ''}})()}</p><button class="btn ghost" data-act="refreshCat">Refresh catalogue now</button></div>
+    <div class="group"><h3>Film catalogue · ${TITLES.length} titles</h3><p class="sub" style="margin:0 0 10px">${TITLES.length-BASE_N} extra films and series from Wikipedia box-office lists, added year by year.${(()=>{try{const st=JSON.parse(localStorage.getItem('mr_ext_status'));if(!st)return ' Downloading in the background.';return st.errs&&st.errs.length?` Some titles couldn't be loaded last time (${new Date(st.at).toLocaleDateString()}). It will try again next time you open the app.`:` Catalogue updated ${new Date(st.at).toLocaleDateString()}.`}catch(e){return ''}})()}</p><button class="btn ghost" data-act="refreshCat">Refresh catalogue now</button></div>
     ${sec('chosen','Picked to watch')}<button class="btn ghost" data-act="lib" data-v="pass">See Not for me</button><div class="group" style="margin-top:22px"><h3>Already suggested · ${store.suggested.length}</h3><p class="sub" style="margin:0 0 10px">Every film it has suggested is never suggested again. Clear this only if you run out.</p><button class="btn ghost" data-act="clearSuggested">Allow past suggestions again</button></div>`);
 }
 
@@ -1668,7 +1696,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.36';
+const APP_VERSION='3.37';
 window._updNow=true;setTimeout(()=>{window._updNow=false},4000);setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
 ACT.update=()=>{toast('Checking for updates…');fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();
   if(v&&v!==APP_VERSION){try{sessionStorage.removeItem('mr_reload')}catch(e){}toast('Updating to v'+v);setTimeout(()=>location.replace(location.pathname+'?v='+v+'&t='+Date.now()),400)}
