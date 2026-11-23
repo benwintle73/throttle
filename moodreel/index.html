@@ -302,6 +302,14 @@ a.svc{display:block;text-decoration:none}a.svc.go{background:var(--text);color:#
 .spfix .pick2 .acts{margin-top:10px!important;height:auto!important;padding-top:10px}
 .acts .arow .ab{height:62px!important;font-size:18px!important;border-radius:16px}
 .acts .albl{font-size:13px}
+/* v3.42 compact card so the buttons sit within easy reach */
+.spfix .pick2 .heads,.spfix .pick2 .aboutslot{display:none!important}
+.spfix .pick2{--ph:165px}
+.spfix .pick2 .ptop{height:165px!important;grid-template-columns:110px 1fr!important;margin-bottom:10px}
+.spfix .pick2 .ptop .poster{height:165px!important;width:110px!important}
+.spfix .pick2 .story{height:2.9em!important;-webkit-line-clamp:2!important;cursor:pointer}
+.spfix .pick2 .ifliked{margin-bottom:8px!important}
+.spfix .pick2 .acts{margin-top:6px!important}
 </style>
 </head>
 <body>
@@ -977,7 +985,7 @@ function slotHTML(r){const t=r.t,like=r.why.filter(w=>w.startsWith('Like ')).map
   return `<p class="ifliked">${ex.line}</p>
     <p class="heads">${ex.heads||'&nbsp;'}</p>
     <div class="credits"><div>${cast.length?`<span>Starring</span> ${h(cast.join(', '))}`:'&nbsp;'}</div><div>${d?`<span>${lbl}</span>${h(d)}`:'&nbsp;'}</div></div>
-    <p class="story" data-story="${h(wk(t))}">${h(storyText(t))}</p>
+    <p class="story" data-act="info" data-v="${t.id}" data-story="${h(wk(t))}">${h(storyText(t))}</p>
     <div class="aboutslot" data-about="${h(wk(t))}">${aboutHTML(t)}</div>`}
 function aboutHTML(t){const w=WIKI[wk(t)];if(!w||!w.ex)return '';return `<button class="aboutbtn" data-act="about" data-v="${t.id}">About ${t.k==='S'?'the series':'the film'} ›</button>`}
 /* film info sheet: tap any poster or title */
@@ -1747,7 +1755,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.41';
+const APP_VERSION='3.42';
 window._updNow=true;setTimeout(()=>{window._updNow=false},4000);setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
 ACT.update=()=>{toast('Checking for updates…');fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();
   if(v&&v!==APP_VERSION){try{sessionStorage.removeItem('mr_reload')}catch(e){}toast('Updating to v'+v);setTimeout(()=>location.replace(location.pathname+'?v='+v+'&t='+Date.now()),400)}
