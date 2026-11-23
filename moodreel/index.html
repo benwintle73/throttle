@@ -295,6 +295,7 @@ a.svc{display:block;text-decoration:none}a.svc.go{background:var(--text);color:#
 .acts .arow .ab{height:46px;padding:0 4px;font-size:14.5px;line-height:1.15}.spfix .acts{height:126px}.acts .step[hidden]{display:none!important}
 .inp{width:100%;box-sizing:border-box;height:46px;border-radius:12px;border:1px solid var(--line2);background:var(--panel2);color:var(--text);padding:0 14px;font-size:16px;margin-top:8px}
 #acct .row .btn{flex:1}#acct .bad,.bad{color:var(--bad)}
+.whyb{display:grid;gap:8px;margin-top:12px}.whyb .btn{width:100%}
 </style>
 </head>
 <body>
@@ -1543,14 +1544,13 @@ ACT.forgotAs=v=>{const id=+v;setRate(id,'seen');S.out.push(id);toast('Marked as 
 ACT.againSurprise=v=>{const id=+v;spPush(id);setRate(id,'love');uniqPush(store.watchlist,id);save();toast('Loved, and on your watchlist to watch again');S.out.push(id);ACT.surprise(true)};
 ACT.againAs=v=>{const id=+v,t=TITLES[id];setRate(id,'love');uniqPush(store.watchlist,id);save();S.out.push(id);add(S.vec,t.tags,.4);toast('Loved, and on your watchlist to watch again');
   const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{if(el)el.remove();if(!S||!S.picks)return;S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length)ACT.keep()},250)};
-const WHY={pass:[['seen','Seen it already'],['slow','Looks too slow'],['dark','Too dark or violent'],['funny','Not my kind of funny'],['cast','Not into the cast'],['genre','Not my genre'],['long','Too long']],
-  dislike:[['slow','Too slow'],['dark','Too violent or dark'],['funny','Not funny'],['cast',"Didn't like the cast"],['story',"Story didn't grab me"],['long','Too long']]};
+const WHY={pass:[['genre','Not my kind of film'],['dark','Too dark or violent'],['slowlong','Too slow or long']],
+  dislike:[['story',"Didn't grab me"],['dark','Too dark or violent'],['slowlong','Too slow or long']]};
 function askWhy(id,kind){setTimeout(()=>{ACT.closesheet();const t=TITLES[id];const o=document.createElement('div');o.className='sheet';
-  o.innerHTML=`<div class="sheetbox"><div class="row"><b>Why ${kind==='pass'?'not':'didn\'t you like'} ${h(t.t)}?</b><span class="spacer"></span><button class="textbtn" data-act="closesheet">Skip</button></div><p class="sub" style="margin:4px 0 12px">Helps it learn what to avoid.</p>
-    <div class="chips">${WHY[kind].map(([k,l])=>`<button class="chip" data-act="why" data-v="${id}:${kind}:${k}">${h(l)}</button>`).join('')}</div></div>`;
+  o.innerHTML=`<div class="sheetbox"><div class="row"><b>Why ${kind==='pass'?'not':'didn\'t you like'} ${h(t.t)}?</b><span class="spacer"></span><button class="textbtn" data-act="closesheet">Skip</button></div><div class="whyb">${WHY[kind].map(([k,l])=>`<button class="btn ghost" data-act="why" data-v="${id}:${kind}:${k}">${h(l)}</button>`).join('')}</div></div>`;
   o.addEventListener('click',e=>{if(e.target===o)o.remove()});document.body.appendChild(o)},280)}
 ACT.why=v=>{const [i,kind,k]=v.split(':'),id=+i,t=TITLES[id],T=store.taste,a=(x,n)=>T[x]=(T[x]||0)+n;
-  if(k==='slow'){a('slow',-.8);a('fast',.2)}if(k==='dark'){a('dark',-.6);a('gore',-.8);a('horror',-.4)}if(k==='funny')a('comedy',-.6);
+  if(k==='slow'||k==='slowlong'){a('slow',-.8);a('fast',.2)}if(k==='slowlong')store.longPen=(store.longPen||0)+1;if(k==='dark'){a('dark',-.6);a('gore',-.8);a('horror',-.4)}if(k==='funny')a('comedy',-.6);
   if(k==='cast'){store.actorNo=store.actorNo||[];t.actors.slice(0,2).forEach(x=>uniqPush(store.actorNo,x))}
   if(k==='genre'){a(primary(t),-.7)}if(k==='story'){t.tags.forEach(x=>a(x,-.1))}if(k==='long')store.longPen=(store.longPen||0)+1;
   if(k==='seen'){setRate(id,'seen');if(kind==='pass')add(store.taste,t.tags,.08)} // undo the small Not-for-me nudge
@@ -1742,7 +1742,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.38';
+const APP_VERSION='3.39';
 window._updNow=true;setTimeout(()=>{window._updNow=false},4000);setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
 ACT.update=()=>{toast('Checking for updates…');fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();
   if(v&&v!==APP_VERSION){try{sessionStorage.removeItem('mr_reload')}catch(e){}toast('Updating to v'+v);setTimeout(()=>location.replace(location.pathname+'?v='+v+'&t='+Date.now()),400)}
