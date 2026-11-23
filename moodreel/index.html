@@ -1453,13 +1453,13 @@ ACT.unseenSurprise=v=>{const id=+v;spPush(id);setRate(id,'unseen');uniqPush(stor
 ACT.surpriseNo=v=>{const id=+v,t=TITLES[id];spPush(id);askWhy(id,'pass');add(store.taste,t.tags,-.08);setRate(id,'pass');toast('Moved to Not for me');S.out.push(id);ACT.surprise(true)};
 ACT.seenAs=v=>{const [i,r]=v.split(':'),id=+i,t=TITLES[id];if(r==='dislike')askWhy(id,'dislike');setRate(id,r);S.out.push(id);add(S.vec,t.tags,r==='dislike'?-.4:r==='love'?.4:r==='ok'?0:.15);
   toast(r==='love'?'Loved. More like this':r==='like'?'Added to your library':r==='ok'?'Saved as It was OK':'Got it. Less like this');
-  const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{el.remove();S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length)ACT.keep()},250)};
-ACT.unseenAs=v=>{const id=+v;setRate(id,'unseen');uniqPush(store.watchlist,id);save();S.out.push(id);toast('Added to your watchlist');const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{el.remove();S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length)ACT.keep()},250)};
+  const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{if(el)el.remove();if(!S||!S.picks)return;S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length)ACT.keep()},250)};
+ACT.unseenAs=v=>{const id=+v;setRate(id,'unseen');uniqPush(store.watchlist,id);save();S.out.push(id);toast('Added to your watchlist');const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{if(el)el.remove();if(!S||!S.picks)return;S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length)ACT.keep()},250)};
 ACT.forgotSurprise=v=>{const id=+v;spPush(id);setRate(id,'seen');toast('Marked as seen');S.out.push(id);ACT.surprise(true)};
-ACT.forgotAs=v=>{const id=+v;setRate(id,'seen');S.out.push(id);toast('Marked as seen');const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{el.remove();S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length)ACT.keep()},250)};
+ACT.forgotAs=v=>{const id=+v;setRate(id,'seen');S.out.push(id);toast('Marked as seen');const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{if(el)el.remove();if(!S||!S.picks)return;S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length)ACT.keep()},250)};
 ACT.againSurprise=v=>{const id=+v;spPush(id);setRate(id,'love');uniqPush(store.watchlist,id);save();toast('Loved, and on your watchlist to watch again');S.out.push(id);ACT.surprise(true)};
 ACT.againAs=v=>{const id=+v,t=TITLES[id];setRate(id,'love');uniqPush(store.watchlist,id);save();S.out.push(id);add(S.vec,t.tags,.4);toast('Loved, and on your watchlist to watch again');
-  const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{el.remove();S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length)ACT.keep()},250)};
+  const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{if(el)el.remove();if(!S||!S.picks)return;S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length)ACT.keep()},250)};
 const WHY={pass:[['seen','Seen it already'],['slow','Looks too slow'],['dark','Too dark or violent'],['funny','Not my kind of funny'],['cast','Not into the cast'],['genre','Not my genre'],['long','Too long']],
   dislike:[['slow','Too slow'],['dark','Too violent or dark'],['funny','Not funny'],['cast',"Didn't like the cast"],['story',"Story didn't grab me"],['long','Too long']]};
 function askWhy(id,kind){setTimeout(()=>{ACT.closesheet();const t=TITLES[id];const o=document.createElement('div');o.className='sheet';
@@ -1473,9 +1473,9 @@ ACT.why=v=>{const [i,kind,k]=v.split(':'),id=+i,t=TITLES[id],T=store.taste,a=(x,
   if(k==='seen'){setRate(id,'seen');if(kind==='pass')add(store.taste,t.tags,.08)} // undo the small Not-for-me nudge
   store.whyLog.push({id,kind,k});RV++;save();ACT.closesheet();toast(k==='seen'?'Marked as seen, no rating':'Got it, noted')};
 ACT.maybeSurprise=v=>{const id=+v;spPush(id);setRate(id,'unseen');toast("Saved to Haven't seen");S.out.push(id);ACT.surprise(true)};
-ACT.maybeAs=v=>{const id=+v;setRate(id,'unseen');S.out.push(id);toast("Saved to Haven't seen");const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{el.remove();S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length)ACT.keep()},250)};
+ACT.maybeAs=v=>{const id=+v;setRate(id,'unseen');S.out.push(id);toast("Saved to Haven't seen");const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{if(el)el.remove();if(!S||!S.picks)return;S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length)ACT.keep()},250)};
 ACT.skipSurprise=v=>{const id=+v;spPush(id);S.out.push(id);ACT.surprise(true)};
-ACT.skipAs=v=>{const id=+v;S.out.push(id);const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{el.remove();S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length)ACT.keep()},250)};
+ACT.skipAs=v=>{const id=+v;S.out.push(id);const el=$('#s'+id);el.classList.add('gone');setTimeout(()=>{if(el)el.remove();if(!S||!S.picks)return;S.picks=S.picks.filter(x=>x!==id);if(!S.picks.length)ACT.keep()},250)};
 ACT.sugBack=()=>{S.picks=[];deck()};
 
 /* ===== your taste ===== */
@@ -1656,7 +1656,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.30';
+const APP_VERSION='3.31';
 window._updNow=true;setTimeout(()=>{window._updNow=false},4000);setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
 ACT.update=()=>{toast('Checking for updates…');fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();
   if(v&&v!==APP_VERSION){try{sessionStorage.removeItem('mr_reload')}catch(e){}toast('Updating to v'+v);setTimeout(()=>location.replace(location.pathname+'?v='+v+'&t='+Date.now()),400)}
