@@ -320,6 +320,19 @@ a.svc{display:block;text-decoration:none}a.svc.go{background:var(--text);color:#
 .acts .arow .ab{min-width:0;width:100%;white-space:normal;overflow:hidden;text-overflow:ellipsis;font-size:16px!important;line-height:1.15;padding:0 6px}
 .acts .arow4 .ab{font-size:14px!important;padding:0 3px}
 .acts .sub2{margin-top:8px}.acts .sub2 .ab{height:46px!important;font-size:14.5px!important}.ab.backb{color:var(--muted)}
+/* v3.45 tonight */
+.hbig{height:64px;font-size:19px}
+.tptitle{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:.5px;margin-right:auto;margin-left:12px}
+.tp{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+.tptop{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:start}
+.tpp .poster{width:150px;height:225px;border-radius:14px}.tpp.big .poster{width:200px;height:300px;margin:0 auto}
+.tpt{font-size:26px;line-height:1.1;margin:2px 0 8px}.tpm{color:var(--muted);font-size:15px}
+.tpsvc{display:inline-block;margin-top:12px;padding:9px 14px;border-radius:12px;background:var(--text);color:#111;font-weight:700;font-size:15px;text-decoration:none}
+.tpr{font-size:17px;line-height:1.45;margin:4px 0 6px;color:#e6e2ee}.tpr b{color:var(--text)}
+.tpgo{height:62px;font-size:19px;background:var(--good);color:#0b1a13}.tpnext{height:56px;font-size:17px}
+.tpq{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.tpq button{height:46px;border-radius:12px;background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:14.5px;font-weight:600}
+.tpdone{align-items:stretch;text-align:center}.tpdone .btn{text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;height:58px}
+.impl{display:grid;gap:10px;margin-top:8px}.imp{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:16px;border-radius:14px;background:var(--panel);border:1px solid var(--line);color:var(--text);text-align:left}.imp b{font-size:17px}.imp span{font-size:14px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -950,7 +963,7 @@ function simW(o,t){let inter=0,spec=0;for(const k of t.tags)if(o.tags.includes(k
   if(o.tags.includes('family')!==t.tags.includes('family'))j*=.6; // kids' film vs grown-up drama
   return {j,spec}}
 function evidence(t){const LT=libState();
-  const sims=LT.liked.filter(o=>o.id!==t.id).map(o=>{const ca=o.actors.find(a=>t.actors.includes(a)),fr=sameFranchise(o,t),m=simW(o,t);
+  const sims=LT.liked.filter(o=>o.id!==t.id).map(o=>{const ca=o.actors.find(a=>t.actors.includes(a)),m=simW(o,t),fr=sameFranchise(o,t)&&o.k===t.k&&m.j>=.2&&(!!ca||(o.dir&&o.dir===t.dir)||/\b(\d|ii|iii|iv)\b/i.test(o.t+' '+t.t));
     return {o,ca,fr,spec:m.spec,j:(fr?1:m.j)*(rating(o)==='love'?1.15:1)+(ca?.25:0)}}).sort((a,b)=>b.j-a.j);
   const strong=sims.filter(x=>x.j>=.35).slice(0,2);
   const rec=recFromIds(t).map(i=>TITLES[i]).filter(o=>{const r=rating(o);return (r==='love'||r==='like')&&o.id!==t.id}).sort((a,b)=>(rating(b)==='love')-(rating(a)==='love')).slice(0,2);
@@ -1186,7 +1199,7 @@ async function loadMore(force){
   try{localStorage.setItem('mr_ext_status',JSON.stringify({at:Date.now(),n:m.list.length,errs}))}catch(e){}
 }
 let _nf=0;function onNewFilms(n){_nf+=n;
-  if(document.querySelector('.outof')){home();toast(`${_nf} new films ready`)}
+  if(document.querySelector('.outof')){home()}
   const hn=document.querySelector('.hnote .cnt');if(hn)hn.textContent=TITLES.length+' titles'}
 
 ACT.refreshCat=()=>loadMore(true);
@@ -1297,7 +1310,7 @@ function forYou(keep){
   const y=window.scrollY;const tn=tonight3();
   render(`${topBar('home')}
   <h2 class="fyh">Tonight's picks</h2><p class="sub fys">${h(tonightLine())}</p>
-  ${tn.length?tn.map(r=>fyRow(r.t,`<button class="fyb1" data-act="fyWatch" data-v="${r.t.id}">Watch tonight</button><button class="fyx" data-act="fyLater" data-v="${r.t.id}">Want to watch</button><button class="fyx" data-act="fyNot" data-v="${r.t.id}">Not tonight</button><button class="fyx" data-act="fySkip" data-v="${r.t.id}">Never show</button>`,explain(r.t).line)).join(''):'<p class="sub">Nothing left that fits tonight. Try changing Tonight on the home screen.</p>'}
+  ${tn.length?tn.map(r=>fyRow(r.t,`<button class="fyb1" data-act="fyWatch" data-v="${r.t.id}">Pick this movie</button><button class="fyx" data-act="fyLater" data-v="${r.t.id}">Want to watch</button><button class="fyx" data-act="fyNot" data-v="${r.t.id}">Not tonight</button><button class="fyx" data-act="fySkip" data-v="${r.t.id}">Never show</button>`,explain(r.t).line)).join(''):'<p class="sub">Nothing left that fits tonight. Try changing Tonight on the home screen.</p>'}
   <button class="btn ghost" style="margin-top:14px;width:100%" data-act="fyMore">Show me 3 others</button>
   <button class="btn ghost" style="margin-top:10px;width:100%" data-act="go">Refine by swiping</button>
   ${nudgeHTML()}`);
@@ -1314,6 +1327,54 @@ ACT.fyNot=v=>{FY.out.push(+v);forYou(true)};
 ACT.fySkip=v=>{const id=+v;uniqPush(store.suggested,id);save();FY.out.push(id);forYou(true)};
 ACT.fyMore=()=>{tonight3().forEach(r=>{FY.out.push(r.t.id);uniqPush(store.suggested,r.t.id)});save();forYou(true)};
 
+/* ===== Tonight: one strong pick at a time ===== */
+let TP={out:[],skipped:[],cur:null};
+function shortReason(t){const ev=evidence(t),v=o=>rating(o)==='love'?'loved':'liked';
+  const fr=ev.strong.find(x=>x.fr);if(fr)return `Follows on from <b>${h(fr.o.t)}</b>, which you ${v(fr.o)}.`;
+  if(ev.rec.length){const o=ev.rec[0];return `Fans of <b>${h(o.t)}</b> rate this highly. You ${v(o)} it.`}
+  const feat=ev.strong.find(x=>!x.ca&&x.spec);if(feat){const o=feat.o,k=t.tags.find(x=>READ[x]&&o.tags.includes(x)&&!GENERIC[x]);return `Like <b>${h(o.t)}</b>${k?`: ${h(READ[k])}`:''}, which you ${v(o)}.`}
+  const ca=ev.sims.find(x=>x.ca&&x.j>=.45);if(ca)return `Stars ${h(ca.ca)}, like <b>${h(ca.o.t)}</b>, which you ${v(ca.o)}.`;
+  if(ev.strong.length){const o=ev.strong[0].o,k=t.tags.find(x=>READ[x]&&o.tags.includes(x)&&!GENERIC[x]);return `Like <b>${h(o.t)}</b>${k?`: ${h(READ[k])}`:''}, which you ${v(o)}.`}
+  const k=t.tags.find(x=>READ[x]&&!GENERIC[x]);return `Something a bit different${k?`: ${h(READ[k])}`:''}.`}
+function nextTonight(){if(!S)newSession();
+  const all=ranked(t=>!TP.out.includes(t.id)&&!store.suggested.includes(t.id)&&!store.watchlist.includes(t.id));
+  if(!all.length)return null;
+  const recent=TP.skipped.slice(-2).map(i=>TITLES[i]);
+  const ok=r=>!recent.some(o=>jacc(o.tags,r.t.tags)>.45||primary(o)===primary(r.t));
+  return all.slice(0,60).find(ok)||all[0]}
+function tonightPick(){const r=TP.cur||(TP.cur=nextTonight());
+  if(!r){render(`${topBar('home')}<h2>That's everything for tonight</h2><p class="sub">Nothing left that fits your Tonight settings. Change them on the home screen, or check your saved films.</p><button class="btn" data-act="tonight">Change Tonight settings</button>`);return}
+  const t=r.t;tmWant([t],true);
+  const sv=t.own?`<a class="tpsvc" href="https://tv.apple.com/au/search?term=${encodeURIComponent(t.t)}" target="_blank" rel="noopener">In your Apple TV library ›</a>`:t.svc?`<a class="tpsvc" href="${(SVCURL[t.svc]||(()=>JW(t)))(encodeURIComponent(t.t))}" target="_blank" rel="noopener">On ${h(t.svc)} ›</a>`:'';
+  render(`${topBar('home','<span class="tptitle">Tonight</span>')}
+  <div class="tp">
+    <div class="tptop"><div class="tpp" data-act="info" data-v="${t.id}">${poster(t)}</div>
+      <div class="tpi"><h2 class="tpt">${h(t.t)}</h2><div class="tpm">${runtime(t)} · ${h(t.c)} · ${t.y}</div>${sv}</div></div>
+    <p class="tpr">${shortReason(t)}</p>
+    <button class="btn tpgo" data-act="tpPick">Pick this movie</button>
+    <button class="btn ghost tpnext" data-act="tpNext">Show me another</button>
+    <div class="tpq"><button data-act="tpSave">Save for later</button><button data-act="tpSeen">Seen it</button><button data-act="tpNo">Not for me</button></div>
+  </div>`)}
+const tpAdvance=()=>{TP.cur=null;tonightPick()};
+ACT.tpStart=()=>{TP={out:[],skipped:[],cur:null};newSession();tonightPick()};
+ACT.tpNext=()=>{const t=TP.cur&&TP.cur.t;if(t){TP.out.push(t.id);TP.skipped.push(t.id);add(S.vec,t.tags,-.3)}tpAdvance()}; // a skip only nudges tonight's mood
+ACT.tpSave=()=>{const t=TP.cur&&TP.cur.t;if(!t)return;uniqPush(store.watchlist,t.id);if(!rating(t))setRate(t.id,'unseen');add(store.taste,t.tags,.1);TP.out.push(t.id);save();toast('Saved for later');tpAdvance()};
+ACT.tpSeen=()=>{const t=TP.cur&&TP.cur.t;if(!t)return;setRate(t.id,'seen');TP.out.push(t.id);toast('Marked as seen');tpAdvance()};
+ACT.tpNo=()=>{const t=TP.cur&&TP.cur.t;if(!t)return;setRate(t.id,'pass');add(store.taste,t.tags,-.08);TP.out.push(t.id);uniqPush(store.suggested,t.id);save();askWhy(t.id,'pass');tpAdvance()};
+ACT.tpPick=()=>{const t=TP.cur&&TP.cur.t;if(!t)return;uniqPush(store.chosen,t.id);uniqPush(store.suggested,t.id);add(store.taste,t.tags,.3);RV++;save();
+  const sv=t.own?`<a class="btn" href="https://tv.apple.com/au/search?term=${encodeURIComponent(t.t)}" target="_blank" rel="noopener">Open Apple TV</a>`:t.svc?`<a class="btn" href="${(SVCURL[t.svc]||(()=>JW(t)))(encodeURIComponent(t.t))}" target="_blank" rel="noopener">Watch on ${h(t.svc)}</a>`:`<a class="btn ghost" href="${JW(t)}" target="_blank" rel="noopener">Find where to watch</a>`;
+  render(`${topBar('home')}<div class="tp tpdone"><div class="tpp big" data-act="info" data-v="${t.id}">${poster(t)}</div><h2 class="tpt" style="text-align:center">${h(t.t)}</h2><p class="sub" style="text-align:center">Enjoy the movie. After you've watched it, rate it in My library.</p>${sv}<button class="btn ghost" data-act="home" style="margin-top:10px">Done</button></div>`)};
+/* optional: everything that teaches MoodReel, kept off the decision screen */
+function improveView(){render(`${topBar('home')}<h2 style="margin-top:6px">Improve my picks</h2><p class="sub">All optional. Your picks already use your ratings and Tonight settings.</p>
+  <div class="impl">
+   <button class="imp" data-act="sharpen"><b>Sharpen my ratings</b><span>Mark real favourites and ones you didn't enjoy</span></button>
+   <button class="imp" data-act="libswipe"><b>Rate films I've seen</b><span>Quick yes / no on films you might know</span></button>
+   <button class="imp" data-act="go"><b>Swipe for tonight's mood</b><span>A few yes / no questions, then picks</span></button>
+   <button class="imp" data-act="taste"><b>Your taste</b><span>What it has learned, your top 3, genres and services</span></button>
+   <button class="imp" data-act="list"><b>Account & backup</b><span>Sign in to use your ratings on other devices</span></button>
+  </div>${nudgeHTML()}`)}
+ACT.improve=()=>improveView();
+
 /* ===== home ===== */
 const toWatch=t=>rating(t)==='unseen'||(!rating(t)&&store.chosen.includes(t.id));
 function counts(){const c={love:0,like:0,ok:0,dislike:0,unseen:0,pass:0,seen:0};TITLES.forEach(t=>{const r=rating(t);if(r&&r!=='unseen')c[r]++;if(toWatch(t))c.unseen++});store.custom.forEach(x=>{if(c[x.r]!=null)c[x.r]++});return c}
@@ -1321,11 +1382,12 @@ function home(){
   const c=counts();
   render(`<div class="homefix">
     <div class="row"><div class="wordmark"><i></i>MoodReel</div><span class="spacer"></span><button class="textbtn" data-act="taste">Your taste</button></div>
-    <div class="hhero"><h1>Swipe. Pick.<br><span class="accent">Watch.</span></h1>
+    <div class="hhero"><h1>What are we<br><span class="accent">watching tonight?</span></h1>
     <button class="tonightbtn" data-act="tonight"><span>Tonight</span><b>${h(tonightLine())}</b><i>Change</i></button></div>
-    <div class="stats hstats"><button class="stat" data-act="lib" data-v="watch"><b>${store.watchlist.length}</b><span>Watchlist</span></button><button class="stat" data-act="lib" data-v="love"><b>${c.love}</b><span>Loved</span></button><button class="stat" data-act="lib" data-v="like"><b>${c.like+c.ok}</b><span>Liked</span></button><button class="stat" data-act="lib" data-v="dislike"><b>${c.dislike}</b><span>Disliked</span></button></div>
-    <div class="cta hcta"><button class="btn" data-act="foryou">Pick something for tonight</button><div class="hrow h3"><button class="btn ghost" data-act="go">Swipe</button><button class="btn ghost" data-act="surprise">Surprise me</button><button class="btn ghost" data-act="lib">My library</button></div></div>
-    <p class="note hnote"><button class="textbtn" data-act="how">How it picks</button> · <button class="textbtn" data-act="list">${SYNC.user?"Account":"Sign in"} & backup</button> · <span class="cnt">${TITLES.length} titles</span> · <button class="textbtn" data-act="update">v${APP_VERSION} · Update</button></p>
+    <div class="cta hcta"><button class="btn hbig" data-act="tpStart">Pick something for tonight</button>
+      <div class="hrow"><button class="btn ghost" data-act="lib" data-v="watch">Saved for later${store.watchlist.length?` · ${store.watchlist.length}`:''}</button><button class="btn ghost" data-act="lib">My library</button></div>
+      <button class="btn ghost" data-act="improve" style="width:100%;margin-top:10px">Improve my picks</button></div>
+    <p class="note hnote"><button class="textbtn" data-act="how">How it picks</button> · <button class="textbtn" data-act="list">${SYNC.user?"Account":"Sign in"} & backup</button> · <button class="textbtn" data-act="update">v${APP_VERSION} · Update</button></p>
   </div>`);
   document.body.classList.add('nohscroll');
   if(window._updV&&window._updV!==APP_VERSION)setTimeout(checkUpdate,300);
@@ -1765,7 +1827,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.44';
+const APP_VERSION='3.45';
 window._updNow=true;setTimeout(()=>{window._updNow=false},4000);setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
 ACT.update=()=>{toast('Checking for updates…');fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();
   if(v&&v!==APP_VERSION){try{sessionStorage.removeItem('mr_reload')}catch(e){}toast('Updating to v'+v);setTimeout(()=>location.replace(location.pathname+'?v='+v+'&t='+Date.now()),400)}
