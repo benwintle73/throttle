@@ -739,6 +739,11 @@
   body.murray .chip.active{background:#F4E6CC;color:#3D3322}
   body.murray .icon-btn{background:rgba(255,240,214,.16);border-color:rgba(255,232,196,.35)}
   body.murray .tmrw{background:rgba(52,44,28,.35)}
+  /* Murray: the hero lines sit over pale sky and gum leaves, so give them a soft dark backing to stay readable */
+  body.murray .cond{text-shadow:0 1px 3px rgba(30,24,12,.55),0 2px 14px rgba(30,24,12,.45)}
+  body.murray .hilo,body.murray .ptime{display:table;margin-left:auto;margin-right:auto;color:#fff;background:rgba(40,32,18,.38);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);padding:4px 12px;border-radius:999px;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+  body.murray .ptime{margin-top:6px}
   .appear .pv-murray{background:linear-gradient(180deg,#4A4F86 0%,#D9798A 38%,#F7A262 58%,#6E7A58 60%,#4E5B3F 100%);position:relative}
   .appear .pv-murray::after{content:'';position:absolute;left:6%;bottom:30%;width:30%;height:55%;border-radius:50% 50% 40% 40%;background:#2B3122;box-shadow:120px 8px 0 -6px #2B3122}
   .appear .opts{grid-template-columns:1fr 1fr}
@@ -4375,7 +4380,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.46', APP_BUILT = '23 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.47', APP_BUILT = '23 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
