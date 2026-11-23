@@ -272,16 +272,16 @@ body:has(.pick2) #dlstat{display:none!important}
 .spfix .pick2 .acts{flex:0 0 auto!important;margin-top:auto}
 .pick2 .ptop>div:last-child{overflow:hidden}
 .arow2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.arow2 .ab{width:100%;margin:0}.ab.forgot{color:var(--muted)}
-/* v3.30 swipe frame */
-.swf{display:grid;grid-template-columns:38px minmax(0,1fr) 38px;grid-template-rows:auto auto auto;gap:6px;align-items:stretch;margin:8px 0 6px}
-.swf .deck{grid-column:2;grid-row:2;margin:0;height:min(430px,calc(100dvh - 330px));min-height:300px}
-.dir{display:flex;align-items:center;justify-content:center;gap:6px;border-radius:12px;background:var(--panel);border:1px solid var(--line);font-weight:700;font-size:14px;padding:9px 6px;color:var(--text)}
-.dir .c{display:none}.dir b{font-size:16px;opacity:.8}
+/* v3.32 swipe frame: quiet labels on the edge you swipe towards */
+.swf{display:grid;grid-template-columns:26px minmax(0,1fr) 26px;grid-template-rows:30px auto 30px;gap:4px 6px;margin:6px -10px 4px}
+.swf .deck{grid-column:2;grid-row:2;margin:0;height:min(450px,calc(100dvh - 300px));min-height:300px}
+.dir{display:flex;align-items:center;justify-content:center;gap:5px;background:none;border:0;padding:0;font-size:13px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;opacity:.85;color:var(--muted)}
+.dir .c{display:none}.dir b{font-weight:600}
 .dir.dU{grid-column:2;grid-row:1}.dir.dD{grid-column:2;grid-row:3}
-.dir.dL,.dir.dR{grid-row:2;writing-mode:vertical-rl;padding:10px 0}.dir.dL{grid-column:1;transform:rotate(180deg)}.dir.dR{grid-column:3}
+.dir.dL,.dir.dR{grid-row:2;writing-mode:vertical-rl}.dir.dL{grid-column:1;transform:rotate(180deg)}.dir.dR{grid-column:3}
 .dir.dL b,.dir.dR b{writing-mode:horizontal-tb}.dir.dL b{transform:rotate(180deg)}
-.dir.loved{color:var(--love);border-color:rgba(255,184,77,.35)}.dir.into{color:var(--good);border-color:rgba(61,214,154,.35)}.dir.nope{color:var(--bad);border-color:rgba(255,92,108,.35)}.dir.seen{color:var(--seen);border-color:rgba(122,162,255,.35)}
-.dir:active{transform:scale(.97)}.dir.dL:active{transform:rotate(180deg) scale(.97)}
+.dir.loved{color:var(--love)}.dir.into{color:var(--good)}.dir.nope{color:var(--bad)}.dir.seen{color:var(--seen)}
+.dir:active{opacity:.5}
 </style>
 </head>
 <body>
@@ -1291,8 +1291,7 @@ function qHTML(q){
   return `<div class="card qcard" id="front">
     <div class="stamp nope">${h(q.l[0])}</div><div class="stamp into">${h(q.r[0])}</div><div class="stamp loved">${h(q.u[0])}</div><div class="stamp seen">${h(q.d[0])}</div>
     <div class="qbody"><div class="pk">Quick question · ${kind}</div><div class="qt">${h(q.text)}</div>
-      ${q.mood?`<div class="qsides"><span>← ${h(q.l[0])}</span><span>${h(q.r[0])} →</span></div>`:`<div class="qsides"><span>← No</span><span>Yes →</span></div>`}
-      <div class="qhint">↑ ${h(q.u[0])}   ·   ↓ ${h(q.d[0])}</div></div></div>`}
+      </div></div>`}
 
 /* swipe directions sit where you swipe to: up above, down below, left and right at the sides */
 function swipeFrame(deck,lab,ic){const b=(k,cls,arrow)=>`<button class="dir ${cls} ${k}" data-act="sw" data-v="${k}"><span class="c">${ic[k]||''}</span><span class="dl">${h(lab[k])}</span><b>${arrow}</b></button>`;
@@ -1656,7 +1655,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.31';
+const APP_VERSION='3.32';
 window._updNow=true;setTimeout(()=>{window._updNow=false},4000);setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
 ACT.update=()=>{toast('Checking for updates…');fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();
   if(v&&v!==APP_VERSION){try{sessionStorage.removeItem('mr_reload')}catch(e){}toast('Updating to v'+v);setTimeout(()=>location.replace(location.pathname+'?v='+v+'&t='+Date.now()),400)}
