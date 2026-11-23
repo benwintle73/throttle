@@ -272,6 +272,16 @@ body:has(.pick2) #dlstat{display:none!important}
 .spfix .pick2 .acts{flex:0 0 auto!important;margin-top:auto}
 .pick2 .ptop>div:last-child{overflow:hidden}
 .arow2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.arow2 .ab{width:100%;margin:0}.ab.forgot{color:var(--muted)}
+/* v3.30 swipe frame */
+.swf{display:grid;grid-template-columns:38px minmax(0,1fr) 38px;grid-template-rows:auto auto auto;gap:6px;align-items:stretch;margin:8px 0 6px}
+.swf .deck{grid-column:2;grid-row:2;margin:0;height:min(430px,calc(100dvh - 330px));min-height:300px}
+.dir{display:flex;align-items:center;justify-content:center;gap:6px;border-radius:12px;background:var(--panel);border:1px solid var(--line);font-weight:700;font-size:14px;padding:9px 6px;color:var(--text)}
+.dir .c{display:none}.dir b{font-size:16px;opacity:.8}
+.dir.dU{grid-column:2;grid-row:1}.dir.dD{grid-column:2;grid-row:3}
+.dir.dL,.dir.dR{grid-row:2;writing-mode:vertical-rl;padding:10px 0}.dir.dL{grid-column:1;transform:rotate(180deg)}.dir.dR{grid-column:3}
+.dir.dL b,.dir.dR b{writing-mode:horizontal-tb}.dir.dL b{transform:rotate(180deg)}
+.dir.loved{color:var(--love);border-color:rgba(255,184,77,.35)}.dir.into{color:var(--good);border-color:rgba(61,214,154,.35)}.dir.nope{color:var(--bad);border-color:rgba(255,92,108,.35)}.dir.seen{color:var(--seen);border-color:rgba(122,162,255,.35)}
+.dir:active{transform:scale(.97)}.dir.dL:active{transform:rotate(180deg) scale(.97)}
 </style>
 </head>
 <body>
@@ -1266,13 +1276,7 @@ function deck(){
   const ic=q?{nope:ARROW.l,seen:ARROW.d,loved:ARROW.u,into:ARROW.r}:ICON;
   render(`<div class="row"><button class="backbtn" data-act="home"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Home</button><span class="spacer"></span>
       <button class="pill" data-act="aud">${h(AUDS.find(a=>a[0]===store.aud)[1])}</button><button class="pill" data-act="fmt">${h(FMTS.find(f=>f[0]===store.fmt)[1])}</button></div>
-    <div class="deck" id="deck">${S.nxt&&!q?cardHTML(S.nxt,'back'):''}${q?qHTML(c):cardHTML(c,'front')}</div>
-    <div class="controls">
-      <button class="ctl nope" data-act="sw" data-v="nope"><span class="c">${ic.nope}</span>${h(lab.nope)}</button>
-      <button class="ctl seen" data-act="sw" data-v="seen"><span class="c">${ic.seen}</span>${h(lab.seen)}</button>
-      <button class="ctl loved" data-act="sw" data-v="loved"><span class="c">${ic.loved}</span>${h(lab.loved)}</button>
-      <button class="ctl into" data-act="sw" data-v="into"><span class="c">${ic.into}</span>${h(lab.into)}</button>
-    </div>
+    ${swipeFrame(`${S.nxt&&!q?cardHTML(S.nxt,'back'):''}${q?qHTML(c):cardHTML(c,'front')}`,lab,ic)}
     <div class="row" style="margin-top:16px"><button class="textbtn" data-act="undo" ${S.history.length?'':'style="visibility:hidden"'}>Undo</button><span class="spacer"></span>
       <div class="dots">${Array.from({length:ROUND},(_,i)=>`<i class="${i<S.sinceSug?'on':''}"></i>`).join('')}</div><span class="spacer"></span>
       <button class="textbtn" data-act="sugnow">Picks now</button></div>
@@ -1290,6 +1294,9 @@ function qHTML(q){
       ${q.mood?`<div class="qsides"><span>← ${h(q.l[0])}</span><span>${h(q.r[0])} →</span></div>`:`<div class="qsides"><span>← No</span><span>Yes →</span></div>`}
       <div class="qhint">↑ ${h(q.u[0])}   ·   ↓ ${h(q.d[0])}</div></div></div>`}
 
+/* swipe directions sit where you swipe to: up above, down below, left and right at the sides */
+function swipeFrame(deck,lab,ic){const b=(k,cls,arrow)=>`<button class="dir ${cls} ${k}" data-act="sw" data-v="${k}"><span class="c">${ic[k]||''}</span><span class="dl">${h(lab[k])}</span><b>${arrow}</b></button>`;
+  return `<div class="swf">${b('loved','dU','↑')}${b('nope','dL','←')}<div class="deck" id="deck">${deck}</div>${b('into','dR','→')}${b('seen','dD','↓')}</div>`}
 function bindDrag(){
   const el=$('#front');if(!el)return;
   let sx=0,sy=0,dx=0,dy=0,drag=false;
@@ -1633,13 +1640,7 @@ function libCard(){
     ${LS.own?'':`<button class="btn ghost" data-act="libswipeown">Rate my Apple TV films too</button><div style="height:10px"></div>`}<button class="btn" data-act="lib">Back to My library</button>`);return}
   render(`<div class="row"><button class="textbtn" data-act="lib">Done</button><span class="spacer"></span><span class="pill">${LS.done} rated · ${LS.queue.length-LS.i} to go</span></div>
     <p class="sub" style="margin:10px 0 0">${LS.own?'These count as Seen. Swipe to say which you loved or didn\'t like.':'Have you seen it?'}</p>
-    <div class="deck" id="deck">${LS.queue[LS.i+1]?libCardHTML(LS.queue[LS.i+1],'back'):''}${libCardHTML(t,'front')}</div>
-    <div class="controls">
-      <button class="ctl nope" data-act="sw" data-v="nope"><span class="c">${ICON.nope}</span>Didn't like ←</button>
-      <button class="ctl seen" data-act="sw" data-v="seen"><span class="c">${ARROW.d}</span>Not seen ↓</button>
-      <button class="ctl loved" data-act="sw" data-v="loved"><span class="c">${ICON.loved}</span>Loved it ↑</button>
-      <button class="ctl into" data-act="sw" data-v="into"><span class="c">${ICON.seen}</span>Seen it →</button>
-    </div>
+    ${swipeFrame(`${LS.queue[LS.i+1]?libCardHTML(LS.queue[LS.i+1],'back'):''}${libCardHTML(t,'front')}`,{nope:"Didn't like",seen:'Not seen',loved:'Loved it',into:'Seen it'},{nope:ICON.nope,seen:ARROW.d,loved:ICON.loved,into:ICON.seen})}
     <div class="row" style="margin-top:16px"><button class="textbtn" data-act="libundo" ${LS.hist.length?'':'style="visibility:hidden"'}>Undo</button><span class="spacer"></span>${LS.own?'':'<button class="textbtn" data-act="libswipeown">Rate my Apple TV films</button><span class="spacer"></span>'}<button class="textbtn" data-act="libskip">Skip</button></div>`);
   bindDrag();
 }
@@ -1655,7 +1656,7 @@ Object.assign(ACT,{
 });
 
 /* ===== auto-update: reload when a newer version is published ===== */
-const APP_VERSION='3.29';
+const APP_VERSION='3.30';
 window._updNow=true;setTimeout(()=>{window._updNow=false},4000);setInterval(()=>{if(!document.hidden)checkUpdate()},60000);
 ACT.update=()=>{toast('Checking for updates…');fetch('version.txt?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():null).then(v=>{v=(v||'').trim();
   if(v&&v!==APP_VERSION){try{sessionStorage.removeItem('mr_reload')}catch(e){}toast('Updating to v'+v);setTimeout(()=>location.replace(location.pathname+'?v='+v+'&t='+Date.now()),400)}
