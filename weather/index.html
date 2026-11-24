@@ -2479,8 +2479,9 @@ function buildClouds(k){
 // Occasional shooting star on clear nights
 let skyNow = { night: 0, cloud: 1 };
 function shootingStar(){
-  setTimeout(shootingStar, 30000 + Math.random() * 60000);
-  if (document.hidden || skyNow.night < .7 || skyNow.cloud > .4) return;
+  const ufo = theme === 'ufo';
+  setTimeout(shootingStar, ufo ? 5000 + Math.random() * 10000 : 30000 + Math.random() * 60000);
+  if (document.hidden || skyNow.night < (ufo ? .55 : .7) || skyNow.cloud > (ufo ? .6 : .4)) return;
   const sc = $('scene'), w = sc.clientWidth, h = sc.clientHeight;
   const el = document.createElement('i'); el.className = 'shoot';
   const ltr = Math.random() < .5, ang = (ltr ? 1 : -1) * (18 + Math.random() * 22), len = 90 + Math.random() * 70, dist = 160 + Math.random() * 140;
@@ -2568,7 +2569,7 @@ function updateSky(){
     scene.style.height = H + 'px';
     W = scene.clientWidth;
   }
-  const murray = theme === 'murray', base = murray ? H - 64 : theme === 'beach' ? H - 86 : theme === 'island' ? H - 94 : theme === 'drop' ? H - 104 : theme === 'ufo' ? H - 96 : theme === 'pro' ? H - (LANDSCAPE() ? innerHeight * .22 : 70) : theme === 'seoul' ? H - 70 : theme === 'kstreet' ? H - 120 : H;   // in Murray mode the sun sets behind the far bank
+  const murray = theme === 'murray', base = murray ? H - 64 : theme === 'beach' ? H - 86 : theme === 'island' ? H - 94 : theme === 'drop' ? H - 104 : theme === 'ufo' ? H - 150 : theme === 'pro' ? H - (LANDSCAPE() ? innerHeight * .22 : 70) : theme === 'seoul' ? H - 70 : theme === 'kstreet' ? H - 120 : H;   // in Murray mode the sun sets behind the far bank
   const place = (el, t) => {
     el.style.left = (W*(0.07 + t*0.86)) + 'px';
     el.style.top  = (base - Math.sin(Math.PI*t)*(base - (neon ? 95 : Math.max(165, H * 0.42)))) + 'px';   // peak sits below the header, visible
@@ -4395,7 +4396,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.50', APP_BUILT = '24 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.51', APP_BUILT = '24 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
@@ -4603,12 +4604,20 @@ window.addEventListener('focus', refreshIfStale);
 // and on refresh. When one arrives, switch to it straight away — unless you're in the middle of something,
 // in which case a small "tap to update" pill appears instead.
 var swReg = null;
-function checkForUpdate(){ if (swReg) swReg.update().catch(()=>{}); }
+let verChecking = false;
+function checkForUpdate(){
+  if (swReg) swReg.update().catch(()=>{});
+  if (verChecking || !location.protocol.startsWith('http')) return; verChecking = true;
+  fetch('index.html?v=' + Date.now(), { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
+    const m = t.match(/APP_VERSION = '([\d.]+)'/);
+    if (m && m[1] !== APP_VERSION){ let tried = ''; try { tried = sessionStorage.getItem('wx_upd_try') || ''; } catch {} if (tried !== m[1]){ try { sessionStorage.setItem('wx_upd_try', m[1]); } catch {} offerUpdate(); } }
+  }).catch(() => {}).finally(() => { verChecking = false; });
+}
 function busyNow(){
   const a = document.activeElement;
   return (a && /INPUT|TEXTAREA/.test(a.tagName)) || document.querySelector('.pz.open, .sheet.open, .tp.open, .defpop.open') || (typeof editLayout !== 'undefined' && editLayout);
 }
-function applyUpdate(){ try{ sessionStorage.setItem('wx_updated', '1'); }catch(e){} location.reload(); }
+function applyUpdate(){ try{ sessionStorage.setItem('wx_updated', '1'); }catch(e){} (swReg ? swReg.update().catch(()=>{}) : Promise.resolve()).finally(() => setTimeout(() => location.reload(), 400)); }
 function offerUpdate(){
   if (!busyNow()) return applyUpdate();
   if ($('updPill')) return;
@@ -4621,6 +4630,8 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   navigator.serviceWorker.register('sw.js', {updateViaCache:'none'}).then(reg => {
     swReg = reg;
     document.addEventListener('visibilitychange', () => { if (document.visibilityState==='visible') checkForUpdate(); });
+    addEventListener('pageshow', checkForUpdate); addEventListener('focus', checkForUpdate);
+    setTimeout(checkForUpdate, 3000);
     setInterval(checkForUpdate, 5 * 60 * 1000);
   }).catch(()=>{});
   let offered = false;
