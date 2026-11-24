@@ -1093,15 +1093,22 @@
   body.ufo .bg{background:linear-gradient(180deg,var(--g1) 0%,var(--g2) 28%,var(--g3) 46%,var(--earth,#8A5A3C) 74%,var(--earth2,#4A2E22) 100%)}
   .uscene{position:absolute;left:0;right:0;bottom:0;height:262px;pointer-events:none}
   .uscene > svg{position:absolute;inset:0;width:100%;height:100%}
-  .uscene .beam{animation:beam 3.2s ease-in-out infinite;transform-origin:50% 0}
-  @keyframes beam{0%,100%{opacity:.35}50%{opacity:.75}}
-  .uscene .saucer{animation:hover 4s ease-in-out infinite}
-  @keyframes hover{50%{transform:translateY(-5px)}}
+  /* abduction loop (15s): a lamb wanders in, the saucer flies over, beams it up, zooms off, repeat */
+  .uscene .fly{animation:ufly 15s ease-in-out infinite}
+  @keyframes ufly{0%,13%{transform:translate(-160px,-70px)}24%,54%{transform:translate(0,0)}64%,100%{transform:translate(460px,-140px)}}
+  .uscene .saucer{animation:hover 2.2s ease-in-out infinite}
+  @keyframes hover{50%{transform:translateY(-4px)}}
+  .uscene .beam{opacity:0;animation:ubeam 15s linear infinite}
+  @keyframes ubeam{0%,25%{opacity:0}28%{opacity:.75}31%{opacity:.5}34%{opacity:.75}48%{opacity:.75}52%,100%{opacity:0}}
+  .uscene .lamb{animation:uwalk 15s linear infinite}
+  @keyframes uwalk{0%{transform:translate(-120px,0)}14%,29%{transform:translate(0,0)}47%{transform:translate(0,-58px) scale(.35);opacity:1}49%,100%{transform:translate(0,-60px) scale(.2);opacity:0}}
+  .uscene .lamb .legs{animation:ulegs .35s steps(2) infinite}
+  @keyframes ulegs{50%{transform:translateX(1.5px)}}
+  .uscene .lamb .wob{animation:uwob 15s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 50%}
+  @keyframes uwob{0%,30%{transform:rotate(0)}36%{transform:rotate(-12deg)}42%{transform:rotate(14deg)}48%,100%{transform:rotate(0)}}
   .uscene .lights circle{animation:blink 1.2s steps(1) infinite}
   .uscene .lights circle:nth-child(2n){animation-delay:-.6s}
   @keyframes blink{50%{opacity:.25}}
-  .uscene .cow{animation:lift 9s ease-in-out infinite}
-  @keyframes lift{0%,30%{transform:translateY(0)}60%,70%{transform:translateY(-34px)}100%{transform:translateY(0)}}
   .uscene .zip{position:absolute;top:24px;width:34px;height:14px;animation:zip 17s linear infinite;opacity:0}
   .uscene .zip.z2{animation-delay:-9s;animation-duration:23s;top:56px}
   @keyframes zip{0%{transform:translateX(-60px);opacity:0}4%{opacity:1}40%{transform:translateX(45vw) translateY(-8px)}44%{transform:translateX(45vw) translateY(-8px)}60%{opacity:1}64%{transform:translateX(110vw) translateY(10px);opacity:0}100%{opacity:0}}
@@ -2417,11 +2424,16 @@ function buildUfo(){
   let rocks = ''; for (let i = 0; i < 14; i++){ const x = L + r() * W, y = H - 22 + r() * 18; rocks += `<ellipse cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" rx="${(2 + r() * 4).toFixed(1)}" ry="1.6" fill="var(--urock)"/>`; }
   // the saucer, its beam and the cow it's lifting
   const SX = 50, SY = 104;
-  const beam = `<path class="beam" d="M${SX - 12} ${SY + 12} L${SX - 34} ${HOR + 40} L${SX + 34} ${HOR + 40} L${SX + 12} ${SY + 12}Z" fill="url(#ubeam)"/>
-    <ellipse cx="${SX}" cy="${HOR + 40}" rx="34" ry="6" fill="#9CFFC8" opacity=".35"/>`;
-  const cow = `<g class="cow"><g transform="translate(${SX - 13} ${HOR + 22})"><rect x="0" y="0" width="26" height="13" rx="5" fill="#F4F1EA" stroke="#2A2A2A" stroke-width="1"/>
-      <path d="M6 1 q4 3 0 7 q-4 -2 0 -7Z M16 4 q5 2 2 7 q-5 -1 -2 -7Z" fill="#2A2A2A"/><rect x="24" y="-4" width="9" height="8" rx="3" fill="#F4F1EA" stroke="#2A2A2A" stroke-width="1"/>
-      <rect x="29" y="0" width="5" height="4" rx="2" fill="#F2A6B8"/><path d="M3 13 l0 6 M8 13 l0 6 M18 13 l0 6 M23 13 l0 6" stroke="#2A2A2A" stroke-width="2"/></g></g>`;
+  const beam = `<g class="beam"><path d="M${SX - 12} ${SY + 12} L${SX - 34} ${HOR + 40} L${SX + 34} ${HOR + 40} L${SX + 12} ${SY + 12}Z" fill="url(#ubeam)"/>
+    <ellipse cx="${SX}" cy="${HOR + 40}" rx="34" ry="6" fill="#9CFFC8" opacity=".5"/></g>`;
+  // a fluffy lamb; the animation walks it in, lifts it into the saucer, and a fresh one wanders in next loop
+  const LY = HOR + 26;
+  const cow = `<g class="lamb" style="transform-box:view-box;transform-origin:${SX}px ${LY}px"><g class="wob">
+      <g class="legs" stroke="#2A2A2A" stroke-width="2.2" stroke-linecap="round"><path d="M${SX - 8} ${LY + 4} l0 8 M${SX + 6} ${LY + 4} l0 8"/></g>
+      <g stroke="#2A2A2A" stroke-width="2.2" stroke-linecap="round"><path d="M${SX - 3} ${LY + 5} l0 7 M${SX + 10} ${LY + 4} l0 7"/></g>
+      <g fill="#FBF8F2" stroke="#CFC8BC" stroke-width=".8"><circle cx="${SX - 9}" cy="${LY}" r="6"/><circle cx="${SX - 2}" cy="${LY - 3}" r="7"/><circle cx="${SX + 6}" cy="${LY - 1}" r="6.5"/><circle cx="${SX - 4}" cy="${LY + 3}" r="6"/><circle cx="${SX + 4}" cy="${LY + 3}" r="6"/></g>
+      <ellipse cx="${SX + 14}" cy="${LY - 4}" rx="5" ry="4.2" fill="#3A3330"/><ellipse cx="${SX + 11}" cy="${LY - 8}" rx="2.6" ry="1.4" fill="#3A3330" transform="rotate(-30 ${SX + 11} ${LY - 8})"/>
+      <circle cx="${SX + 15.5}" cy="${LY - 5}" r="1" fill="#fff"/><circle cx="${SX + 11}" cy="${LY - 7}" r="3" fill="#FBF8F2"/></g></g>`;
   const saucer = `<g class="saucer"><ellipse cx="${SX}" cy="${SY}" rx="14" ry="10" fill="url(#udome)" stroke="#BFFFE0" stroke-width="1" opacity=".95"/>
       <ellipse cx="${SX}" cy="${SY + 8}" rx="36" ry="9" fill="url(#uhull)" stroke="#2A3A4A" stroke-width="1"/>
       <ellipse cx="${SX}" cy="${SY + 12}" rx="16" ry="3" fill="#2A3A4A"/>
@@ -2432,7 +2444,7 @@ function buildUfo(){
     <defs><linearGradient id="ubeam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C8FFE0" stop-opacity=".9"/><stop offset="1" stop-color="#7CFFAA" stop-opacity=".15"/></linearGradient>
       <linearGradient id="uhull" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E4ECF4"/><stop offset="1" stop-color="#7A8898"/></linearGradient>
       <radialGradient id="udome" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#E8FFF4"/><stop offset="1" stop-color="#5FD6A8"/></radialGradient></defs>
-    ${mesas}${ground}${circle}${farm}${cacti}${rocks}${beam}${cow}${saucer}
+    ${mesas}${ground}${circle}${farm}${cacti}${rocks}${cow}<g class="fly">${beam}${saucer}</g>
   </svg>${mini('z1')}${mini('z2')}`;
 }
 buildUfo();
@@ -4396,7 +4408,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.51', APP_BUILT = '24 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.52', APP_BUILT = '24 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
