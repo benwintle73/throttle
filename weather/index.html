@@ -1131,21 +1131,9 @@
   .wscene{position:absolute;left:0;right:0;bottom:0;height:262px;pointer-events:none}
   .wscene > svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
   .wscene .horse{position:absolute;left:0;line-height:0;animation:wrun var(--d,12s) linear infinite;animation-delay:var(--dl,0s)}
-  .wscene .horse svg{display:block;overflow:visible;filter:brightness(var(--wdim,1));transform-origin:50% 100%;animation:gBob .5s ease-in-out infinite;animation-delay:var(--ph,0s)}
-  .wscene .horse g[class]{transform-origin:0 0;animation-duration:.5s;animation-iteration-count:infinite;animation-timing-function:ease-in-out;animation-delay:var(--ph,0s)}
-  .wscene .horse .fnu,.wscene .horse .ffu{animation-name:gFU}
-  .wscene .horse .fnl,.wscene .horse .ffl{animation-name:gFL}
-  .wscene .horse .hnu,.wscene .horse .hfu{animation-name:gHU}
-  .wscene .horse .hnl,.wscene .horse .hfl{animation-name:gHL}
-  .wscene .horse .tail{animation-name:gTail}
-  .wscene .horse .ffu,.wscene .horse .ffl,.wscene .horse .hfu,.wscene .horse .hfl{animation-delay:calc(var(--ph,0s) - .09s)}
-  @keyframes wrun{0%{transform:translateX(-90px)}100%{transform:translateX(calc(100vw + 90px))}}
-  @keyframes gBob{0%,100%{transform:translateY(0) rotate(0)}30%{transform:translateY(-4px) rotate(-3deg)}65%{transform:translateY(-1px) rotate(2deg)}}
-  @keyframes gFU{0%,100%{transform:rotate(-38deg)}35%{transform:rotate(-6deg)}55%{transform:rotate(28deg)}75%{transform:rotate(10deg)}}
-  @keyframes gFL{0%,100%{transform:rotate(-4deg)}35%{transform:rotate(0)}55%{transform:rotate(22deg)}75%{transform:rotate(100deg)}}
-  @keyframes gHU{0%,100%{transform:rotate(30deg)}50%{transform:rotate(-30deg)}}
-  @keyframes gHL{0%,100%{transform:rotate(8deg)}25%{transform:rotate(-55deg)}50%{transform:rotate(-8deg)}}
-  @keyframes gTail{0%,100%{transform:rotate(0)}50%{transform:rotate(14deg)}}
+  .wscene .horse b{display:block;width:var(--fw);height:var(--fh);background-size:calc(var(--fw) * 4) var(--fh);background-repeat:no-repeat;image-rendering:pixelated;filter:brightness(var(--wdim,1));animation:gallop 1.2s steps(4) infinite;animation-delay:var(--ph,0s)}
+  @keyframes wrun{0%{transform:translateX(-110px)}100%{transform:translateX(calc(100vw + 110px))}}
+  @keyframes gallop{from{background-position:0 0}to{background-position:calc(var(--fw) * -4) 0}}
   .wscene .dust{position:absolute;width:30px;height:12px;border-radius:50%;background:radial-gradient(var(--wdust,rgba(230,200,140,.55)),transparent 70%);animation:wdust .6s linear infinite;left:-14px;bottom:-2px}
   @keyframes wdust{from{transform:scale(.6);opacity:.9}to{transform:translateX(-18px) scale(1.4);opacity:0}}
   .wscene .eagle{position:absolute;top:58px;width:46px;height:20px;animation:weagle 32s linear infinite}
@@ -2499,6 +2487,59 @@ function buildUfo(){
   </svg>${mini('z1')}${mini('z2')}`;
 }
 buildUfo();
+// retro pixel horse: body/head drawn as a pixel map, legs rasterised per frame for a 4-frame gallop
+const HORSE_COATS = [
+  { B:'#8A4E2A', H:'#A9683E', M:'#1C1411', L:'#1C1411' },  // bay
+  { B:'#2E2622', H:'#4A3E38', M:'#0E0B0A', L:'#17120F' },  // black
+  { B:'#D9A65A', H:'#F0C987', M:'#FFF3D6', L:'#C08E48' },  // palomino
+  { B:'#B0552A', H:'#CF7646', M:'#6E2C12', L:'#94461F' },  // chestnut
+  { B:'#CFCBC4', H:'#EEEBE6', M:'#7C7873', L:'#A29D96' }   // grey
+];
+const HORSE_MAP = [
+  '.........................BB.....',
+  '........................MBBB....',
+  '.......................MMBBBB...',
+  '......................MMBBEBBB..',
+  '.....................MMBBBBBBBB.',
+  '....................MMBBBB.BBBBN',
+  '...................MMBBBB.......',
+  '..................MBBBBB........',
+  '.....HHHHHHHHHHHHHBBBBBB........',
+  '...MBBBBBBBBBBBBBBBBBBBB........',
+  '..MMBBBBBBBBBBBBBBBBBBBB........',
+  '..M.BBBBBBBBBBBBBBBBBBB.........',
+  '.M...BBBBBBBBBBBBBBBBB..........',
+  '......BBBBBBBBBBBBBBBB..........'
+];
+function horseSprite(c){
+  const W = 32, H = 21, shade = (hex, k) => '#' + [1, 3, 5].map(i => Math.round(parseInt(hex.slice(i, i + 2), 16) * k).toString(16).padStart(2, '0')).join('');
+  // [knee, hoof] offsets from the joint for a slow 4-beat walk: forward, plant, back, lift
+  const F = [[[1,3],[2,6]], [[0,3],[0,6]], [[-1,3],[-2,6]], [[1,2],[1,5]]];
+  const K = [[[-1,3],[-2,6]], [[0,2],[1,5]], [[1,3],[2,6]], [[0,3],[0,6]]];
+  const bob = [0, 0, 0, 0], tailY = [0, 0, 1, 0];
+  let rects = '';
+  const px = (x, y, col, ox, w = 1) => { if (x < 0 || x >= W || y < 0 || y >= H) return; rects += `<rect x="${x + ox}" y="${y}" width="${w}" height="1" fill="${col}"/>`; };
+  const line = (x0, y0, x1, y1, col, ox, w) => { const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) || 1; for (let t = 0; t <= n; t++) px(Math.round(x0 + (x1 - x0) * t / n), Math.round(y0 + (y1 - y0) * t / n), col, ox, w); };
+  const leg = (jx, jy, [[kx, ky], [hx, hy]], up, low, ox) => {
+    line(jx, jy, jx + kx, jy + ky, up, ox, 2);
+    line(jx + kx, jy + ky, jx + hx, jy + hy, low, ox, 1);
+    px(jx + hx - (hx < kx ? 1 : 0), jy + hy, '#120D0B', ox, 2);
+  };
+  for (let f = 0; f < 4; f++){
+    const ox = f * W, dy = bob[f] + 1, fb = shade(c.B, .7), fl = shade(c.L, .7);
+    // far legs (darker, one frame behind)
+    leg(18, 13 + dy, F[(f + 2) % 4], fb, fl, ox);
+    leg(9, 13 + dy, K[(f + 2) % 4], fb, fl, ox);
+    HORSE_MAP.forEach((row, y) => { for (let x = 0; x < W; x++){ const ch = row[x]; if (ch === '.') continue;
+      let yy = y + dy; if (ch === 'M' && x < 5) yy += tailY[f];
+      px(x, yy, ch === 'B' ? c.B : ch === 'H' ? c.H : ch === 'M' ? c.M : '#120D0B', ox); } });
+    // near legs
+    leg(20, 13 + dy, F[f], c.B, c.L, ox);
+    leg(7, 13 + dy, K[f], c.B, c.L, ox);
+  }
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W * 4}" height="${H}" shape-rendering="crispEdges">${rects}</svg>`;
+  return { w: W, h: H, url: 'data:image/svg+xml,' + encodeURIComponent(svg).replace(/'/g, '%27') };
+}
 function buildWild(){
   // original frontier scene: red-rock buttes, golden plains, a winding river and a herd of wild horses galloping through
   const el = $('wild'); if (!el) return;
@@ -2512,33 +2553,10 @@ function buildWild(){
   const pine = (x, y, s) => `<path d="M${x} ${y - 30 * s} L${x + 9 * s} ${y - 10 * s} L${x + 5 * s} ${y - 10 * s} L${x + 11 * s} ${y} L${x - 11 * s} ${y} L${x - 5 * s} ${y - 10 * s} L${x - 9 * s} ${y - 10 * s}Z" fill="var(--wpine)"/>`;
   let trees = ''; for (const [x, y, sc] of [[352, HOR + 6, .9], [366, HOR + 4, 1.1], [382, HOR + 8, .8], [12, HOR + 6, .8], [26, HOR + 4, 1]]) trees += pine(x, y, sc);
   let tufts = ''; for (let i = 0; i < 30; i++){ const x = L + r() * W, y = H - 34 + r() * 30; tufts += `<path d="M${x.toFixed(0)} ${y.toFixed(0)} l-3 -7 M${x.toFixed(0)} ${y.toFixed(0)} l0 -9 M${x.toFixed(0)} ${y.toFixed(0)} l3 -7" stroke="var(--wtuft)" stroke-width="1.4" stroke-linecap="round"/>`; }
-  // the herd: original drawn horses, facing right, with animated galloping legs, mane and tail
-  const shade = (hex, k) => '#' + [1, 3, 5].map(i => Math.round(parseInt(hex.slice(i, i + 2), 16) * k).toString(16).padStart(2, '0')).join('');
-  const COATS = [
-    { b:'#7A4526', m:'#1C1411', l:'#1C1411' },  // bay
-    { b:'#2E2521', m:'#120E0C', l:'#1A1412' },  // black
-    { b:'#D6A458', m:'#F5E9CA', l:'#C4924A' },  // palomino
-    { b:'#A44F25', m:'#6A2C13', l:'#8F4420' },  // chestnut
-    { b:'#CFCBC3', m:'#7E7A74', l:'#9C978F' }   // grey
-  ];
-  const horse = (c, w) => {
-    const leg = (x, cls, col, hind) => `<g transform="translate(${x} 31)"><g class="${cls}u"><path d="${hind ? 'M-5.5 -6 L5 -6 L2.2 12 L-1.8 12Z' : 'M-3.6 -4 L3.2 -4 L2 12 L-1.6 12Z'}" fill="${c.b}"/><g transform="translate(0 12)"><g class="${cls}l"><path d="M-1.9 -.6 L1.9 -.6 L1.4 10 L-1.4 10Z" fill="${col}"/><path d="M-2 9.4 L2.3 9.4 L2.8 12.4 L-2.3 12.4Z" fill="#17110E"/></g></g></g></g>`;
-    const far = shade(c.l, .72), farB = shade(c.b, .72);
-    const farLeg = (x, cls, hind) => leg(x, cls, far, hind).replace(`fill="${c.b}"`, `fill="${farB}"`);
-    return `<svg width="${w}" height="${(w * .64).toFixed(0)}" viewBox="0 -4 100 64">
-      ${farLeg(32, 'hf', true)}${farLeg(59, 'ff', false)}
-      <g transform="translate(25 22)"><g class="tail"><path d="M1 -1 C-7 -4 -15 1 -20 13 C-18 15 -14 11 -11 10 C-7 8 -3 6 1 5Z" fill="${c.m}"/></g></g>
-      <path d="M24 21 C31 15 57 14 66 19 C71 22 71 32 64 36 C54 40 35 40 26 37 C19 34 18 26 24 21Z" fill="${c.b}"/>
-      <path d="M58 22 C62 13 69 7 77 3 L85 9 C79 14 73 22 71 31 Z" fill="${c.b}"/>
-      <path d="M75 3 C79 0 86 1 90 5 L97 12 C99 15 96 18 92 17 L84 13 C80 11 76 8 75 3Z" fill="${c.b}"/>
-      <path d="M77 3 L78 -3 L82 2Z" fill="${c.b}"/>
-      <path d="M77 2 C70 5 63 12 58 22 L62 23 C64 18 67 14 70 12 L68 16 C72 12 75 9 80 6Z" fill="${c.m}"/>
-      <circle cx="87" cy="6.5" r="1.3" fill="#120D0B"/><circle cx="95" cy="13.5" r=".8" fill="#120D0B" opacity=".7"/>
-      ${leg(28, 'hn', c.l, true)}${leg(63, 'fn', c.l, false)}
-    </svg>`;
-  };
-  const herd = [[0, 52, 0, 46], [1, 64, -2.2, 50], [2, 48, -4.6, 40], [3, 70, -6.4, 52], [4, 58, -8.3, 42]]
-    .map(([c, y, dl, fs], i) => `<div class="horse" style="--d:11s;--dl:${dl}s;--ph:${(-i * .13).toFixed(2)}s;top:${HOR + y - Math.round(fs * 1.1)}px"><i class="dust"></i>${horse(COATS[c], Math.round(fs * 1.7))}</div>`).join('');
+  // the herd: retro 8-bit pixel horses walking slowly across — a 4-frame walk sprite sheet built per coat
+  const herd = [[0, 54, 0, 2], [1, 66, -14, 3], [2, 48, -29, 2], [3, 72, -41, 3], [4, 58, -52, 2]]
+    .map(([c, y, dl, sc], i) => { const sp = horseSprite(HORSE_COATS[c]);
+      return `<div class="horse" style="--d:60s;--dl:${dl}s;--ph:${(-i * .37).toFixed(2)}s;--fw:${sp.w * sc}px;--fh:${sp.h * sc}px;top:${HOR + y - sp.h * sc}px"><b style="background-image:url('${sp.url}')"></b></div>`; }).join('');
   const eagle = `<div class="eagle"><svg viewBox="0 0 46 20"><path d="M23 10 C17 4 9 2 0 6 C8 6 14 9 20 12 L26 12 C32 9 38 6 46 6 C37 2 29 4 23 10Z" fill="var(--weagle)"/><circle cx="23" cy="9" r="2.2" fill="#F4EEE0"/></svg></div>`;
   el.innerHTML = `<svg viewBox="${-DX} 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice">${buttes}${plain}${trees}${tufts}</svg>${herd}${eagle}`;
 }
