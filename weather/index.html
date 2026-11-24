@@ -990,7 +990,7 @@
     .app,.ptr,#editDone{display:none!important}
     .scene{position:fixed!important;top:0!important;height:100vh!important}
     .river{height:100vh!important}
-    body:not(.neon):not(.murray):not(.beach):not(.island):not(.drop):not(.retro) .lhills{display:block;position:absolute;left:0;right:0;bottom:0;height:42%}
+    body:not(.neon):not(.murray):not(.beach):not(.island):not(.drop):not(.ufo):not(.retro) .lhills{display:block;position:absolute;left:0;right:0;bottom:0;height:42%}
     .lhills svg{width:100%;height:100%;display:block}
     body.retro .lgrid{display:block;position:absolute;left:0;right:0;bottom:0;height:44%}
     .lgrid .mtn{position:absolute;left:0;right:0;bottom:62%;width:100%;height:38%;opacity:var(--mtn,1)}
@@ -1088,11 +1088,41 @@
   body.drop .chip.active{background:#FFE45C;color:#2A1A6E}
   body.drop .tmrw{background:rgba(40,30,120,.3)}
   body.drop .todo-card .go,body.drop .saju .go,body.drop .mind .go,body.drop .pz-card .go,body.drop .radar-card .go{background:#FFE45C;color:#2A1A6E;font-family:'Luckiest Guy',cursive;font-weight:400;letter-spacing:.8px}
+  .ufo-only{display:none}
+  body.ufo .ufo-only{display:block}
+  body.ufo .bg{background:linear-gradient(180deg,var(--g1) 0%,var(--g2) 28%,var(--g3) 46%,var(--earth,#8A5A3C) 74%,var(--earth2,#4A2E22) 100%)}
+  .uscene{position:absolute;left:0;right:0;bottom:0;height:262px;pointer-events:none}
+  .uscene > svg{position:absolute;inset:0;width:100%;height:100%}
+  .uscene .beam{animation:beam 3.2s ease-in-out infinite;transform-origin:50% 0}
+  @keyframes beam{0%,100%{opacity:.35}50%{opacity:.75}}
+  .uscene .saucer{animation:hover 4s ease-in-out infinite}
+  @keyframes hover{50%{transform:translateY(-5px)}}
+  .uscene .lights circle{animation:blink 1.2s steps(1) infinite}
+  .uscene .lights circle:nth-child(2n){animation-delay:-.6s}
+  @keyframes blink{50%{opacity:.25}}
+  .uscene .cow{animation:lift 9s ease-in-out infinite}
+  @keyframes lift{0%,30%{transform:translateY(0)}60%,70%{transform:translateY(-34px)}100%{transform:translateY(0)}}
+  .uscene .zip{position:absolute;top:24px;width:34px;height:14px;animation:zip 17s linear infinite;opacity:0}
+  .uscene .zip.z2{animation-delay:-9s;animation-duration:23s;top:56px}
+  @keyframes zip{0%{transform:translateX(-60px);opacity:0}4%{opacity:1}40%{transform:translateX(45vw) translateY(-8px)}44%{transform:translateX(45vw) translateY(-8px)}60%{opacity:1}64%{transform:translateX(110vw) translateY(10px);opacity:0}100%{opacity:0}}
+  @media (orientation:landscape) and (max-height:520px){ .uscene{height:100vh!important} }
+  body.ufo .hero{padding-bottom:116px}
+  body.ufo .place h1{font-family:'Orbitron',sans-serif;font-weight:700;letter-spacing:1px;font-size:26px}
+  body.ufo .cond{font-family:'Orbitron',sans-serif;font-weight:600;letter-spacing:2px;font-size:17px;text-transform:uppercase;color:#C8FFD8;text-shadow:0 0 12px rgba(80,255,160,.55)}
+  body.ufo .temp{text-shadow:0 0 22px rgba(90,255,170,.35)}
+  body.ufo .card{background:rgba(14,22,44,.32);border-color:rgba(124,255,170,.32)}
+  body.ufo .card h2{color:#7CFFAA;font-family:'Orbitron',sans-serif;letter-spacing:1.6px}
+  body.ufo .chip.active{background:#7CFFAA;color:#0E1A2E}
+  body.ufo .tmrw{background:rgba(10,16,34,.35)}
+  body.ufo .hilo,body.ufo .ptime{background:rgba(10,16,40,.42);border:1px solid rgba(124,255,170,.25)}
+  body.ufo .todo-card .go,body.ufo .saju .go,body.ufo .mind .go,body.ufo .pz-card .go{background:#7CFFAA;color:#0E1A2E}
+  .appear .pv-ufo{background:linear-gradient(180deg,#120C33 0%,#3A2A80 45%,#2FC6A0 62%,#8A5A3C 63%,#4A2E22 100%);position:relative;overflow:hidden}
+  .appear .pv-ufo::after{content:'🛸';position:absolute;left:50%;top:14%;transform:translateX(-50%);font-size:14px;line-height:1}
   .appear .pv-drop{background:linear-gradient(180deg,#2F7BFF 0%,#7FD2FF 50%,#5FD067 51%,#2F8C45 100%);position:relative;overflow:hidden}
   .appear .pv-drop::before{content:'';position:absolute;left:0;top:10%;width:22%;height:60%;background:linear-gradient(90deg,#8A3DFF,#B66BFF);opacity:.85}
   .appear .pv-drop::after{content:'🪂';position:absolute;right:16%;top:12%;font-size:13px;line-height:1}
-  .river,.bscene,.iscene,.dscene,.lhills,.lgrid,.skyline,.sea,.palm{transition:opacity .6s}
-  body:not(.skyready) .river,body:not(.skyready) .bscene,body:not(.skyready) .iscene,body:not(.skyready) .dscene,body:not(.skyready) .lhills,body:not(.skyready) .lgrid,body:not(.skyready) .skyline,body:not(.skyready) .sea,body:not(.skyready) .palm{opacity:0}
+  .river,.bscene,.iscene,.dscene,.uscene,.lhills,.lgrid,.skyline,.sea,.palm{transition:opacity .6s}
+  body:not(.skyready) .river,body:not(.skyready) .bscene,body:not(.skyready) .iscene,body:not(.skyready) .dscene,body:not(.skyready) .uscene,body:not(.skyready) .lhills,body:not(.skyready) .lgrid,body:not(.skyready) .skyline,body:not(.skyready) .sea,body:not(.skyready) .palm{opacity:0}
   /* ===== Seoul theme ===== */
   .seoul-only{display:none}
   body.seoul .seoul-only{display:block}
@@ -1209,6 +1239,7 @@
   <div class="bscene beach-only" id="beach"></div>
   <div class="iscene island-only" id="island"></div>
   <div class="dscene drop-only" id="drop"></div>
+  <div class="uscene ufo-only" id="ufo"></div>
   <div class="phz pro-only" id="phz"><i id="phzGlow"></i><svg viewBox="0 0 800 60" preserveAspectRatio="none">
     <path d="M0 44 L50 30 L95 38 L150 14 L205 33 L250 24 L300 40 L360 20 L410 6 L455 26 L500 18 L560 36 L615 22 L660 30 L720 12 L770 28 L800 22 L800 60 L0 60Z" fill="#151C29"/>
     <path d="M0 50 L70 40 L130 46 L210 32 L280 44 L340 36 L430 48 L520 34 L600 46 L680 38 L760 46 L800 42 L800 60 L0 60Z" fill="#131A26"/>
@@ -1749,6 +1780,17 @@ const DROP_SKY = [
   [ 1.06, ['#26157A','#7A2FA8','#FF6A9A']],
   [ 1.16, ['#120A3A','#24145E','#3A1F7A']],
 ];
+const UFO_SKY = [
+  [-0.16, ['#07061A','#120C33','#1E1450']],
+  [-0.06, ['#141244','#3A2A80','#2FC6A0']],
+  [ 0.02, ['#1E2C6E','#5A4FB0','#9CF5C0']],
+  [ 0.14, ['#1C3F7A','#3A8CB0','#B6F2D6']],
+  [ 0.50, ['#1A4C8A','#3AA0C0','#BFF5DE']],
+  [ 0.86, ['#22407A','#5A8CC0','#D8F5B0']],
+  [ 0.98, ['#2A2070','#8A3FB0','#5FF0B0']],
+  [ 1.06, ['#16124A','#3A1F78','#2FB8A0']],
+  [ 1.16, ['#07061A','#120C33','#1E1450']],
+];
 const KST_SKY = [
   [-0.16, ['#140A33','#2B1258','#4A1E78']],
   [-0.06, ['#3A1E78','#8A4FB8','#FF8FC4']],
@@ -1783,7 +1825,7 @@ const NEON_SKY = [
   [ 1.16, ['#0D0221','#26083F','#541066']],
 ];
 let theme = store.get('wx_theme', null) || (store.get('wx_neon', false) ? 'neon' : 'classic');
-{ const t = new URLSearchParams(location.search).get('theme'); if (['classic','neon','murray','retro','beach','island','drop','seoul','kstreet','pro'].includes(t)) theme = t; }
+{ const t = new URLSearchParams(location.search).get('theme'); if (['classic','neon','murray','retro','beach','island','drop','ufo','seoul','kstreet','pro'].includes(t)) theme = t; }
 let neon = theme === 'neon';
 /* ---------- Time Warp theme: clock-radio style segment display + time-jump flash ---------- */
 const SEG = { '0':'abcdef','1':'bc','2':'abged','3':'abgcd','4':'fgbc','5':'afgcd','6':'afgedc','7':'abc','8':'abcdefg','9':'abcdfg','-':'g',' ':'' };
@@ -1875,7 +1917,7 @@ function updAgo(){ if (!lastFetch) return 'Updated just now'; const m = Math.rou
   return m < 1 ? 'Updated just now' : m < 60 ? `Updated ${m} min ago` : `Updated ${Math.round(m / 60)} hr${m >= 90 ? 's' : ''} ago — pull down to refresh`; }
 setInterval(() => { const el = $('ptime'); if (el && lastData) el.textContent = placeTimeText(lastData); const u = $('updAgo'); if (u) u.textContent = updAgo(); }, 15000);
 function setThemeClass(){
-  ['neon','murray','retro','beach','island','drop','seoul','kstreet','pro'].forEach(t => document.body.classList.toggle(t, theme === t));
+  ['neon','murray','retro','beach','island','drop','ufo','seoul','kstreet','pro'].forEach(t => document.body.classList.toggle(t, theme === t));
 }
 function applyMode(){
   neon = theme === 'neon';
@@ -2205,7 +2247,7 @@ function buildKStreet(){
 buildKStreet();
 let sceneWas = sceneW();
 let sceneT = 0;
-addEventListener("resize", () => { clearTimeout(sceneT); sceneT = setTimeout(() => { const w = sceneW(); if (Math.abs(w - sceneWas) < 20) return; sceneWas = w; buildRiver(); buildSeoul(); buildKStreet(); buildBeach(); buildIsland(); buildDrop(); if (lastData) updateSky(); }, 250); });
+addEventListener("resize", () => { clearTimeout(sceneT); sceneT = setTimeout(() => { const w = sceneW(); if (Math.abs(w - sceneWas) < 20) return; sceneWas = w; buildRiver(); buildSeoul(); buildKStreet(); buildBeach(); buildIsland(); buildDrop(); buildUfo(); if (lastData) updateSky(); }, 250); });
 function buildBeach(){
   // original bay-side beach: calm bay, long timber pier, a row of striped bathing boxes, umbrella
   const W = sceneW(), H = 262, HOR = 176, SH = 214, DX = (W - 400) / 2;   // horizon, shoreline
@@ -2354,6 +2396,46 @@ function buildDrop(){
   ${glider('g1', 30, '#FF5FA2', '#FFE45C')}${glider('g2', 58, '#3AD1FF', '#FF8A3D')}${glider('g3', 76, '#FFE45C', '#8A3DFF')}`;
 }
 buildDrop();
+function buildUfo(){
+  // original desert night scene: mesas, a lonely farm with a windmill, a crop circle and a saucer beaming up a cow
+  const el = $('ufo'); if (!el) return;
+  const W = sceneW(), H = 262, HOR = 160, DX = (W - 400) / 2, L = -DX, R = W - DX;
+  let seed = 51; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const mesas = `<path d="M${L} ${HOR + 4} L${L} ${HOR - 22} L-10 ${HOR - 22} L4 ${HOR - 46} L60 ${HOR - 46} L72 ${HOR - 24} L118 ${HOR - 24} L126 ${HOR - 8} L250 ${HOR - 8} L262 ${HOR - 36} L300 ${HOR - 36} L310 ${HOR - 18} L360 ${HOR - 18} L372 ${HOR - 52} L${R} ${HOR - 52} L${R} ${HOR + 4}Z" fill="var(--umesa)"/>
+    <path d="M4 ${HOR - 46} L60 ${HOR - 46} M262 ${HOR - 36} L300 ${HOR - 36} M372 ${HOR - 52} L${R} ${HOR - 52}" stroke="var(--umesa2)" stroke-width="2"/>`;
+  const ground = `<path d="M${L} ${HOR} C80 ${HOR - 4} 200 ${HOR + 6} 300 ${HOR} C350 ${HOR - 3} 380 ${HOR + 2} ${R} ${HOR} L${R} ${H} L${L} ${H}Z" fill="var(--uground)"/>
+    <path d="M${L} ${H - 34} C90 ${H - 46} 200 ${H - 30} 290 ${H - 42} C340 ${H - 48} 380 ${H - 40} ${R} ${H - 44} L${R} ${H} L${L} ${H}Z" fill="var(--unear)"/>`;
+  const circle = `<g opacity=".55" fill="none" stroke="var(--ucrop)" stroke-width="2"><ellipse cx="200" cy="${HOR + 30}" rx="44" ry="9"/><ellipse cx="200" cy="${HOR + 30}" rx="28" ry="5.5"/><ellipse cx="200" cy="${HOR + 30}" rx="10" ry="2"/>
+      <ellipse cx="254" cy="${HOR + 34}" rx="12" ry="2.6"/><path d="M244 ${HOR + 30} L210 ${HOR + 30}"/></g>`;
+  const farm = `<g><rect x="300" y="${HOR - 2}" width="34" height="22" fill="var(--uwall)"/><path d="M296 ${HOR - 2} L317 ${HOR - 20} L338 ${HOR - 2}Z" fill="var(--uroof)"/>
+      <rect x="306" y="${HOR + 4}" width="8" height="7" fill="#FFE27A" opacity="var(--ulit)"/><rect x="320" y="${HOR + 8}" width="8" height="12" fill="var(--uroof)"/>
+      <path d="M356 ${HOR + 20} L362 ${HOR - 36} L368 ${HOR + 20} M358 ${HOR} L366 ${HOR} M359 ${HOR - 16} L365 ${HOR - 16}" stroke="var(--uwood)" stroke-width="1.6" fill="none"/>
+      <g class="vane" transform="translate(362 ${HOR - 38})"><g><path d="M0 0 L0 -13 M0 0 L11 6 M0 0 L-11 6" stroke="var(--uwood)" stroke-width="2.4" stroke-linecap="round"/><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="6s" repeatCount="indefinite"/></g></g>
+      <path d="M260 ${HOR + 14} L292 ${HOR + 14} M262 ${HOR + 8} L262 ${HOR + 18} M276 ${HOR + 8} L276 ${HOR + 18} M290 ${HOR + 8} L290 ${HOR + 18}" stroke="var(--uwood)" stroke-width="1.4"/></g>`;
+  let cacti = '';
+  for (const [x, y, s] of [[120, H - 30, 1.1], [214, H - 36, .9], [388, H - 40, 1.2], [180, HOR + 18, .6]]) cacti += `<path d="M${x} ${y} L${x} ${y - 26 * s} M${x} ${y - 14 * s} L${x - 7 * s} ${y - 14 * s} L${x - 7 * s} ${y - 22 * s} M${x} ${y - 10 * s} L${x + 7 * s} ${y - 10 * s} L${x + 7 * s} ${y - 19 * s}" stroke="var(--ucact)" stroke-width="${5 * s}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`;
+  let rocks = ''; for (let i = 0; i < 14; i++){ const x = L + r() * W, y = H - 22 + r() * 18; rocks += `<ellipse cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" rx="${(2 + r() * 4).toFixed(1)}" ry="1.6" fill="var(--urock)"/>`; }
+  // the saucer, its beam and the cow it's lifting
+  const SX = 50, SY = 104;
+  const beam = `<path class="beam" d="M${SX - 12} ${SY + 12} L${SX - 34} ${HOR + 40} L${SX + 34} ${HOR + 40} L${SX + 12} ${SY + 12}Z" fill="url(#ubeam)"/>
+    <ellipse cx="${SX}" cy="${HOR + 40}" rx="34" ry="6" fill="#9CFFC8" opacity=".35"/>`;
+  const cow = `<g class="cow"><g transform="translate(${SX - 13} ${HOR + 22})"><rect x="0" y="0" width="26" height="13" rx="5" fill="#F4F1EA" stroke="#2A2A2A" stroke-width="1"/>
+      <path d="M6 1 q4 3 0 7 q-4 -2 0 -7Z M16 4 q5 2 2 7 q-5 -1 -2 -7Z" fill="#2A2A2A"/><rect x="24" y="-4" width="9" height="8" rx="3" fill="#F4F1EA" stroke="#2A2A2A" stroke-width="1"/>
+      <rect x="29" y="0" width="5" height="4" rx="2" fill="#F2A6B8"/><path d="M3 13 l0 6 M8 13 l0 6 M18 13 l0 6 M23 13 l0 6" stroke="#2A2A2A" stroke-width="2"/></g></g>`;
+  const saucer = `<g class="saucer"><ellipse cx="${SX}" cy="${SY}" rx="14" ry="10" fill="url(#udome)" stroke="#BFFFE0" stroke-width="1" opacity=".95"/>
+      <ellipse cx="${SX}" cy="${SY + 8}" rx="36" ry="9" fill="url(#uhull)" stroke="#2A3A4A" stroke-width="1"/>
+      <ellipse cx="${SX}" cy="${SY + 12}" rx="16" ry="3" fill="#2A3A4A"/>
+      <g class="lights">${[-27, -18, -9, 0, 9, 18, 27].map((dx, i) => `<circle cx="${SX + dx}" cy="${SY + 9 + Math.abs(dx) * -.04}" r="2.2" fill="${['#7CFFAA','#FFE45C','#FF5FA2'][i % 3]}"/>`).join('')}</g>
+      <circle cx="${SX - 4}" cy="${SY - 4}" r="3" fill="#7CFFAA"/><circle cx="${SX - 5}" cy="${SY - 5}" r="1" fill="#0E1A2E"/></g>`;
+  const mini = c => `<div class="zip ${c}"><svg viewBox="0 0 34 14"><ellipse cx="17" cy="6" rx="6" ry="5" fill="#BFFFE0" opacity=".9"/><ellipse cx="17" cy="9" rx="16" ry="4" fill="#9AA8B8" stroke="#2A3A4A" stroke-width=".8"/><circle cx="8" cy="9" r="1.2" fill="#7CFFAA"/><circle cx="17" cy="10.5" r="1.2" fill="#FFE45C"/><circle cx="26" cy="9" r="1.2" fill="#FF5FA2"/></svg></div>`;
+  el.innerHTML = `<svg viewBox="${-DX} 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice">
+    <defs><linearGradient id="ubeam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C8FFE0" stop-opacity=".9"/><stop offset="1" stop-color="#7CFFAA" stop-opacity=".15"/></linearGradient>
+      <linearGradient id="uhull" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E4ECF4"/><stop offset="1" stop-color="#7A8898"/></linearGradient>
+      <radialGradient id="udome" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#E8FFF4"/><stop offset="1" stop-color="#5FD6A8"/></radialGradient></defs>
+    ${mesas}${ground}${circle}${farm}${cacti}${rocks}${beam}${cow}${saucer}
+  </svg>${mini('z1')}${mini('z2')}`;
+}
+buildUfo();
 const CLOUDINESS = {clear:0, partly:.18, cloudy:.78, fog:.72, rain:.8, snow:.6, storm:.88};
 // overcast palettes (top, middle, horizon) the sky blends towards: day / night, and storm
 const GREY_DAY   = ['#8E9AA8','#A7B0BA','#C2C8CE'], GREY_NIGHT = ['#1D2129','#262A33','#30343D'];
@@ -2369,7 +2451,7 @@ function mute(hex, amt){ // desaturate + dim for overcast skies
 }
 function mixSet(a, b, t){ return a.map((c, i) => mix(c, b[i], t)); }
 function skyAt(p){
-  const K = neon ? NEON_SKY : theme === 'murray' ? MURRAY_SKY : theme === 'retro' ? RETRO_SKY : theme === 'beach' ? BEACH_SKY : theme === 'island' ? ISLAND_SKY : theme === 'drop' ? DROP_SKY : theme === 'seoul' ? SEOUL_SKY : theme === 'kstreet' ? KST_SKY : SKY;
+  const K = neon ? NEON_SKY : theme === 'murray' ? MURRAY_SKY : theme === 'retro' ? RETRO_SKY : theme === 'beach' ? BEACH_SKY : theme === 'island' ? ISLAND_SKY : theme === 'drop' ? DROP_SKY : theme === 'ufo' ? UFO_SKY : theme === 'seoul' ? SEOUL_SKY : theme === 'kstreet' ? KST_SKY : SKY;
   if (p <= K[0][0] || p >= K[K.length-1][0]) return K[0][1];
   for (let i=0;i<K.length-1;i++){
     const [p0,c0] = K[i], [p1,c1] = K[i+1];
@@ -2486,7 +2568,7 @@ function updateSky(){
     scene.style.height = H + 'px';
     W = scene.clientWidth;
   }
-  const murray = theme === 'murray', base = murray ? H - 64 : theme === 'beach' ? H - 86 : theme === 'island' ? H - 94 : theme === 'drop' ? H - 104 : theme === 'pro' ? H - (LANDSCAPE() ? innerHeight * .22 : 70) : theme === 'seoul' ? H - 70 : theme === 'kstreet' ? H - 120 : H;   // in Murray mode the sun sets behind the far bank
+  const murray = theme === 'murray', base = murray ? H - 64 : theme === 'beach' ? H - 86 : theme === 'island' ? H - 94 : theme === 'drop' ? H - 104 : theme === 'ufo' ? H - 96 : theme === 'pro' ? H - (LANDSCAPE() ? innerHeight * .22 : 70) : theme === 'seoul' ? H - 70 : theme === 'kstreet' ? H - 120 : H;   // in Murray mode the sun sets behind the far bank
   const place = (el, t) => {
     el.style.left = (W*(0.07 + t*0.86)) + 'px';
     el.style.top  = (base - Math.sin(Math.PI*t)*(base - (neon ? 95 : Math.max(165, H * 0.42)))) + 'px';   // peak sits below the header, visible
@@ -2569,6 +2651,15 @@ function updateSky(){
     set('--dlit', Math.min(1, night * 1.2 + twilight * .5).toFixed(2));
     set('--earth', mix(mute('#3FB255', cloud * .4), '#0B1E16', dark)); set('--earth2', mix('#2F8C45', '#07140E', night * .9));
     document.querySelectorAll('#drop .glider').forEach(g => g.style.display = (k === 'storm' || night > .6) ? 'none' : '');
+  }
+  if (theme === 'ufo'){
+    const set = (k, v) => r.setProperty(k, v), dark = Math.max(night * .85, twilight * .35);
+    set('--umesa', mix(mix(cols[2], '#B0603C', .6), '#1A1030', dark)); set('--umesa2', mix('#D88A5A', '#2A1A40', dark));
+    set('--uground', mix(mute('#C07A4A', cloud * .4), '#1C1424', dark)); set('--unear', mix(mute('#9A5E3A', cloud * .4), '#120C18', dark));
+    set('--ucrop', mix('#F6D98A', '#7CFFAA', night)); set('--urock', mix('#6A4030', '#0A0810', dark));
+    set('--uwall', mix('#E8D2B0', '#2A2430', dark)); set('--uroof', mix('#A83A2A', '#24101A', dark)); set('--uwood', mix('#6A4A30', '#100C10', dark));
+    set('--ucact', mix(mute('#3E8A4A', cloud * .3), '#0C1A14', dark)); set('--ulit', Math.min(1, night * 1.2 + twilight * .5).toFixed(2));
+    set('--earth', mix(mute('#9A5E3A', cloud * .4), '#120C18', dark)); set('--earth2', mix('#4A2E22', '#08060C', night * .9));
   }
   if (theme === 'island'){
     const set = (k, v) => r.setProperty(k, v), dark = Math.max(night * .9, twilight * .35);
@@ -3557,7 +3648,7 @@ function alertsHTML(d, start){
 /* ---------- typical weather by month (10-year averages from past observations) ---------- */
 const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 let xtrasOpen = false, appearOpen = false;
-const THEME_NAMES = { classic:'Classic', neon:'🌴 Neon', murray:'🌳 Murray', retro:'⚡ Time Warp', beach:'🏖️ Beach', island:'🇹🇭 Thailand', drop:'🪂 Drop Zone', seoul:'🌸 Seoul', kstreet:'💜 K-Street', pro:'💼 Business' };
+const THEME_NAMES = { classic:'Classic', neon:'🌴 Neon', murray:'🌳 Murray', retro:'⚡ Time Warp', beach:'🏖️ Beach', island:'🇹🇭 Thailand', drop:'🪂 Drop Zone', ufo:'🛸 UFO', seoul:'🌸 Seoul', kstreet:'💜 K-Street', pro:'💼 Business' };
 const xtrasCount = () => [store.get('wx_fun_on', true), store.get('wx_wear_on', false), store.get('wx_otd_on', false), store.get('wx_saju_on', true), store.get('wx_movie_on', false), newsOn(), store.get('wx_mind_on', false), store.get('wx_arrange', false)].filter(Boolean).length;
 document.addEventListener('change', e => { if (e.target.closest && e.target.closest('.xtras')) setTimeout(() => { const n = document.querySelector('.xtras .xn'); if (n) n.textContent = `${xtrasCount()} of 8 on`; }, 0); });
 let climPick = null, climLoading = '', climFail = {};
@@ -4304,7 +4395,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.49', APP_BUILT = '24 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.50', APP_BUILT = '24 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
@@ -4335,6 +4426,7 @@ function appearanceHTML(){
     <button type="button" data-theme="beach" class="${theme==='beach'?'on':''}"><i class="pv-beach"></i><span>🏖️ Beach<b></b></span></button>
     <button type="button" data-theme="island" class="${theme==='island'?'on':''}"><i class="pv-island"></i><span>🇹🇭 Thailand<b></b></span></button>
     <button type="button" data-theme="drop" class="${theme==='drop'?'on':''}"><i class="pv-drop"></i><span>🪂 Drop Zone<b></b></span></button>
+    <button type="button" data-theme="ufo" class="${theme==='ufo'?'on':''}"><i class="pv-ufo"></i><span>🛸 UFO<b></b></span></button>
     <button type="button" data-theme="seoul" class="${theme==='seoul'?'on':''}"><i class="pv-seoul"></i><span>🌸 Seoul<b></b></span></button>
     <button type="button" data-theme="kstreet" class="${theme==='kstreet'?'on':''}"><i class="pv-kst"></i><span>💜 K-Street<b></b></span></button>
     <button type="button" data-theme="pro" class="${theme==='pro'?'on':''}"><i class="pv-pro"></i><span>💼 Business<b></b></span></button>
