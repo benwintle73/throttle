@@ -1173,6 +1173,7 @@
   .appear .pv-seoul{background:linear-gradient(180deg,#7FB2F0 0%,#F7DDE8 55%,#8A93B8 56%,#4E7FAE 75%,#3A3F4A 76%);position:relative}
   .appear .pv-seoul::after{content:'';position:absolute;right:12%;top:18%;width:3px;height:40%;background:#EDEFF5;box-shadow:-1px 6px 0 2px #EDEFF5}
   @media (orientation:landscape) and (max-height:520px){ .kscene{height:100vh!important} }
+  .eb-shake{background:none;border:0;padding:0;color:inherit;font:inherit;text-decoration:underline;cursor:pointer}
   .updpill{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:99;border:0;border-radius:999px;padding:11px 18px;background:#fff;color:#222;font:700 14px 'Outfit',sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.3);cursor:pointer;animation:popIn .3s ease}
   /* ===== K-Street theme ===== */
   .kstreet-only{display:none}
@@ -3264,12 +3265,13 @@ let ebBusy = false, ebMotion = false, ebLast = 0;
 function openEightBall(){
   $('ebPage').classList.add('open'); $('ebQ').value = '';
   $('ball').classList.remove('open','reveal','shake');
-  $('ebHint').textContent = 'Shake your phone or tap the ball';
-  try{
-    if (typeof DeviceMotionEvent !== 'undefined' && DeviceMotionEvent.requestPermission && !ebMotion)
-      DeviceMotionEvent.requestPermission().then(r => { if (r === 'granted') addShake(); }).catch(() => {});
-    else addShake();
-  }catch(e){}
+  // iPhone forgets motion permission every time the app closes, so never ask on open: tap the ball, or opt in to shake
+  const needsAsk = typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function';
+  if (!needsAsk) addShake();
+  $('ebHint').innerHTML = ebMotion ? 'Shake your phone or tap the ball' : `Tap the ball to ask${needsAsk ? ' · <button type="button" class="eb-shake" onclick="enableShake()">Use shake</button>' : ''}`;
+}
+function enableShake(){
+  try { DeviceMotionEvent.requestPermission().then(r => { if (r === 'granted'){ addShake(); $('ebHint').textContent = 'Shake your phone or tap the ball'; } else $('ebHint').textContent = 'Tap the ball to ask'; }).catch(() => {}); } catch {}
 }
 function addShake(){
   if (ebMotion) return; ebMotion = true;
@@ -4508,7 +4510,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.57', APP_BUILT = '24 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.58', APP_BUILT = '25 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
