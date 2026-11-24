@@ -1130,16 +1130,10 @@
   body.wild .bg{background:linear-gradient(180deg,var(--g1) 0%,var(--g2) 28%,var(--g3) 46%,var(--earth,#B08A3E) 74%,var(--earth2,#6A5022) 100%)}
   .wscene{position:absolute;left:0;right:0;bottom:0;height:262px;pointer-events:none}
   .wscene > svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-  .wscene .horse{position:absolute;width:78px;height:53px;left:0;animation:wrun var(--d,12s) linear infinite;animation-delay:var(--dl,0s)}
-  .wscene .horse svg{width:100%;height:100%;overflow:visible;animation:wbob .36s ease-in-out infinite}
+  .wscene .horse{position:absolute;left:0;line-height:1;animation:wrun var(--d,12s) linear infinite;animation-delay:var(--dl,0s)}
+  .wscene .horse span{display:inline-block;transform:scaleX(-1);animation:wbob .42s ease-in-out infinite}
   @keyframes wrun{0%{transform:translateX(-90px)}100%{transform:translateX(calc(100vw + 90px))}}
-  @keyframes wbob{50%{transform:translateY(-3px) rotate(-2deg)}}
-  .wscene .horse .lf{animation:wlegA .36s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 0}
-  .wscene .horse .lb{animation:wlegB .36s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 0}
-  @keyframes wlegA{0%,100%{transform:rotate(-42deg)}50%{transform:rotate(22deg)}}
-  @keyframes wlegB{0%,100%{transform:rotate(38deg)}50%{transform:rotate(-24deg)}}
-  .wscene .horse .mane{animation:wmane .36s ease-in-out infinite;transform-box:fill-box;transform-origin:100% 100%}
-  @keyframes wmane{50%{transform:skewX(-14deg)}}
+  @keyframes wbob{0%,100%{transform:scaleX(-1) translateY(0) rotate(0)}50%{transform:scaleX(-1) translateY(-5px) rotate(4deg)}}
   .wscene .dust{position:absolute;width:30px;height:12px;border-radius:50%;background:radial-gradient(var(--wdust,rgba(230,200,140,.55)),transparent 70%);animation:wdust .6s linear infinite;left:-14px;bottom:-2px}
   @keyframes wdust{from{transform:scale(.6);opacity:.9}to{transform:translateX(-18px) scale(1.4);opacity:0}}
   .wscene .eagle{position:absolute;top:58px;width:46px;height:20px;animation:weagle 32s linear infinite}
@@ -2507,17 +2501,9 @@ function buildWild(){
   let trees = ''; for (const [x, y, sc] of [[352, HOR + 6, .9], [366, HOR + 4, 1.1], [382, HOR + 8, .8], [12, HOR + 6, .8], [26, HOR + 4, 1]]) trees += pine(x, y, sc);
   let tufts = ''; for (let i = 0; i < 30; i++){ const x = L + r() * W, y = H - 34 + r() * 30; tufts += `<path d="M${x.toFixed(0)} ${y.toFixed(0)} l-3 -7 M${x.toFixed(0)} ${y.toFixed(0)} l0 -9 M${x.toFixed(0)} ${y.toFixed(0)} l3 -7" stroke="var(--wtuft)" stroke-width="1.4" stroke-linecap="round"/>`; }
   // an original galloping horse, drawn facing right
-  const horse = (coat, mane, blaze) => `<svg viewBox="0 0 62 42">
-      <path class="lb" style="animation-delay:-.05s" d="M17 22 l-1 9 l4 5 l-1 4" stroke="${coat}" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".7"/>
-      <path class="lf" style="animation-delay:-.05s" d="M41 23 l1 9 l-1 7" stroke="${coat}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".7"/>
-      <path d="M12 16 C6 14 2 18 0 25 C5 22 9 22 12 21Z" fill="${mane}"/>
-      <path d="M11 20 C10 13 16 10 22 11 C29 12 35 12 41 11 L46 6 C48 4 50 3 52 3 L60 9 C61 11 60 13 58 13 L53 11 C50 14 47 19 45 24 C40 28 33 28 27 27 C23 28 19 29 15 27 C12 25 11 23 11 20Z" fill="${coat}"/>
-      <path class="mane" d="M52 2 C47 2 43 6 40 11 C43 10 45 9 47 8 C45 11 44 13 43 15 C47 11 50 7 53 5Z" fill="${mane}"/>
-      <path d="M51 3 l1 -3 l2 3Z" fill="${coat}"/>${blaze ? `<path d="M57 8 l2 3 l-2 .5Z" fill="#fff"/>` : ''}<circle cx="54.5" cy="6.5" r=".9" fill="#1A120A"/>
-      <path class="lf" d="M38 24 l1 9 l-1 7" stroke="${coat}" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      <path class="lb" d="M15 22 l-1 9 l4 5 l-1 4" stroke="${coat}" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`;
-  const herd = [['#8A5A2E','#2A1A10',1,11,0,HOR + 52,.9],['#2A2220','#141010',0,11,-2.2,HOR + 64,1],['#D6B070','#F4E8CC',1,11,-4.6,HOR + 48,.8],['#6A3A1E','#1E120A',0,11,-6.4,HOR + 70,1.05],['#B8A89A','#4A4038',0,11,-8.3,HOR + 58,.85]]
-    .map(([c, m, b, d, dl, y, sc]) => `<div class="horse" style="--d:${d}s;--dl:${dl}s;top:${y - 42}px;transform-origin:0 0;scale:${sc}"><i class="dust"></i>${horse(c, m, b)}</div>`).join('');
+  // the herd: the phone's own galloping-horse emoji, flipped to run right and tinted for each coat
+  const herd = [['', 52, .95, 0, 46], ['brightness(.35) saturate(.6)', 64, 1.05, -2.2, 50], ['sepia(.5) saturate(.7) brightness(1.45)', 48, .85, -4.6, 40], ['hue-rotate(-12deg) saturate(1.35) brightness(.85)', 70, 1.1, -6.4, 52], ['grayscale(1) brightness(1.25)', 58, .9, -8.3, 42]]
+    .map(([f, y, sc, dl, fs]) => `<div class="horse" style="--d:11s;--dl:${dl}s;top:${HOR + y - fs}px;font-size:${fs}px"><i class="dust"></i><span style="filter:${f || 'none'} brightness(var(--wdim,1))">🐎</span></div>`).join('');
   const eagle = `<div class="eagle"><svg viewBox="0 0 46 20"><path d="M23 10 C17 4 9 2 0 6 C8 6 14 9 20 12 L26 12 C32 9 38 6 46 6 C37 2 29 4 23 10Z" fill="var(--weagle)"/><circle cx="23" cy="9" r="2.2" fill="#F4EEE0"/></svg></div>`;
   el.innerHTML = `<svg viewBox="${-DX} 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice">${buttes}${plain}${trees}${tufts}</svg>${herd}${eagle}`;
 }
@@ -2745,6 +2731,7 @@ function updateSky(){
     set('--wgrass', mix(mute('#D8B060', cloud * .45), '#1A1A14', dark)); set('--wnear', mix(mute('#B08A3E', cloud * .45), '#12100C', dark));
     set('--wriver', mix(mix(cols[1], '#5AA8D8', .5), '#1A2440', dark)); set('--wpine', mix(mute('#2E5A3A', cloud * .3), '#0A120E', dark));
     set('--wtuft', mix('#8A6A2E', '#0A0806', dark)); set('--weagle', mix('#3A2A1E', '#0A0808', night * .5));
+    set('--wdim', (1 - dark * .55).toFixed(2));
     set('--wdust', `rgba(230,200,140,${(.55 * (1 - night)).toFixed(2)})`);
     set('--earth', mix(mute('#B08A3E', cloud * .45), '#12100C', dark)); set('--earth2', mix('#6A5022', '#08060A', night * .9));
   }
@@ -4493,7 +4480,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.56', APP_BUILT = '24 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.57', APP_BUILT = '24 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
