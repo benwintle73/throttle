@@ -1130,10 +1130,9 @@
   body.wild .bg{background:linear-gradient(180deg,var(--g1) 0%,var(--g2) 28%,var(--g3) 46%,var(--earth,#B08A3E) 74%,var(--earth2,#6A5022) 100%)}
   .wscene{position:absolute;left:0;right:0;bottom:0;height:262px;pointer-events:none}
   .wscene > svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-  .wscene .horse{position:absolute;left:0;line-height:0;animation:wrun var(--d,12s) linear infinite;animation-delay:var(--dl,0s)}
-  .wscene .horse b{display:block;width:var(--fw);height:var(--fh);background-size:calc(var(--fw) * 4) var(--fh);background-repeat:no-repeat;image-rendering:pixelated;filter:brightness(var(--wdim,1));animation:gallop 1.2s steps(4) infinite;animation-delay:var(--ph,0s)}
-  @keyframes wrun{0%{transform:translateX(-110px)}100%{transform:translateX(calc(100vw + 110px))}}
-  @keyframes gallop{from{background-position:0 0}to{background-position:calc(var(--fw) * -4) 0}}
+  .wscene .horse{position:absolute}
+  .wscene .horse svg{display:block;width:100%;height:100%;overflow:visible;filter:brightness(var(--wdim,1))}
+  .wscene .horse.flip svg{transform:scaleX(-1)}
   .wscene .dust{position:absolute;width:30px;height:12px;border-radius:50%;background:radial-gradient(var(--wdust,rgba(230,200,140,.55)),transparent 70%);animation:wdust .6s linear infinite;left:-14px;bottom:-2px}
   @keyframes wdust{from{transform:scale(.6);opacity:.9}to{transform:translateX(-18px) scale(1.4);opacity:0}}
   .wscene .eagle{position:absolute;top:58px;width:46px;height:20px;animation:weagle 32s linear infinite}
@@ -2487,61 +2486,38 @@ function buildUfo(){
   </svg>${mini('z1')}${mini('z2')}`;
 }
 buildUfo();
-// retro pixel horse: body/head drawn as a pixel map, legs rasterised per frame for a 4-frame gallop
+// original vector horses for the Wild Horses scene: standing and grazing poses, flat coat colours, swishing tails
 const HORSE_COATS = [
-  { B:'#8A4E2A', H:'#A9683E', M:'#1C1411', L:'#1C1411' },  // bay
-  { B:'#2E2622', H:'#4A3E38', M:'#0E0B0A', L:'#17120F' },  // black
-  { B:'#D9A65A', H:'#F0C987', M:'#FFF3D6', L:'#C08E48' },  // palomino
-  { B:'#B0552A', H:'#CF7646', M:'#6E2C12', L:'#94461F' },  // chestnut
-  { B:'#CFCBC4', H:'#EEEBE6', M:'#7C7873', L:'#A29D96' }   // grey
+  { b:'#6E3D20', f:'#4E2A15', m:'#1A100B' },  // bay
+  { b:'#2C221E', f:'#1C1512', m:'#0F0B09' },  // black
+  { b:'#C99350', f:'#A8773C', m:'#F2E4C4' },  // palomino
+  { b:'#9A4A22', f:'#7A3818', m:'#5E2610' },  // chestnut
+  { b:'#BDB7AD', f:'#968F85', m:'#6E6862' }   // grey
 ];
-const HORSE_MAP = [
-  '.........................BB.....',
-  '........................MBBB....',
-  '.......................MMBBBB...',
-  '......................MMBBEBBB..',
-  '.....................MMBBBBBBBB.',
-  '....................MMBBBB.BBBBN',
-  '...................MMBBBB.......',
-  '..................MBBBBB........',
-  '.....HHHHHHHHHHHHHBBBBBB........',
-  '...MBBBBBBBBBBBBBBBBBBBB........',
-  '..MMBBBBBBBBBBBBBBBBBBBB........',
-  '..M.BBBBBBBBBBBBBBBBBBB.........',
-  '.M...BBBBBBBBBBBBBBBBB..........',
-  '......BBBBBBBBBBBBBBBB..........'
-];
-function horseSprite(c){
-  const W = 32, H = 21, shade = (hex, k) => '#' + [1, 3, 5].map(i => Math.round(parseInt(hex.slice(i, i + 2), 16) * k).toString(16).padStart(2, '0')).join('');
-  // [knee, hoof] offsets from the joint for a slow 4-beat walk: forward, plant, back, lift
-  const F = [[[1,3],[2,6]], [[0,3],[0,6]], [[-1,3],[-2,6]], [[1,2],[1,5]]];
-  const K = [[[-1,3],[-2,6]], [[0,2],[1,5]], [[1,3],[2,6]], [[0,3],[0,6]]];
-  const bob = [0, 0, 0, 0], tailY = [0, 0, 1, 0];
-  let rects = '';
-  const px = (x, y, col, ox, w = 1) => { if (x < 0 || x >= W || y < 0 || y >= H) return; rects += `<rect x="${x + ox}" y="${y}" width="${w}" height="1" fill="${col}"/>`; };
-  const line = (x0, y0, x1, y1, col, ox, w) => { const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) || 1; for (let t = 0; t <= n; t++) px(Math.round(x0 + (x1 - x0) * t / n), Math.round(y0 + (y1 - y0) * t / n), col, ox, w); };
-  const leg = (jx, jy, [[kx, ky], [hx, hy]], up, low, ox) => {
-    line(jx, jy, jx + kx, jy + ky, up, ox, 2);
-    line(jx + kx, jy + ky, jx + hx, jy + hy, low, ox, 1);
-    px(jx + hx - (hx < kx ? 1 : 0), jy + hy, '#120D0B', ox, 2);
-  };
-  for (let f = 0; f < 4; f++){
-    const ox = f * W, dy = bob[f] + 1, fb = shade(c.B, .7), fl = shade(c.L, .7);
-    // far legs (darker, one frame behind)
-    leg(18, 13 + dy, F[(f + 2) % 4], fb, fl, ox);
-    leg(9, 13 + dy, K[(f + 2) % 4], fb, fl, ox);
-    HORSE_MAP.forEach((row, y) => { for (let x = 0; x < W; x++){ const ch = row[x]; if (ch === '.') continue;
-      let yy = y + dy; if (ch === 'M' && x < 5) yy += tailY[f];
-      px(x, yy, ch === 'B' ? c.B : ch === 'H' ? c.H : ch === 'M' ? c.M : '#120D0B', ox); } });
-    // near legs
-    leg(20, 13 + dy, F[f], c.B, c.L, ox);
-    leg(7, 13 + dy, K[f], c.B, c.L, ox);
+const HORSE_LEGS_FAR = 'M128 78 C128 86 127 92 128 98 L129 100 C129 108 129 116 129 121 C129 125 130 128 132 131 L134 134 L125 134 L124 130 C123 126 123 120 123 114 L123 102 C122 96 120 90 119 84 C118 80 118 78 118 78Z M84 74 C84 82 80 88 76 92 C73 95 72 98 71 102 L71 120 C71 124 72 128 74 131 L76 134 L67 134 L66 130 C65 126 65 122 65 118 L65 106 C64 102 63 99 62 96 C60 90 62 82 68 76Z';
+const HORSE_REST = 'C146 76 145 82 144 88 C143 92 143 95 143 98 C142 100 142 102 142 104 L142 121 C142 124 143 126 145 128 C146 130 147 132 148 134 L139 134 C138 132 137 130 137 127 C136 124 136 121 136 118 L136 104 C136 101 135 99 135 97 C134 92 133 88 132 85 C131 82 130 80 128 80 C118 82 104 82 92 80 C86 79 83 77 81 75 C80 81 77 86 72 90 C69 93 67 96 66 100 C65 102 65 104 65 106 L65 121 C65 124 66 127 68 130 C69 132 70 133 70 134 L61 134 C60 132 59 130 59 127 C58 124 58 121 58 118 L58 108 C58 105 57 103 56 101 C55 98 53 95 51 91 C47 85 43 77 41 68 C39 58 40 49 44 42 C50 36 58 34 66 35 C74 36 82 38 90 39 C100 40 110 38 118 33Z';
+const HORSE_POSE = {
+  stand: {
+    body: 'M118 33 C123 28 129 20 136 13 C142 7 148 4 154 3 L156 -6 L159 1 L161 -4 L162 3 C166 6 170 11 175 18 C179 24 184 31 188 36 C190 39 189 43 186 44 C182 45 177 44 174 42 C170 40 167 37 164 34 C162 32 160 31 159 33 C156 40 154 48 152 56 C151 62 150 66 147 70 ' + HORSE_REST,
+    mane: 'M154 4 C148 6 142 10 136 16 C130 22 125 28 119 33 C123 33 127 30 130 27 C128 31 126 34 124 36 C130 32 135 26 139 21 C138 25 137 28 135 31 C141 25 146 17 150 11 C150 14 149 17 148 19 C152 14 154 9 154 4Z'
+  },
+  graze: {
+    body: 'M118 33 C128 34 138 40 146 50 C153 59 158 70 162 82 L162 76 L165 82 L168 78 L167 86 C170 94 173 104 175 114 C177 120 178 125 177 129 C176 132 172 133 169 131 C166 129 165 125 164 121 C162 114 160 108 157 103 C155 100 153 98 152 96 C150 90 149 84 148 78 C148 75 148 73 147 70 ' + HORSE_REST,
+    mane: 'M162 82 C158 70 152 58 144 48 C136 40 128 35 119 33 C124 37 129 40 133 44 C130 44 127 43 125 42 C132 47 138 52 143 58 C140 58 138 57 136 56 C143 63 149 72 154 82 C155 79 155 76 154 74 C157 78 160 82 162 86Z'
   }
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W * 4}" height="${H}" shape-rendering="crispEdges">${rects}</svg>`;
-  return { w: W, h: H, url: 'data:image/svg+xml,' + encodeURIComponent(svg).replace(/'/g, '%27') };
+};
+function horseSVG(pose, c, i){
+  const p = HORSE_POSE[pose], sw = (2.6 + (i % 3) * .5).toFixed(1);
+  return `<svg viewBox="20 -10 175 146" preserveAspectRatio="xMidYMax meet">
+    <path d="${HORSE_LEGS_FAR}" fill="${c.f}"/>
+    <path d="M47 38 C38 40 33 50 33 62 C33 74 35 84 33 94 C32 100 30 106 27 110 C33 109 37 104 39 98 C41 104 40 110 38 114 C44 108 45 98 44 88 C43 76 42 64 46 52 C48 46 50 42 51 40Z" fill="${c.m}"><animateTransform attributeName="transform" type="rotate" values="0 47 40;9 47 40;-3 47 40;0 47 40" dur="${sw}s" begin="-${i * .7}s" repeatCount="indefinite"/></path>
+    <path d="${p.body}" fill="${c.b}"/>
+    <path d="${p.mane}" fill="${c.m}"/>
+    <path d="M136 134 h12 v-2.4 c-4 -1 -8 -1 -12 0Z M59 134 h11 v-2.4 c-4 -1 -7 -1 -11 0Z M123 134 h11 v-2.4 c-4 -1 -7 -1 -11 0Z M65 134 h11 v-2.4 c-4 -1 -7 -1 -11 0Z" fill="#17100C" opacity=".85"/>
+  </svg>`;
 }
 function buildWild(){
-  // original frontier scene: red-rock buttes, golden plains, a winding river and a herd of wild horses galloping through
+  // original frontier scene: red-rock buttes, golden plains, a winding river and a herd of wild horses grazing
   const el = $('wild'); if (!el) return;
   const W = sceneW(), H = 262, HOR = 156, DX = (W - 400) / 2, L = -DX, R = W - DX;
   let seed = 7; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
@@ -2553,10 +2529,9 @@ function buildWild(){
   const pine = (x, y, s) => `<path d="M${x} ${y - 30 * s} L${x + 9 * s} ${y - 10 * s} L${x + 5 * s} ${y - 10 * s} L${x + 11 * s} ${y} L${x - 11 * s} ${y} L${x - 5 * s} ${y - 10 * s} L${x - 9 * s} ${y - 10 * s}Z" fill="var(--wpine)"/>`;
   let trees = ''; for (const [x, y, sc] of [[352, HOR + 6, .9], [366, HOR + 4, 1.1], [382, HOR + 8, .8], [12, HOR + 6, .8], [26, HOR + 4, 1]]) trees += pine(x, y, sc);
   let tufts = ''; for (let i = 0; i < 30; i++){ const x = L + r() * W, y = H - 34 + r() * 30; tufts += `<path d="M${x.toFixed(0)} ${y.toFixed(0)} l-3 -7 M${x.toFixed(0)} ${y.toFixed(0)} l0 -9 M${x.toFixed(0)} ${y.toFixed(0)} l3 -7" stroke="var(--wtuft)" stroke-width="1.4" stroke-linecap="round"/>`; }
-  // the herd: retro 8-bit pixel horses walking slowly across — a 4-frame walk sprite sheet built per coat
-  const herd = [[0, 54, 0, 2], [1, 66, -14, 3], [2, 48, -29, 2], [3, 72, -41, 3], [4, 58, -52, 2]]
-    .map(([c, y, dl, sc], i) => { const sp = horseSprite(HORSE_COATS[c]);
-      return `<div class="horse" style="--d:60s;--dl:${dl}s;--ph:${(-i * .37).toFixed(2)}s;--fw:${sp.w * sc}px;--fh:${sp.h * sc}px;top:${HOR + y - sp.h * sc}px"><b style="background-image:url('${sp.url}')"></b></div>`; }).join('');
+  // the herd: grazing and standing horses dotted across the plain (x %, y below horizon, width, facing left)
+  const herd = [['graze', 3, 51, 44, 48, 0], ['graze', 4, 60, 52, 68, 1], ['graze', 0, 3, 56, 94, 0], ['stand', 2, 28, 66, 108, 0], ['stand', 1, 72, 72, 116, 1]]
+    .map(([pose, c, x, y, w, fl], i) => `<div class="horse${fl ? ' flip' : ''}" style="left:${x}%;top:${HOR + y - Math.round(w * .83)}px;width:${w}px;height:${Math.round(w * .83)}px">${horseSVG(pose, HORSE_COATS[c], i)}</div>`).join('');
   const eagle = `<div class="eagle"><svg viewBox="0 0 46 20"><path d="M23 10 C17 4 9 2 0 6 C8 6 14 9 20 12 L26 12 C32 9 38 6 46 6 C37 2 29 4 23 10Z" fill="var(--weagle)"/><circle cx="23" cy="9" r="2.2" fill="#F4EEE0"/></svg></div>`;
   el.innerHTML = `<svg viewBox="${-DX} 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice">${buttes}${plain}${trees}${tufts}</svg>${herd}${eagle}`;
 }
