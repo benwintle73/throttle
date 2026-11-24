@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Jua&family=Luckiest+Guy&family=Pacifico&family=Orbitron:wght@500;700;900&family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Mountains+of+Christmas:wght@700&family=Jua&family=Luckiest+Guy&family=Pacifico&family=Orbitron:wght@500;700;900&family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --g1:#FFD166; --g2:#FF8A5B; --g3:#FF5E7E;
@@ -990,7 +990,7 @@
     .app,.ptr,#editDone{display:none!important}
     .scene{position:fixed!important;top:0!important;height:100vh!important}
     .river{height:100vh!important}
-    body:not(.neon):not(.murray):not(.beach):not(.island):not(.drop):not(.ufo):not(.wild):not(.retro) .lhills{display:block;position:absolute;left:0;right:0;bottom:0;height:42%}
+    body:not(.neon):not(.murray):not(.beach):not(.island):not(.drop):not(.ufo):not(.wild):not(.xmas):not(.retro) .lhills{display:block;position:absolute;left:0;right:0;bottom:0;height:42%}
     .lhills svg{width:100%;height:100%;display:block}
     body.retro .lgrid{display:block;position:absolute;left:0;right:0;bottom:0;height:44%}
     .lgrid .mtn{position:absolute;left:0;right:0;bottom:62%;width:100%;height:38%;opacity:var(--mtn,1)}
@@ -1151,11 +1151,41 @@
   body.wild .todo-card .go,body.wild .saju .go,body.wild .mind .go,body.wild .pz-card .go{background:#FFD48A;color:#3A2410}
   .appear .pv-wild{background:linear-gradient(180deg,#3A7AD0 0%,#F0A070 48%,#C0603C 49%,#D8B060 64%,#8A6A2E 100%);position:relative;overflow:hidden}
   .appear .pv-wild::after{content:'🐎';position:absolute;left:30%;bottom:14%;font-size:13px;line-height:1;transform:scaleX(-1)}
+  .xmas-only{display:none}
+  body.xmas .xmas-only{display:block}
+  body.xmas .bg{background:linear-gradient(180deg,var(--g1) 0%,var(--g2) 28%,var(--g3) 46%,var(--earth,#E8EEF6) 74%,var(--earth2,#B8C6D8) 100%)}
+  .xscene{position:absolute;left:0;right:0;bottom:0;height:262px;pointer-events:none}
+  .xscene > svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+  .xscene .tw{animation:xtw 1.6s steps(1) infinite}
+  .xscene .tw.b{animation-delay:-.53s}.xscene .tw.c{animation-delay:-1.07s}
+  @keyframes xtw{33%{opacity:.25}66%{opacity:1}}
+  .xscene .star{animation:xstar 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 50%}
+  @keyframes xstar{50%{transform:scale(1.15);filter:drop-shadow(0 0 6px #FFE27A)}}
+  .xscene .smoke{animation:xsmoke 4s ease-out infinite;opacity:0}
+  @keyframes xsmoke{0%{opacity:.6;transform:translate(0,0) scale(.6)}100%{opacity:0;transform:translate(6px,-26px) scale(1.6)}}
+  .xscene .snowfall{position:absolute;left:0;right:0;bottom:0;height:820px;overflow:hidden}
+  .xscene .fl{position:absolute;top:-10px;border-radius:50%;background:#fff;opacity:.85;animation:xfall linear infinite}
+  @keyframes xfall{to{transform:translate(var(--dx,20px),830px)}}
+  .xscene .sleigh{position:absolute;top:-330px;right:0;font-size:22px;white-space:nowrap;animation:xsleigh 26s linear infinite;filter:drop-shadow(0 0 4px rgba(255,255,255,.35))}
+  .xscene .sleigh b{display:inline-block;font-size:16px;margin-left:-2px}
+  @keyframes xsleigh{0%{transform:translate(120px,40px) rotate(-6deg)}45%{transform:translate(calc(-100vw - 160px),-30px) rotate(-6deg)}100%{transform:translate(calc(-100vw - 160px),-30px)}}
+  @media (orientation:landscape) and (max-height:520px){ .xscene{height:100vh!important} }
+  body.xmas .hero{padding-bottom:118px}
+  body.xmas .place h1{font-family:'Mountains of Christmas',serif;font-weight:700;font-size:34px;letter-spacing:.5px}
+  body.xmas .cond{font-family:'Mountains of Christmas',serif;font-weight:700;font-size:26px;text-shadow:0 1px 3px rgba(20,10,30,.55),0 2px 14px rgba(20,10,30,.4)}
+  body.xmas .card{background:rgba(120,20,30,.22);border-color:rgba(255,230,180,.35)}
+  body.xmas .card h2{color:#FFD9A0}
+  body.xmas .chip.active{background:#E8383C;color:#fff}
+  body.xmas .tmrw{background:rgba(110,16,26,.3)}
+  body.xmas .hilo,body.xmas .ptime{background:rgba(110,16,26,.42);border:1px solid rgba(255,230,180,.28)}
+  body.xmas .todo-card .go,body.xmas .saju .go,body.xmas .mind .go,body.xmas .pz-card .go{background:#E8383C;color:#fff}
+  .appear .pv-xmas{background:linear-gradient(180deg,#0E1A40 0%,#4A3A7A 45%,#EEF6FC 62%,#B8C6D8 100%);position:relative;overflow:hidden}
+  .appear .pv-xmas::after{content:'🎄';position:absolute;left:50%;bottom:16%;transform:translateX(-50%);font-size:14px;line-height:1}
   .appear .pv-drop{background:linear-gradient(180deg,#2F7BFF 0%,#7FD2FF 50%,#5FD067 51%,#2F8C45 100%);position:relative;overflow:hidden}
   .appear .pv-drop::before{content:'';position:absolute;left:0;top:10%;width:22%;height:60%;background:linear-gradient(90deg,#8A3DFF,#B66BFF);opacity:.85}
   .appear .pv-drop::after{content:'🪂';position:absolute;right:16%;top:12%;font-size:13px;line-height:1}
-  .river,.bscene,.iscene,.dscene,.uscene,.wscene,.lhills,.lgrid,.skyline,.sea,.palm{transition:opacity .6s}
-  body:not(.skyready) .river,body:not(.skyready) .bscene,body:not(.skyready) .iscene,body:not(.skyready) .dscene,body:not(.skyready) .uscene,body:not(.skyready) .wscene,body:not(.skyready) .lhills,body:not(.skyready) .lgrid,body:not(.skyready) .skyline,body:not(.skyready) .sea,body:not(.skyready) .palm{opacity:0}
+  .river,.bscene,.iscene,.dscene,.uscene,.wscene,.xscene,.lhills,.lgrid,.skyline,.sea,.palm{transition:opacity .6s}
+  body:not(.skyready) .river,body:not(.skyready) .bscene,body:not(.skyready) .iscene,body:not(.skyready) .dscene,body:not(.skyready) .uscene,body:not(.skyready) .wscene,body:not(.skyready) .xscene,body:not(.skyready) .lhills,body:not(.skyready) .lgrid,body:not(.skyready) .skyline,body:not(.skyready) .sea,body:not(.skyready) .palm{opacity:0}
   /* ===== Seoul theme ===== */
   .seoul-only{display:none}
   body.seoul .seoul-only{display:block}
@@ -1275,6 +1305,7 @@
   <div class="dscene drop-only" id="drop"></div>
   <div class="uscene ufo-only" id="ufo"></div>
   <div class="wscene wild-only" id="wild"></div>
+  <div class="xscene xmas-only" id="xmas"></div>
   <div class="phz pro-only" id="phz"><i id="phzGlow"></i><svg viewBox="0 0 800 60" preserveAspectRatio="none">
     <path d="M0 44 L50 30 L95 38 L150 14 L205 33 L250 24 L300 40 L360 20 L410 6 L455 26 L500 18 L560 36 L615 22 L660 30 L720 12 L770 28 L800 22 L800 60 L0 60Z" fill="#151C29"/>
     <path d="M0 50 L70 40 L130 46 L210 32 L280 44 L340 36 L430 48 L520 34 L600 46 L680 38 L760 46 L800 42 L800 60 L0 60Z" fill="#131A26"/>
@@ -1837,6 +1868,17 @@ const WILD_SKY = [
   [ 1.06, ['#1E1E50','#7A3A5A','#E07040']],
   [ 1.16, ['#0E1430','#1C2446','#2A3050']],
 ];
+const XMAS_SKY = [
+  [-0.16, ['#060C24','#0E1A40','#1A2C5A']],
+  [-0.06, ['#141E4E','#4A3A7A','#E8A0A8']],
+  [ 0.02, ['#2A4A8A','#9AB0D8','#F4D8D0']],
+  [ 0.14, ['#3A6AB0','#9CC4E8','#E4F0F8']],
+  [ 0.50, ['#3A70BA','#A0C8EC','#EEF6FC']],
+  [ 0.86, ['#3A5EA8','#B0B8DC','#F6E0D0']],
+  [ 0.98, ['#2A2E78','#9A5A8A','#F4A880']],
+  [ 1.06, ['#12184A','#3A2C6A','#8A5A8A']],
+  [ 1.16, ['#060C24','#0E1A40','#1A2C5A']],
+];
 const KST_SKY = [
   [-0.16, ['#140A33','#2B1258','#4A1E78']],
   [-0.06, ['#3A1E78','#8A4FB8','#FF8FC4']],
@@ -1871,7 +1913,7 @@ const NEON_SKY = [
   [ 1.16, ['#0D0221','#26083F','#541066']],
 ];
 let theme = store.get('wx_theme', null) || (store.get('wx_neon', false) ? 'neon' : 'classic');
-{ const t = new URLSearchParams(location.search).get('theme'); if (['classic','neon','murray','retro','beach','island','drop','ufo','wild','seoul','kstreet','pro'].includes(t)) theme = t; }
+{ const t = new URLSearchParams(location.search).get('theme'); if (['classic','neon','murray','retro','beach','island','drop','ufo','wild','xmas','seoul','kstreet','pro'].includes(t)) theme = t; }
 let neon = theme === 'neon';
 /* ---------- Time Warp theme: clock-radio style segment display + time-jump flash ---------- */
 const SEG = { '0':'abcdef','1':'bc','2':'abged','3':'abgcd','4':'fgbc','5':'afgcd','6':'afgedc','7':'abc','8':'abcdefg','9':'abcdfg','-':'g',' ':'' };
@@ -1963,7 +2005,7 @@ function updAgo(){ if (!lastFetch) return 'Updated just now'; const m = Math.rou
   return m < 1 ? 'Updated just now' : m < 60 ? `Updated ${m} min ago` : `Updated ${Math.round(m / 60)} hr${m >= 90 ? 's' : ''} ago — pull down to refresh`; }
 setInterval(() => { const el = $('ptime'); if (el && lastData) el.textContent = placeTimeText(lastData); const u = $('updAgo'); if (u) u.textContent = updAgo(); }, 15000);
 function setThemeClass(){
-  ['neon','murray','retro','beach','island','drop','ufo','wild','seoul','kstreet','pro'].forEach(t => document.body.classList.toggle(t, theme === t));
+  ['neon','murray','retro','beach','island','drop','ufo','wild','xmas','seoul','kstreet','pro'].forEach(t => document.body.classList.toggle(t, theme === t));
 }
 function applyMode(){
   neon = theme === 'neon';
@@ -2293,7 +2335,7 @@ function buildKStreet(){
 buildKStreet();
 let sceneWas = sceneW();
 let sceneT = 0;
-addEventListener("resize", () => { clearTimeout(sceneT); sceneT = setTimeout(() => { const w = sceneW(); if (Math.abs(w - sceneWas) < 20) return; sceneWas = w; buildRiver(); buildSeoul(); buildKStreet(); buildBeach(); buildIsland(); buildDrop(); buildUfo(); buildWild(); if (lastData) updateSky(); }, 250); });
+addEventListener("resize", () => { clearTimeout(sceneT); sceneT = setTimeout(() => { const w = sceneW(); if (Math.abs(w - sceneWas) < 20) return; sceneWas = w; buildRiver(); buildSeoul(); buildKStreet(); buildBeach(); buildIsland(); buildDrop(); buildUfo(); buildWild(); buildXmas(); if (lastData) updateSky(); }, 250); });
 function buildBeach(){
   // original bay-side beach: calm bay, long timber pier, a row of striped bathing boxes, umbrella
   const W = sceneW(), H = 262, HOR = 176, SH = 214, DX = (W - 400) / 2;   // horizon, shoreline
@@ -2537,6 +2579,48 @@ function buildWild(){
   el.innerHTML = `<svg viewBox="${-DX} 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice">${buttes}${plain}${trees}${tufts}</svg>${herd}${eagle}`;
 }
 buildWild();
+function buildXmas(){
+  // original snowy village: rolling snow, frosted pines, cottages with fairy lights, a big decorated tree, a snowman, falling snow and a sleigh across the sky
+  const el = $('xmas'); if (!el) return;
+  const W = sceneW(), H = 262, HOR = 160, DX = (W - 400) / 2, L = -DX, R = W - DX;
+  let seed = 25; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const LC = ['#FF4A4A', '#FFD84A', '#4AE07A', '#5AB8FF', '#FF7AD0'];
+  const hills = `<path d="M${L} ${HOR + 4} L${L} ${HOR - 26} C-20 ${HOR - 40} 40 ${HOR - 44} 90 ${HOR - 24} C140 ${HOR - 6} 220 ${HOR - 10} 270 ${HOR - 30} C320 ${HOR - 48} 370 ${HOR - 40} ${R} ${HOR - 22} L${R} ${HOR + 4}Z" fill="var(--xhill)"/>
+    <path d="M${L} ${HOR} C70 ${HOR - 8} 180 ${HOR + 6} 280 ${HOR - 2} C330 ${HOR - 6} 370 ${HOR + 2} ${R} ${HOR} L${R} ${H} L${L} ${H}Z" fill="var(--xsnow)"/>
+    <path d="M${L} ${H - 36} C90 ${H - 50} 200 ${H - 32} 290 ${H - 44} C340 ${H - 50} 380 ${H - 42} ${R} ${H - 46} L${R} ${H} L${L} ${H}Z" fill="var(--xsnow2)"/>`;
+  const pine = (x, y, s, dim) => `<g opacity="${dim}"><path d="M${x} ${y - 34 * s} L${x + 10 * s} ${y - 14 * s} L${x + 6 * s} ${y - 14 * s} L${x + 13 * s} ${y} L${x - 13 * s} ${y} L${x - 6 * s} ${y - 14 * s} L${x - 10 * s} ${y - 14 * s}Z" fill="var(--xpine)"/>
+      <path d="M${x} ${y - 34 * s} L${x + 5 * s} ${y - 24 * s} L${x - 5 * s} ${y - 24 * s}Z M${x - 6 * s} ${y - 14 * s} L${x + 6 * s} ${y - 14 * s} L${x + 3 * s} ${y - 11 * s} L${x - 3 * s} ${y - 11 * s}Z" fill="#fff" opacity=".9"/></g>`;
+  let back = ''; for (const [x, s] of [[-14, .7], [8, .9], [56, .6], [236, .7], [254, .55], [396, .8], [414, .65]]) back += pine(x, HOR - 18 + (1 - s) * 10, s, .85);
+  // cottages with snowy roofs, lit windows and blinking fairy lights along the eaves
+  const cottage = (x, y, w, h, roof, i) => {
+    let lights = ''; const n = Math.round(w / 6);
+    for (let k = 0; k <= n; k++){ const lx = x - 4 + (w + 8) * k / n, ly = y - 1 + Math.sin(k * 1.3) * 1.2; lights += `<circle class="tw ${'abc'[k % 3]}" cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="1.6" fill="${LC[(k + i) % 5]}"/>`; }
+    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="var(--xwall)"/><path d="M${x - 6} ${y + 1} L${x + w / 2} ${y - h * .7} L${x + w + 6} ${y + 1}Z" fill="${roof}"/>
+      <path d="M${x - 7} ${y + 1} L${x + w / 2} ${y - h * .7 - 2} L${x + w + 7} ${y + 1} L${x + w + 2} ${y - 3} L${x + w / 2} ${y - h * .7 + 3} L${x - 2} ${y - 3}Z" fill="#fff"/>
+      <rect x="${x + w * .18}" y="${y + h * .3}" width="${w * .22}" height="${h * .28}" fill="#FFD87A" opacity="var(--xlit)"/><rect x="${x + w * .6}" y="${y + h * .3}" width="${w * .22}" height="${h * .28}" fill="#FFD87A" opacity="var(--xlit)"/>
+      <rect x="${x + w * .72}" y="${y - h * .55}" width="5" height="${h * .3}" fill="var(--xwall2)"/><circle class="smoke" cx="${x + w * .72 + 2.5}" cy="${y - h * .6}" r="3" fill="#E8EEF6" style="animation-delay:${-i * 1.3}s"/>${lights}`;
+  };
+  const houses = cottage(282, HOR - 6, 34, 22, '#8A2A2A', 0) + cottage(326, HOR - 2, 28, 18, '#2A4A6A', 2) + cottage(84, HOR + 2, 30, 18, '#2A5A3A', 4);
+  // the big tree with a glowing star and blinking baubles
+  const TX = 210, TY = HOR + 62;
+  let baubles = ''; for (let i = 0; i < 16; i++){ const t = .15 + r() * .8, w = 34 * t, bx = TX + (r() * 2 - 1) * w * .8, by = TY - 76 + 70 * t; baubles += `<circle class="tw ${'abc'[i % 3]}" cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="${(2 + r() * 1.4).toFixed(1)}" fill="${LC[i % 5]}"/>`; }
+  const tree = `<g transform="translate(${TX} ${TY}) scale(.82) translate(${-TX} ${-TY})"><path d="M${TX} ${TY - 82} L${TX + 18} ${TY - 52} L${TX + 10} ${TY - 52} L${TX + 28} ${TY - 26} L${TX + 18} ${TY - 26} L${TX + 36} ${TY} L${TX - 36} ${TY} L${TX - 18} ${TY - 26} L${TX - 28} ${TY - 26} L${TX - 10} ${TY - 52} L${TX - 18} ${TY - 52}Z" fill="var(--xtree)"/>
+    <path d="M${TX - 14} ${TY - 46} Q${TX} ${TY - 38} ${TX + 16} ${TY - 50} M${TX - 24} ${TY - 20} Q${TX} ${TY - 10} ${TX + 26} ${TY - 24}" stroke="#FFD84A" stroke-width="1.6" fill="none" opacity=".85"/>
+    <rect x="${TX - 5}" y="${TY}" width="10" height="8" fill="#6A3A1E"/>${baubles}
+    <path class="star" d="M${TX} ${TY - 94} l3.2 6.6 7.2 1 -5.2 5 1.3 7.2 -6.5 -3.4 -6.5 3.4 1.3 -7.2 -5.2 -5 7.2 -1Z" fill="#FFE27A"/>
+    <rect x="${TX - 30}" y="${TY + 2}" width="12" height="9" fill="#E8383C"/><rect x="${TX - 25}" y="${TY + 2}" width="2" height="9" fill="#FFD84A"/>
+    <rect x="${TX + 18}" y="${TY + 3}" width="10" height="8" fill="#3A8AD8"/><rect x="${TX + 22}" y="${TY + 3}" width="2" height="8" fill="#fff"/></g>`;
+  const SX = 140, SY = H - 40;
+  const snowman = `<circle cx="${SX}" cy="${SY}" r="11" fill="#FBFDFF"/><circle cx="${SX}" cy="${SY - 16}" r="8" fill="#FBFDFF"/><circle cx="${SX}" cy="${SY - 28}" r="6" fill="#FBFDFF"/>
+    <rect x="${SX - 6}" y="${SY - 40}" width="12" height="7" fill="#1A1A2A"/><rect x="${SX - 9}" y="${SY - 34}" width="18" height="2" fill="#1A1A2A"/><path d="M${SX - 6} ${SY - 22} Q${SX} ${SY - 19} ${SX + 7} ${SY - 22} L${SX + 10} ${SY - 14}" stroke="#E8383C" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <circle cx="${SX - 2}" cy="${SY - 29}" r=".9" fill="#1A1A2A"/><circle cx="${SX + 2}" cy="${SY - 29}" r=".9" fill="#1A1A2A"/><path d="M${SX} ${SY - 27} l6 1.5 -6 1Z" fill="#F08A2A"/>
+    <circle cx="${SX}" cy="${SY - 13}" r="1" fill="#1A1A2A"/><circle cx="${SX}" cy="${SY - 8}" r="1" fill="#1A1A2A"/>`;
+  let front = ''; for (const [x, s] of [[20, 1.2], [374, 1.3], [396, 1]]) front += pine(x, H - 30 + (1.3 - s) * 8, s, 1);
+  let flakes = ''; for (let i = 0; i < 46; i++){ const sz = 1.6 + r() * 3; flakes += `<i class="fl" style="left:${(r() * 100).toFixed(1)}%;width:${sz.toFixed(1)}px;height:${sz.toFixed(1)}px;animation-duration:${(7 + r() * 9).toFixed(1)}s;animation-delay:${(-r() * 16).toFixed(1)}s;--dx:${(r() * 60 - 30).toFixed(0)}px;opacity:${(.5 + r() * .5).toFixed(2)}"></i>`; }
+  el.innerHTML = `<svg viewBox="${-DX} 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice">${hills}${back}${houses}${tree}${snowman}${front}</svg>
+    <div class="snowfall">${flakes}</div><div class="sleigh">🦌🦌<b>🛷</b></div>`;
+}
+buildXmas();
 const CLOUDINESS = {clear:0, partly:.18, cloudy:.78, fog:.72, rain:.8, snow:.6, storm:.88};
 // overcast palettes (top, middle, horizon) the sky blends towards: day / night, and storm
 const GREY_DAY   = ['#8E9AA8','#A7B0BA','#C2C8CE'], GREY_NIGHT = ['#1D2129','#262A33','#30343D'];
@@ -2552,7 +2636,7 @@ function mute(hex, amt){ // desaturate + dim for overcast skies
 }
 function mixSet(a, b, t){ return a.map((c, i) => mix(c, b[i], t)); }
 function skyAt(p){
-  const K = neon ? NEON_SKY : theme === 'murray' ? MURRAY_SKY : theme === 'retro' ? RETRO_SKY : theme === 'beach' ? BEACH_SKY : theme === 'island' ? ISLAND_SKY : theme === 'drop' ? DROP_SKY : theme === 'ufo' ? UFO_SKY : theme === 'wild' ? WILD_SKY : theme === 'seoul' ? SEOUL_SKY : theme === 'kstreet' ? KST_SKY : SKY;
+  const K = neon ? NEON_SKY : theme === 'murray' ? MURRAY_SKY : theme === 'retro' ? RETRO_SKY : theme === 'beach' ? BEACH_SKY : theme === 'island' ? ISLAND_SKY : theme === 'drop' ? DROP_SKY : theme === 'ufo' ? UFO_SKY : theme === 'wild' ? WILD_SKY : theme === 'xmas' ? XMAS_SKY : theme === 'seoul' ? SEOUL_SKY : theme === 'kstreet' ? KST_SKY : SKY;
   if (p <= K[0][0] || p >= K[K.length-1][0]) return K[0][1];
   for (let i=0;i<K.length-1;i++){
     const [p0,c0] = K[i], [p1,c1] = K[i+1];
@@ -2670,7 +2754,7 @@ function updateSky(){
     scene.style.height = H + 'px';
     W = scene.clientWidth;
   }
-  const murray = theme === 'murray', base = murray ? H - 64 : theme === 'beach' ? H - 86 : theme === 'island' ? H - 94 : theme === 'drop' ? H - 104 : theme === 'ufo' ? H - 150 : theme === 'wild' ? H - 120 : theme === 'pro' ? H - (LANDSCAPE() ? innerHeight * .22 : 70) : theme === 'seoul' ? H - 70 : theme === 'kstreet' ? H - 120 : H;   // in Murray mode the sun sets behind the far bank
+  const murray = theme === 'murray', base = murray ? H - 64 : theme === 'beach' ? H - 86 : theme === 'island' ? H - 94 : theme === 'drop' ? H - 104 : theme === 'ufo' ? H - 150 : theme === 'wild' ? H - 120 : theme === 'xmas' ? H - 130 : theme === 'pro' ? H - (LANDSCAPE() ? innerHeight * .22 : 70) : theme === 'seoul' ? H - 70 : theme === 'kstreet' ? H - 120 : H;   // in Murray mode the sun sets behind the far bank
   const place = (el, t) => {
     el.style.left = (W*(0.07 + t*0.86)) + 'px';
     el.style.top  = (base - Math.sin(Math.PI*t)*(base - (neon ? 95 : Math.max(165, H * 0.42)))) + 'px';   // peak sits below the header, visible
@@ -2753,6 +2837,13 @@ function updateSky(){
     set('--dlit', Math.min(1, night * 1.2 + twilight * .5).toFixed(2));
     set('--earth', mix(mute('#3FB255', cloud * .4), '#0B1E16', dark)); set('--earth2', mix('#2F8C45', '#07140E', night * .9));
     document.querySelectorAll('#drop .glider').forEach(g => g.style.display = (k === 'storm' || night > .6) ? 'none' : '');
+  }
+  if (theme === 'xmas'){
+    const set = (k, v) => r.setProperty(k, v), dark = Math.max(night * .8, twilight * .3);
+    set('--xhill', mix(mix(cols[2], '#C8D4E8', .5), '#24304E', dark)); set('--xsnow', mix('#F2F6FC', '#5A6A90', dark)); set('--xsnow2', mix('#E2EAF4', '#46557A', dark));
+    set('--xpine', mix(mute('#1E5A3A', cloud * .3), '#0C2018', dark)); set('--xtree', mix('#1E6A3E', '#123A26', dark * .6));
+    set('--xwall', mix('#C8865A', '#4A3030', dark)); set('--xwall2', mix('#8A4A3A', '#2A1A1A', dark)); set('--xlit', Math.min(1, .35 + night * .8 + twilight * .4).toFixed(2));
+    set('--earth', mix('#E2EAF4', '#46557A', dark)); set('--earth2', mix('#B8C6D8', '#2A3450', night * .9));
   }
   if (theme === 'wild'){
     const set = (k, v) => r.setProperty(k, v), dark = Math.max(night * .85, twilight * .3);
@@ -3761,7 +3852,7 @@ function alertsHTML(d, start){
 /* ---------- typical weather by month (10-year averages from past observations) ---------- */
 const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 let xtrasOpen = false, appearOpen = false;
-const THEME_NAMES = { classic:'Classic', neon:'🌴 Neon', murray:'🌳 Murray', retro:'⚡ Time Warp', beach:'🏖️ Beach', island:'🇹🇭 Thailand', drop:'🪂 Drop Zone', ufo:'🛸 UFO', wild:'🐎 Wild Horses', seoul:'🌸 Seoul', kstreet:'💜 K-Street', pro:'💼 Business' };
+const THEME_NAMES = { classic:'Classic', neon:'🌴 Neon', murray:'🌳 Murray', retro:'⚡ Time Warp', beach:'🏖️ Beach', island:'🇹🇭 Thailand', drop:'🪂 Drop Zone', ufo:'🛸 UFO', wild:'🐎 Wild Horses', xmas:'🎄 Christmas', seoul:'🌸 Seoul', kstreet:'💜 K-Street', pro:'💼 Business' };
 const xtrasCount = () => [store.get('wx_fun_on', true), store.get('wx_wear_on', false), store.get('wx_otd_on', false), store.get('wx_saju_on', true), store.get('wx_movie_on', false), newsOn(), store.get('wx_mind_on', false), store.get('wx_arrange', false)].filter(Boolean).length;
 document.addEventListener('change', e => { if (e.target.closest && e.target.closest('.xtras')) setTimeout(() => { const n = document.querySelector('.xtras .xn'); if (n) n.textContent = `${xtrasCount()} of 8 on`; }, 0); });
 let climPick = null, climLoading = '', climFail = {};
@@ -4510,7 +4601,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.58', APP_BUILT = '25 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.59', APP_BUILT = '25 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
@@ -4543,6 +4634,7 @@ function appearanceHTML(){
     <button type="button" data-theme="drop" class="${theme==='drop'?'on':''}"><i class="pv-drop"></i><span>🪂 Drop Zone<b></b></span></button>
     <button type="button" data-theme="ufo" class="${theme==='ufo'?'on':''}"><i class="pv-ufo"></i><span>🛸 UFO<b></b></span></button>
     <button type="button" data-theme="wild" class="${theme==='wild'?'on':''}"><i class="pv-wild"></i><span>🐎 Wild Horses<b></b></span></button>
+    <button type="button" data-theme="xmas" class="${theme==='xmas'?'on':''}"><i class="pv-xmas"></i><span>🎄 Christmas<b></b></span></button>
     <button type="button" data-theme="seoul" class="${theme==='seoul'?'on':''}"><i class="pv-seoul"></i><span>🌸 Seoul<b></b></span></button>
     <button type="button" data-theme="kstreet" class="${theme==='kstreet'?'on':''}"><i class="pv-kst"></i><span>💜 K-Street<b></b></span></button>
     <button type="button" data-theme="pro" class="${theme==='pro'?'on':''}"><i class="pv-pro"></i><span>💼 Business<b></b></span></button>
