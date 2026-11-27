@@ -386,7 +386,7 @@
   .pz-card .row{display:flex;align-items:center;gap:14px}
   .pz-card .mini{display:grid;grid-template-columns:repeat(5,12px);gap:3px;flex-shrink:0}
   .pz-card .mini i{width:12px;height:12px;border-radius:3px;background:rgba(255,255,255,.22)}
-  .pz-card .mini i.c{background:#14C8B4}.pz-card .mini i.p{background:#FF9F43}.pz-card .mini i.a{background:#23262F}
+  .pz-card .mini i.c{background:#14C8B4}.pz-card .mini i.p{background:#FF9F43}.pz-card .mini i.a{background:rgba(0,0,0,.25)}
   .pz-card .t1{font-size:18px;font-weight:600}
   .pz-card .t2{font-size:13px;color:var(--soft);margin-top:3px}
   .pz-card .go{margin-left:auto;padding:9px 16px;border-radius:999px;background:#fff;color:#333;font-weight:600;font-size:14px;flex-shrink:0}
@@ -407,14 +407,14 @@
   .tile.f{border-color:rgba(255,255,255,.6);animation:pop .1s}
   @keyframes pop{50%{transform:scale(1.08)}}
   .tile.c,.tile.p,.tile.a{border-color:transparent;animation:flip .5s ease both}
-  .tile.c{background:#14C8B4}.tile.p{background:#FF9F43}.tile.a{background:#23262F}
+  .tile.c{background:#14C8B4}.tile.p{background:#FF9F43}.tile.a{background:rgba(0,0,0,.32)}
   @keyframes flip{0%{transform:rotateX(0)}50%{transform:rotateX(90deg)}100%{transform:rotateX(0)}}
   .pz-help{padding:4px 10px 0;text-align:center;flex-shrink:0}
   .pz-help p{font-size:13px;color:var(--soft);font-weight:500}
   .pz-key{display:flex;justify-content:center;gap:12px;margin-top:8px}
   .pz-key span{display:flex;align-items:center;gap:6px;font-size:11px;line-height:1.2;text-align:left;font-weight:600}
   .pz-key i{width:18px;height:18px;border-radius:5px;flex-shrink:0}
-  .pz-key i.c{background:#14C8B4}.pz-key i.p{background:#FF9F43}.pz-key i.a{background:#23262F;border:1px solid rgba(255,255,255,.25)}
+  .pz-key i.c{background:#14C8B4}.pz-key i.p{background:#FF9F43}.pz-key i.a{background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.2)}
   body.neon .pz-key i{border-radius:2px}
   body.neon .pz-key i.p{background:#FF3F8E}
   /* end-of-game moment: winning row hops, then a result card, then it settles into the final layout */
@@ -458,7 +458,7 @@
   .kb button.del svg{width:28px;height:28px}
   .kb button.del{pointer-events:auto}
   .kb button.del svg{pointer-events:none}
-  .kb button.c{background:#14C8B4}.kb button.p{background:#FF9F43}.kb button.a{background:#23262F;color:rgba(255,255,255,.45)}
+  .kb button.c{background:#14C8B4}.kb button.p{background:#FF9F43}.kb button.a{background:rgba(0,0,0,.35);color:rgba(255,255,255,.55)}
   .kb button.h{box-shadow:0 0 0 2px #FFD84D inset,0 0 14px rgba(255,216,77,.75);animation:hintglow 1.6s ease-in-out infinite}
   .kb button.c.h,.kb button.p.h{animation:none;box-shadow:0 0 0 2px #FFD84D inset}
   @keyframes hintglow{50%{box-shadow:0 0 0 2px #FFD84D inset,0 0 4px rgba(255,216,77,.3)}}
@@ -483,7 +483,7 @@
   .how li{margin:3px 0}
   .how .ex{display:flex;gap:5px;margin:8px 0 4px}
   .how .ex span{width:34px;height:34px;border-radius:7px;display:grid;place-items:center;font-weight:800;font-size:16px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.22)}
-  .how .ex .c{background:#14C8B4;border-color:transparent}.how .ex .p{background:#FF9F43;border-color:transparent}.how .ex .a{background:#23262F;border-color:transparent}
+  .how .ex .c{background:#14C8B4;border-color:transparent}.how .ex .p{background:#FF9F43;border-color:transparent}.how .ex .a{background:rgba(0,0,0,.32);border-color:transparent}
   body.neon .how .ex .p{background:#FF3F8E}
   .how table{width:100%;border-collapse:collapse;margin:6px 0;font-size:14px}
   .how td{padding:5px 2px;border-bottom:1px solid rgba(255,255,255,.1)}
@@ -4678,7 +4678,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.65', APP_BUILT = '27 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.66', APP_BUILT = '27 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
