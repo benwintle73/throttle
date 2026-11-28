@@ -1130,8 +1130,13 @@
   @keyframes ubeam{0%,25%{opacity:0}28%{opacity:.75}31%{opacity:.5}34%{opacity:.75}48%{opacity:.75}52%,100%{opacity:0}}
   /* two lambs on a 30s loop, half a loop apart: while one is beamed up the next is already walking in from past the left edge (--lx0),
      stopping at --lp for a little poo on the way */
-  .uscene .lamb{animation:uwalk 30s linear infinite}
-  .uscene .s2 .lamb,.uscene .s2 .wob,.uscene .s2 .poo,.uscene .s2 .stink{animation-delay:-15s}
+  /* phones keep the original single-lamb 15s loop; .wide (desktop) gets the two-lamb version */
+  .uscene .s2,.uscene .poo,.uscene .stink{display:none}
+  .uscene .lamb{animation:uwalk1 15s linear infinite}
+  @keyframes uwalk1{0%{transform:translate(-120px,0)}14%,29%{transform:translate(0,0)}47%{transform:translate(0,-58px) scale(.35);opacity:1}49%,100%{transform:translate(0,-60px) scale(.2);opacity:0}}
+  .uscene.wide .s2,.uscene.wide .poo,.uscene.wide .stink{display:inline}
+  .uscene.wide .lamb{animation:uwalk 30s linear infinite}
+  .uscene.wide .s2 .lamb,.uscene.wide .s2 .wob,.uscene.wide .s2 .poo,.uscene.wide .s2 .stink{animation-delay:-15s}
   @keyframes uwalk{0%,10%{transform:translate(var(--lx0,-120px),0);opacity:0}10.1%{opacity:1}30%{transform:translate(var(--lp,-60px),0)}31%,36%{transform:translate(var(--lp,-60px),1.5px)}37%{transform:translate(var(--lp,-60px),0)}57%,64.5%{transform:translate(0,0)}73.5%{transform:translate(0,-58px) scale(.35);opacity:1}74.5%{transform:translate(0,-60px) scale(.2);opacity:0}75%,100%{transform:translate(var(--lx0,-120px),0);opacity:0}}
   .uscene .poo{opacity:0;animation:upoo 30s ease-out infinite;transform-box:fill-box;transform-origin:50% 100%}
   @keyframes upoo{0%,31.5%{opacity:0;transform:translateY(-6px) scale(.3)}34%{opacity:1;transform:translateY(0) scale(1)}58%{opacity:1}64%,100%{opacity:0;transform:translateY(0) scale(1)}}
@@ -1139,7 +1144,9 @@
   @keyframes ustink{0%,35%{opacity:0;transform:translateY(0)}39%{opacity:.8}52%{opacity:0;transform:translateY(-7px)}100%{opacity:0}}
   .uscene .lamb .legs{animation:ulegs .35s steps(2) infinite}
   @keyframes ulegs{50%{transform:translateX(1.5px)}}
-  .uscene .lamb .wob{animation:uwob 30s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 50%}
+  .uscene .lamb .wob{animation:uwob1 15s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 50%}
+  @keyframes uwob1{0%,30%{transform:rotate(0)}36%{transform:rotate(-12deg)}42%{transform:rotate(14deg)}48%,100%{transform:rotate(0)}}
+  .uscene.wide .lamb .wob{animation:uwob 30s ease-in-out infinite}
   @keyframes uwob{0%,65%{transform:rotate(0)}68%{transform:rotate(-12deg)}71%{transform:rotate(14deg)}74%,100%{transform:rotate(0)}}
   .uscene .lights circle{animation:blink 1.2s steps(1) infinite}
   .uscene .lights circle:nth-child(2n){animation-delay:-.6s}
@@ -2525,7 +2532,8 @@ function buildUfo(){
   const el = $('ufo'); if (!el) return;
   const W = sceneW(), H = 262, HOR = 160, DX = (W - 400) / 2, L = -DX, R = W - DX;
   // saucer sits at x=50 and is ~72 wide: start past the left edge, finish past the right edge
-  el.style.setProperty('--ux0', `${Math.round(L - 50 - 60)}px`); el.style.setProperty('--ux1', `${Math.round(R - 50 + 60)}px`);
+  const wide = W > 700; el.classList.toggle('wide', wide);   // phones keep the original scene; desktop gets edge-to-edge flight + the second lamb
+  if (wide){ el.style.setProperty('--ux0', `${Math.round(L - 50 - 60)}px`); el.style.setProperty('--ux1', `${Math.round(R - 50 + 60)}px`); } else { el.style.removeProperty('--ux0'); el.style.removeProperty('--ux1'); }
   const LD = Math.max(120, 50 - L + 30), LP = Math.round(Math.max(-LD * .5, L - 50 + 40));   // start off-screen; poo stop about halfway (kept on screen on phones)
   el.style.setProperty('--lx0', `${-LD}px`); el.style.setProperty('--lp', `${LP}px`);
   let seed = 51; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
@@ -4694,7 +4702,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.70', APP_BUILT = '28 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.71', APP_BUILT = '28 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
