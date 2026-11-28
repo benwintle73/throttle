@@ -2557,8 +2557,8 @@ function buildUfo(){
       <circle cx="${SX + 15.5}" cy="${LY - 5}" r="1" fill="#fff"/><circle cx="${SX + 11}" cy="${LY - 7}" r="3" fill="#FBF8F2"/></g></g>`;
   // a little poo left behind where the lamb stops on the way in (its rear is ~15 left of centre)
   const PX = SX + LP - 15, PY = LY + 12;
-  const poo = `<g class="poo"><ellipse cx="${PX}" cy="${PY - 2.2}" rx="6" ry="2.8" fill="#4A2E18"/><ellipse cx="${PX}" cy="${PY - 5.2}" rx="4.3" ry="2.4" fill="#5C3A20"/><ellipse cx="${PX + .5}" cy="${PY - 7.8}" rx="2.5" ry="1.8" fill="#6E4628"/><circle cx="${PX + 1.2}" cy="${PY - 9.6}" r="1.1" fill="#6E4628"/></g>
-    <g class="stink" fill="none" stroke="#B8E07A" stroke-width="1.2" stroke-linecap="round"><path d="M${PX - 3} ${PY - 12} q-2 -2.5 0 -5 q2 -2.5 0 -5"/><path d="M${PX + 3.5} ${PY - 13} q2 -2.5 0 -5 q-2 -2.5 0 -5"/></g>`;
+  const poo = `<g class="poo">${[[-4, -1.2], [-1.2, -.4], [1.8, -1.4], [4.2, -.2], [-2.6, -3.4], [.6, -3.2], [3, -3.8]].map(([dx, dy], k) => `<circle cx="${PX + dx}" cy="${PY - 1 + dy}" r="${k % 3 ? 1.5 : 1.3}" fill="${k % 2 ? '#3A2412' : '#4A2E18'}"/>`).join('')}</g>
+    <g class="stink" fill="none" stroke="#B8E07A" stroke-width="1.2" stroke-linecap="round"><path d="M${PX - 2.5} ${PY - 8} q-1.6 -2 0 -4 q1.6 -2 0 -4"/><path d="M${PX + 3} ${PY - 9} q1.6 -2 0 -4 q-1.6 -2 0 -4"/></g>`;
   const sheep = `<g class="s1">${poo}${cow}</g><g class="s2">${poo}${cow}</g>`;
   const saucer = `<g class="saucer"><ellipse cx="${SX}" cy="${SY}" rx="14" ry="10" fill="url(#udome)" stroke="#BFFFE0" stroke-width="1" opacity=".95"/>
       <ellipse cx="${SX}" cy="${SY + 8}" rx="36" ry="9" fill="url(#uhull)" stroke="#2A3A4A" stroke-width="1"/>
@@ -4694,7 +4694,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.69', APP_BUILT = '28 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.70', APP_BUILT = '28 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
