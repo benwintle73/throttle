@@ -1123,7 +1123,7 @@
   .uscene > svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}   /* let the saucer fly above the scene box */
   /* abduction loop (15s): a lamb wanders in, the saucer flies over, beams it up, zooms off, repeat */
   .uscene .fly{animation:ufly 15s ease-in-out infinite}
-  @keyframes ufly{0%,13%{transform:translate(-160px,-70px)}24%,54%{transform:translate(0,0)}64%,100%{transform:translate(460px,-140px)}}
+  @keyframes ufly{0%,13%{transform:translate(var(--ux0,-160px),-70px)}24%,54%{transform:translate(0,0)}64%,100%{transform:translate(var(--ux1,460px),-140px)}}   /* --ux0/--ux1 set in buildUfo so it enters/exits fully off-screen at any width */
   .uscene .saucer{animation:hover 2.2s ease-in-out infinite}
   @keyframes hover{50%{transform:translateY(-4px)}}
   .uscene .beam{opacity:0;animation:ubeam 15s linear infinite}
@@ -2517,6 +2517,8 @@ function buildUfo(){
   // original desert night scene: mesas, a lonely farm with a windmill, a crop circle and a saucer beaming up a cow
   const el = $('ufo'); if (!el) return;
   const W = sceneW(), H = 262, HOR = 160, DX = (W - 400) / 2, L = -DX, R = W - DX;
+  // saucer sits at x=50 and is ~72 wide: start past the left edge, finish past the right edge
+  el.style.setProperty('--ux0', `${Math.round(L - 50 - 60)}px`); el.style.setProperty('--ux1', `${Math.round(R - 50 + 60)}px`);
   let seed = 51; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   const mesas = `<path d="M${L} ${HOR + 4} L${L} ${HOR - 22} L-10 ${HOR - 22} L4 ${HOR - 46} L60 ${HOR - 46} L72 ${HOR - 24} L118 ${HOR - 24} L126 ${HOR - 8} L250 ${HOR - 8} L262 ${HOR - 36} L300 ${HOR - 36} L310 ${HOR - 18} L360 ${HOR - 18} L372 ${HOR - 52} L${R} ${HOR - 52} L${R} ${HOR + 4}Z" fill="var(--umesa)"/>
     <path d="M4 ${HOR - 46} L60 ${HOR - 46} M262 ${HOR - 36} L300 ${HOR - 36} M372 ${HOR - 52} L${R} ${HOR - 52}" stroke="var(--umesa2)" stroke-width="2"/>`;
@@ -4678,7 +4680,7 @@ function setUser(u){
 }
 const X_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_VERSION = '2.66', APP_BUILT = '27 Nov 2026';   // keep in step with the cache name in sw.js
+const APP_VERSION = '2.67', APP_BUILT = '28 Nov 2026';   // keep in step with the cache name in sw.js
 function addVersion(){ $('acctBody').insertAdjacentHTML('beforeend', `<p class="ver">Weather v${APP_VERSION} · updated ${APP_BUILT}</p>`); }
 function appearanceHTML(){
   return `<div class="appear"><h4>Location</h4>
